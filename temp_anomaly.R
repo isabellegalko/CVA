@@ -182,18 +182,21 @@ ggplot(plot_data) +
 setwd("~/Documents/OSU/GOA CVA/Exposure/CVA/plots/")
 ggsave(filename="anomaly_histogram.png", device = "png")
   
-# calculate counts and percent of counts into L, M, H, V
+# assign categories from low - very high to the anomaly values
 exposure_plot <- data_anomaly |> 
   mutate(
     exposure_score = ifelse(anomaly >= -0.5 & anomaly <= 0.5, "low", ifelse((anomaly < -0.5 & anomaly >= -1.5) | (anomaly > 0.5 & anomaly <= 1.5), "moderate", ifelse((anomaly < -1.5 & anomaly >= -2) | (anomaly > 1.5 & anomaly <= 2), "high", "very high")))
   )
 
+# set levels for exposure scores from low - very high
 exposure_plot$exposure_score <- factor(exposure_plot$exposure_score, levels = c("low", "moderate", "high", "very high"))
 exposure_plot$exposure_score = ordered(exposure_plot$exposure_score,
                                                  levels = c("low",
                                                             "moderate",
                                                             "high",
-                                                            "very high"))
+                                                           "very high"))
+
+# calculate counts and proportion in each scoring category 
 exposure_plot <- exposure_plot |>
   group_by(exposure_score, .drop =FALSE) |>
   summarize(count = n()) |>
