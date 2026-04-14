@@ -1,8 +1,10 @@
-
-#title: EFH mapping script
-#author: Mason Smith
-#date: 8 April 2026
-#editor: visual
+# ============================================================================
+# EFH Mapping Script
+# ============================================================================
+# Purpose: Mapping EFH maps and creating overlap with ROMS outputs
+# Author: Mason Smith, Isabelle Galko
+# Date created: 8 April 2026
+# Date modified: 14 April 2026
 
 #load packages
 library(terra) #vector and raster files
