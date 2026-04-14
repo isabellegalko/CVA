@@ -48,17 +48,16 @@ ggplot() +
 
 # adjust the EFH map 
 adult_alaskaplaice <- project(adult_alaskaplaice, "epsg:4326") # project EFH map onto same crs as ROMS 
-sf_akplaice <- st_as_sf(adult_alaskaplaice, crs = 4326) # make sf object
-sf_akplaice <- sf_akplaice |> filter(layer != "1") # remove non-EFH areas
-valid_shape <- st_make_valid(sf_akplaice) # make geometry valid (not sure why)
+sf_akplaice <- st_as_sf(adult_alaskaplaice, crs = 4326) |> # make sf object
+  filter(layer != "1") |> # remove non-EFH areas
+  st_make_valid() # make geometry valid (not sure why)
 sf_use_s2(FALSE) # don't use spherical geometry (not sure why)
-valid_shape <- valid_shape |>
-  st_shift_longitude() # Convert to 0-360° longitude to match ROMS data
-valid_shape$layer <- as.character(valid_shape$layer) # fix EFH layer class to text instead of numbers
+sf_akplaice <- sf_akplaice |> st_shift_longitude() # Convert to 0-360° longitude to match ROMS data
+sf_akplaice$layer <- as.character(sf_akplaice$layer) # fix EFH layer class to text instead of numbers
 
 # plot the EFH map
 ggplot() +
-  geom_sf(data = valid_shape, aes(color = layer, geometry = geometry), size = 0.5, alpha = 0.8) +
+  geom_sf(data = sf_akplaice, aes(color = layer, geometry = geometry), size = 0.5, alpha = 0.8) +
   geom_sf(data = coast, color = "black", linewidth = 0.3) +
   scale_color_manual(
     values = EFH_cols
@@ -77,11 +76,11 @@ temp_anoms <- data_anomaly |> st_as_sf(coords = c("lon_rho", "lat_rho")) |>
                              anomaly >=2 & anomaly <= 5~"very high")
   )
 st_crs(temp_anoms)= 4326
-temp_anoms = st_transform(temp_anoms, crs = st_crs(valid_shape)) # match crs of ROMS points and EFH polygons ??
+temp_anoms = st_transform(temp_anoms, crs = st_crs(sf_akplaice)) # match crs of ROMS points and EFH polygons ??
 
 # find intersects between points (ROMS) and polygons (EFH)
-temp_anoms$EFH <- apply(st_intersects(valid_shape, temp_anoms, sparse = FALSE), 2, 
-                                function(col) {valid_shape[which(col), ]$layer}) # not exactly sure how this code works, but it seems to have done what I want it to
+temp_anoms$EFH <- apply(st_intersects(sf_akplaice, temp_anoms, sparse = FALSE), 2, 
+                                function(col) {sf_akplaice[which(col), ]$layer}) # not exactly sure how this code works, but it seems to have done what I want it to
 
 # remove every point that lies outside of the species distribution
 exposure <- temp_anoms |> filter(EFH == "2" | EFH == "3" | EFH == "4" | EFH == "5")
