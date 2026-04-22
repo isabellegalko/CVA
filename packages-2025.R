@@ -6,12 +6,6 @@
 # Date modified: 24th Nov 2025
 # ------------------------------------------------------------------------
 
-# Check for and install 'installr' package for system maintenance (Windows only)
-installr::updateR()
-
-# Set CRAN mirror - New Zealand
-options(repos = c(CRAN = "https://cran.stat.auckland.ac.nz/"))
-
 # Package groupings for improved workflow
 # 1. Environment & Editor
 env_editor <- c(

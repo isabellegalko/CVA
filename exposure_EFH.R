@@ -42,8 +42,9 @@ assign(paste(variable_name, "_", depth, "_hindcast", sep = ""), hindcast, envir 
 load_data("surface", "temp")
 load_data("bottom", "temp")
 load_data("surface", "salt")
+load_data("bottom", "salt")
 
-exposure_factors <- c("SST", "BT", "salinity")
+exposure_factors <- c("SST", "BT", "SS", "BS")
 
 # ============================================================================
 # SECTION 2: Calculate Anomaly
@@ -84,8 +85,18 @@ create_anomaly <- function(future_data, hindcast_data) {
 }
 
 SST_anomaly <- create_anomaly(temp_surface_future, temp_surface_hindcast)
+SST_anomaly <- SST_anomaly |> mutate(type = "SST")
+
 BT_anomaly <- create_anomaly(temp_bottom_future, temp_bottom_hindcast)
-salinity_anomaly <- create_anomaly(salt_surface_future, salt_surface_hindcast)
+BT_anomaly <- BT_anomaly |> mutate(type = "BT")
+
+SS_anomaly <- create_anomaly(salt_surface_future, salt_surface_hindcast)
+SS_anomaly <- SS_anomaly |> mutate(type = "SS")
+
+BS_anomaly <- create_anomaly(salt_bottom_future, salt_bottom_hindcast)
+BS_anomaly <- BS_anomaly |> mutate(type = "BS")
+
+anomaly <- list(SST_anomaly, BT_anomaly, SS_anomaly, BS_anomaly) # combine all anomaly data frames
 
 coast <- ne_coastline(scale = "medium", returnclass = "sf") %>%
   st_crop(xmin = -170, xmax = -130, ymin = 50, ymax = 62) %>%  # Crop to GOA region
@@ -123,9 +134,11 @@ create_anomaly_plot <- function(data, exposure_factor_name) {
 
 }
 
-create_anomaly_plot(SST_anomaly, "SST")
-create_anomaly_plot(BT_anomaly, "BT")
-create_anomaly_plot(salinity_anomaly, "salinity")
+# create anomaly plots for all exposure factors
+for (k in 1:length(exposure_factors)){
+  create_anomaly_plot(anomaly[[k]], exposure_factors[k])
+}
+
 
 # ============================================================================
 # SECTION 3: Calculate exposure
@@ -138,23 +151,23 @@ create_anomaly_plot(salinity_anomaly, "salinity")
 
 #tell R where files are 
 gdb_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/GOA_groundfish_2023.gdb"
-scallop_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/EFH_2018_Scallop.gdb"
-salmon_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/Salmon_2023.gdb"
+# scallop_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/EFH_2018_Scallop.gdb"
+# salmon_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/Salmon_2023.gdb"
 
 #list all vector layers in the .gbd
 layers <- vector_layers(gdb_path)
 print(layers)
 
-scallop_layers <- vector_layers(scallop_path)
-print(scallop_layers)
-
-salmon_layers <- vector_layers(salmon_path)
-print(salmon_layers)
+# scallop_layers <- vector_layers(scallop_path)
+# print(scallop_layers)
+# salmon_layers <- vector_layers(salmon_path)
+# print(salmon_layers)
 
 # get list of all the species layers we want to put through the function
 layer_names <- read_excel(here("goa_efh_spp_lifestages.xlsx"), sheet = "groundfish",
                            col_names = c("species_name", "layer_name"))
 species_layers<-unique(layer_names$layer_name)
+species_name<-unique(layer_names$species_name)
 
 # set colors for plotting EFH areas
 EFH_cols <- c( 
@@ -235,7 +248,6 @@ create_overlap <- function(species_layer, species_name, anomaly_data, exposure_f
   # remove every point that lies outside of the species distribution
   exposure <- anomaly_data |> filter(EFH == "4" | EFH == "5") # filter to core habitat
   
-  #dir.create(here(paste("plots/Exposure plots/", species_name, "/", exposure_factor_name, sep ="")), recursive = TRUE)
   return(exposure)
 }
 
@@ -285,6 +297,7 @@ calculate_exposure_score <- function(species_layer, species_name, anomaly_data, 
 }
 
 create_exposure_plots <- function(species_layer, species_name, anomaly_data, exposure_factor_name) {
+  #dir.create(here(paste("plots/Exposure plots/", species_name, "/", exposure_factor_name, sep ="")), recursive = TRUE)
   original_exposure_data <- create_overlap(species_layer, species_name, anomaly_data, exposure_factor_name)
   exposure_plot <- assign_exposure_levels(species_layer, species_name, anomaly_data, exposure_factor_name)
   # plot exposure map
@@ -353,56 +366,26 @@ create_exposure_plots <- function(species_layer, species_name, anomaly_data, exp
   ggsave(paste(species_layer, exposure_factor_name, "exposure_scores.png", sep="_"), path = here(paste("plots/Exposure plots/", species_name, "/", exposure_factor_name, sep ="")), plot = plot4, device = "png",width = 7, height = 5, bg = "transparent", dpi = 300)
   
 }
-  
-species_name<-unique(layer_names$species_name)
 
 # tests - ak plaice
 assign_exposure_levels("GOA_adult_alaskaplaice_efh_level2_abundance_summer", "Alaska plaice", SST_anomaly, "SST")
 calculate_exposure_score("GOA_adult_alaskaplaice_efh_level2_abundance_summer", "Alaska plaice", SST_anomaly, "SST")
 create_exposure_plots("GOA_adult_alaskaplaice_efh_level2_abundance_summer", "Alaska plaice", SST_anomaly, "SST")
 
-###### Create exposure plots - for loops by exposure factor #######
+###### Create exposure plots for all EFH species and exposure factors #######
 
-# for loop to create all species (30) exposure plots for SST
 for (i in 1:length(species_layers)) {
-  create_exposure_plots(species_layers[i], species_name[i], SST_anomaly, "SST") 
-}
-# for loop to create all species (30) exposure plots for BT
-for (i in 1:length(species_layers)) {
-  create_exposure_plots(species_layers[i], species_name[i], BT_anomaly, "BT")
-}
-# for loop to create all species (30) exposure plots for salinity
-for (i in 1:length(species_layers)) {
-  create_exposure_plots(species_layers[i], species_name[i], salinity_anomaly, "salinity")
+  for(k in 1:length(exposure_factors)){
+    create_exposure_plots(species_layers[i], species_name[i], anomaly[[k]], exposure_factors[k])
+  }
 }
 
-###### Calculate exposure scores - for loops by exposure factor #######
+###### Calculate exposure scores for all species and exposure factors #######
 
-# for loop to create all species (30) exposure plots for SST
 for (i in 1:length(species_layers)) {
-  exposure_score <- calculate_exposure_score(species_layers[i], species_name[i], SST_anomaly, "SST")
-  layer_names[i,"SST"] <- exposure_score
+  for(k in 1:length(exposure_factors)){
+  exposure_score <- calculate_exposure_score(species_layers[i], species_name[i], anomaly[[k]], exposure_factors[k])
+  layer_names[i,exposure_factors[k]] <- exposure_score
 }
-# for loop to create all species (30) exposure plots for BT
-for (i in 1:length(species_layers)) {
-  exposure_score <- calculate_exposure_score(species_layers[i], species_name[i], BT_anomaly, "BT")
-  layer_names[i,"BT"] <- exposure_score
 }
-# for loop to create all species (30) exposure plots for salinity
-for (i in 1:length(species_layers)) {
-  exposure_score <- calculate_exposure_score(species_layers[i], species_name[i], salinity_anomaly, "salinity")
-  layer_names[i,"salinity"] <- exposure_score
-}
-
-# original code (for just SST):
-#   exposure_score <- calculate_exposure_score(species_layers[i], species_name[i], SST_anomaly, "SST")
-#   layer_names[i,"SST] <- exposure_score
-
-# # make for loop to calculate exposure scores for all listed exposure factors then add them to the table layer_names
-# for(j in 1:length(exposure_factors)) {
-# for (i in 1:length(species_layers)) {
-#   exposure_score <- calculate_exposure_score(species_layers[i], species_name[i], SST_anomaly, exposure_factors[j])
-#   layer_names[i,exposure_factors[j]] <- exposure_score
-# }
-# }
 

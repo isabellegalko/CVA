@@ -1,13 +1,13 @@
 # ============================================================================
 # Draft exposure script
 # ============================================================================
-# Purpose: This script calculate exposure for a single species (AK plaice) and
+# Purpose: This script calculate exposure for a single species (AK plaice or Walleye pollock) and
 # single exposure factor (sea surface temperature). It produces 3 plots:
-#   1. Map of SST anomalies across the AK plaice distribution in the GOA.
-#   2. Histogram of anomalies across AK plaice distribution.
+#   1. Map of SST anomalies across the AK plaice or Walleye pollock distribution in the GOA.
+#   2. Histogram of anomalies across AK plaice or Walleye pollock distribution.
 #   3. Distribution of exposure scores and ultimate exposure score.
 
-# Clear workspace and free up memory
+# Clear work space and free up memory
 rm(list = ls())
 gc()
 

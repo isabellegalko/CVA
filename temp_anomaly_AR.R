@@ -27,12 +27,11 @@ gc()
 
 # Load required packages
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(tidyverse, tidync, ncdf4, lubridate, here, sf, rnaturalearth, arrow, dplyr, here)
+pacman::p_load(tidyverse, tidync, ncdf4, lubridate, here, sf, rnaturalearth, arrow, dplyr)
 pacman::p_load_gh("ropensci/rnaturalearthhires")  # High-resolution coastline data
-here::i_am("temp_anomaly.R")
 
 # Load custom analysis functions by Albi
-source(here("functions.R"))
+source("functions.R")
 
 # ============================================================================
 # SECTION 1: Load and Filter Data - Historical and Future
@@ -107,17 +106,63 @@ SST_hindcast <- SST |> filter(run == "hindcast") |> # hindcast
 # SECTION 2: Calculate Temperature Anomaly
 # ============================================================================
 # Calculate standardized anomaly: (future mean - historical mean) / historical SD 
-# for SST. Set anomaly bins (low -> very high).
+# for SST.
 # ============================================================================
 
+# Notes AR:
+# You are using the correct bias corrected projections, BUT - you should use "value_dc" for your calculations, as that is the delta-corrected value. For the hindcast, value=value_dc
+# You take annual averages for temp. However, focusing on either summer or winter will give you more contrast in your anomalies. In the last step here you divide by the SD of the hindcast. There is a lot of variability over one year so your SD in the denominator is going to swamp the anomalies at the numerators if you took SD over the whole year
+# You use a pretty long period as "future". I understand that this is meant to absorb short-term variability and I remember Al recommending using multi-decadal windows. However, hindcast and future period are pretty close to eachother in time and this is also going to dampen your anomalies
+# Your future period is 2030-2059. ROMS really start diverging past 2060 as far as I can tell, so you should not expect extreme increases in temp before then
+# I suggest you keep cell_id in the grouping. lon and lat get rounded sometimes you end up lumping a few cells together, which adds to the SD
+# note that this is surface temperature so it may or may not be appropriate for groundfish
+
+# see below for what happens if you use value_dc, summer (July-Sept) temperatures for both proj and hind (and keep cell_id)
+
+# but first, check out these couple plots on the raw temp values, they should give you some insights
+SST_checks <- SST |> filter(run %in% c("hindcast", "ssp126", "ssp585")) |> # future projections
+  filter(date > as.Date("1991-01-01")) |>  # Restrict dates to later than 2030
+  filter(date < as.Date("2059-12-31")) |>  # Restrict to earlier than 2059
+  collect()  # NOW load the filtered data into RAM
+
+# first, check out the difference between value and value_dc 
+# I am using one month for ease of visualization - picking january because I know that the bias in GFLD is largest in the winter. You can fiddle with other months to learn something about the bias
+SST_checks %>%
+  filter(run != "ssp126", month == 1) %>%
+  group_by(year) %>%
+  summarise(mean_value = mean(value),
+            mean_value_dc = mean(value_dc)) %>%
+  pivot_longer(-year) %>%
+  ggplot(aes(x = year, y = value, color = name))+geom_line()
+  
+# now look at how noisy the time series is if you use all months to get your annual averages - all that noise goes into your SD and swamps your anomalies
+SST_checks %>%
+  filter(run != "ssp126") %>%
+  # filter(month %in% c(7:9)) %>% # toggle this line on and off to see how your time series changes as you filter by month
+  group_by(year, month, run) %>%
+  summarise(mean_value_dc = mean(value_dc)) %>%
+  ungroup() %>%
+  mutate(date = as.Date(sprintf("%d-%02d-15", year, month))) %>%
+  dplyr::select(date, run, mean_value_dc) %>%
+  ggplot(aes(x = date, y = mean_value_dc, color = run))+geom_line()+geom_point()
+
+# now look how close ssp126 and ssp585 are in 2030-2059
+SST_checks %>%
+  filter(month %in% c(7:9)) %>% 
+  group_by(year, run) %>%
+  summarise(mean_value_dc = mean(value_dc)) %>%
+  ungroup() %>%
+  ggplot(aes(x = year, y = mean_value_dc, color = run))+geom_line()+geom_point()
+
+# and here is your code using value_dc for the future, summer temps, and retaining cell_id
 data_anomaly <- SST_future |> # calculate climate anomaly (future mean - historical mean / historical standard deviation)
-  filter(month == "7" | month == "8" | month == "9") |> # can filter by winter or summer months by changing month numbers
+  filter(month %in% 7:9) |> # can filter by winter or summer months by changing month numbers
   summarize(average_future = mean(value_dc), .by = c(cell_id, lon_rho, lat_rho)) |>
   left_join(
     SST_hindcast |> 
-    filter(month == "7" | month == "8" | month == "9") |> # filter in hindcast as well
-    summarize(average_hist = mean(value), sd_hist = sd(value), .by = c(cell_id, lon_rho, lat_rho)), # for hindcast, value=value_dc
-    by = join_by(lon_rho, lat_rho)
+      filter(month %in% 7:9) |> # needs to be consistent between hidcast and future
+      summarize(average_hist = mean(value), sd_hist = sd(value), .by = c(cell_id, lon_rho, lat_rho)), # for hindcast, value=value_dc
+    by = join_by(cell_id, lon_rho, lat_rho)
     ) |>
   mutate(anomaly = (average_future-average_hist)/sd_hist) # calculate anomaly
 
@@ -147,7 +192,7 @@ plot <- ggplot() + # plot climate anomaly
     limits = c(-3, 3),
     name = "Anomaly"
   ) +
-  labs(title = "Exposure Map for SST",
+  labs(title = "Exposure Map",
        x = "Longitude",
        y = "Latitude",
        color = "standardized anomaly") +
@@ -201,7 +246,7 @@ exposure_plot$exposure_score = ordered(exposure_plot$exposure_score,
 
 # calculate counts and proportion in each scoring category 
 exposure_plot <- exposure_plot |>
-  group_by(exposure_score, .drop = FALSE) |>
+  group_by(exposure_score, .drop =FALSE) |>
   summarize(count = n()) |>
   ungroup() |>
   complete(exposure_score,fill = list(count = 0)) |>
