@@ -223,12 +223,12 @@ create_EFH_layer <- function(species_layer){
   filtered <- vect(gdb_path, layer = species_layer)  
   # adjust the EFH map 
   filtered <- project(filtered, "epsg:4326") # project EFH map onto same crs as ROMS 
-  sf_filtered <- st_as_sf(filtered, crs = 4326) |> # create sf object
-    filter(layer != "1") |> # remove non-EFH areas
-    st_make_valid() # make geometry valid 
+  sf_filtered <- st_as_sf(filtered, crs = 4326) |> # convert terra vector -> sf for sf-based spatial joins/intersections
+    filter(layer != "1") |> # drop layer 1 - non-EFH areas
+    st_make_valid() # repair invalid polygon geometries so spatial operations do not fail
   sf_use_s2(FALSE) # don't use spherical geometry 
-  sf_filtered <- sf_filtered |> st_shift_longitude() # convert to 0-360° longitude to match ROMS data
-  sf_filtered$layer <- as.character(sf_filtered$layer) # fix EFH layer class to text instead of numbers
+  sf_filtered <- sf_filtered |> st_shift_longitude() # shift longitudes from -180..180 to 0..360 to match ROMS grid convention
+  sf_filtered$layer <- as.character(sf_filtered$layer) # keep EFH designations as character labels for filtering/legend mapping
   
   return(sf_filtered)
 }
@@ -283,9 +283,13 @@ plot_EFH_layer <- function(species_layer){
 create_overlap <- function(species_layer, species_name, anomaly_data, exposure_factor_name){
   sf_filtered <- create_EFH_layer(species_layer)
   
-  anomaly_data = st_transform(anomaly_data, crs = st_crs(sf_filtered)) # match crs of ROMS points and EFH polygons ??
+  anomaly_data = st_transform(anomaly_data, crs = st_crs(sf_filtered)) # transform points to exact CRS used by EFH polygons
   
-  # find intersects between points and EFH polygons
+  # spatial join - assign EFH layer to each ROMS point
+  # st_intersects() creates a polygon x point logical matrix:
+  # apply(..., 2, ...) loops across columns (one point at a time)
+  # for each point-column, which(col) finds intersecting polygon row indices,
+  # then sf_filtered[which(col), ]$layer returns that point's EFH layer label(s)
   anomaly_data$EFH <- apply(st_intersects(sf_filtered, anomaly_data, sparse = FALSE), 2, 
                             function(col) {sf_filtered[which(col), ]$layer}) 
   
