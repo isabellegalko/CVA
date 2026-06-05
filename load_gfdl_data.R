@@ -3,7 +3,7 @@
 # Save locally as parquet files.
 
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(tidyverse, tidync, ncdf4, lubridate, here, sf, arrow, dplyr, here) # packages 
+pacman::p_load(tidyverse, tidync, ncdf4, lubridate, here, sf, arrow, dplyr, here, data.table) # packages 
 here::i_am("load_gfdl_data.R")
 
 # make lat-lon box for the GOA
@@ -63,28 +63,8 @@ get_gfdl <- function(exposure_factor, data, run, esm_slice){
                cell_id = paste(lon, lat, sep = '_'))
     }
     
-    # standardize exposure factor value
-    if(exposure_factor == "PH"){ # ph
-      this_esm_data <- this_esm_data |>
-        mutate(value = ph) |>
-        select(-ph)
-    }
-    else if(exposure_factor == "O2"){ # oxygen
-      this_esm_data <- this_esm_data |>
-        mutate(value = o2) |>
-        select(-o2)
-    }
-    else if(exposure_factor == "AT"){ # air temperature
-      this_esm_data <- this_esm_data |>
-        mutate(value = tas) |>
-        select(-tas)
-    }
-    else if(exposure_factor == "PR"){ # precipitation
-      this_esm_data <- this_esm_data |>
-        mutate(value = pr) |>
-        select(-pr)
-    }
-    else{}
+    this_esm_data <- this_esm_data |>
+      rename(any_of(c(value = "ph", value = "o2", value = "tas", value = "pr")))
     
     # now group by time step and average ph weighting by cell area
     mean_value <- this_esm_data %>%
@@ -123,6 +103,7 @@ ph_historical_files <- list(ph_hist_2010_2014_url, ph_hist_1990_2009_url, ph_ssp
 
 # run functions to put GFDL pH data into a data frame for correct coords and surface layer, and compute means by month and year
 ph_ssp585_surface <- get_gfdl("PH", ph_ssp585_files, "ssp585", "surface")
+test <- get_gfdl("PH", ph_ssp585_files, "ssp585", "surface")
 ph_historical_surface <- get_gfdl("PH", ph_historical_files, "historical", "surface")
 
 # write parquet files into folder
