@@ -63,6 +63,7 @@ get_gfdl <- function(exposure_factor, data, run, esm_slice){
                cell_id = paste(lon, lat, sep = '_'))
     }
     
+    # standardize exposure factor column name
     this_esm_data <- this_esm_data |>
       rename(any_of(c(value = "ph", value = "o2", value = "tas", value = "pr")))
     
