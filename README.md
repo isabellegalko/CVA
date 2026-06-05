@@ -10,13 +10,19 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 ### Data sources 
 **Species distributions** – geodatabase of Essential Fish Habitat (EFH) predictions for the GOA Region
 
-**Exposure factors** – ROMS ocean model output data for the GOA region
+**Exposure factors**
+- ROMS ocean model outputs for the GOA region (temperature, salinity, phytoplankton concentration, zooplankton concentration)
+- GFDL ESM4 outputs (pH, oxygen concentration, air temperature, precipitation)
 
-### Notable workflow scripts
+### Current workflow scripts
 
-**exposure_EFH.R** – Calculates exposure and creates associated plots for all species for which EFH maps are available and several exposure factors (SST, BT, and salinity).
+**exposure_EFH.R** – Calculates exposure and creates associated plots for all species for which EFH maps are available and all exposure factors.
 
 **exposure_functions.R** – Contains custom functions used in exposure_EFH.R.
+
+**load_gfdl_data.R** – Pulls data from ESGF using OPeNDAP and saves locally as parquet files.
+
+### Older workflow scripts
 
 **exposure_example.R** – Early example of calculating exposure with two species (AK plaice, walleye pollock) and two exposure factors (SST, BT).
 
