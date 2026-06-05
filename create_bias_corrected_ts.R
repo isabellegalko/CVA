@@ -119,6 +119,14 @@ bias_correction("surface", "temp")
 bias_correction("bottom", "temp")
 bias_correction("surface", "salt")
 bias_correction("bottom", "salt")
+bias_correction("surface", "PhL") # large phytoplankton concentration
+bias_correction("surface", "PhS") # small phytoplankton concentration
+
+bias_correction("surface", "Cop") # small copepod concentration
+bias_correction("surface", "NCa") # large copepod concentration
+bias_correction("surface", "Eup") # euphausiid concentration
+bias_correction("surface", "MZL") # large microzooplankton concentration
+bias_correction("surface", "MZS") # small microzooplankton concentration
 
 # ============================================================================
 # Visualize: Domain-Wide January Time Series
