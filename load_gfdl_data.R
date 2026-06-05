@@ -3,13 +3,103 @@
 # Save locally as parquet files.
 
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(tidyverse, tidync, ncdf4, lubridate, here, sf, arrow, dplyr, here) # packages (not sure if need all)
-
-source("exposure_functions.R") # need for get_gfdl function
+pacman::p_load(tidyverse, tidync, ncdf4, lubridate, here, sf, arrow, dplyr, here) # packages 
+here::i_am("load_gfdl_data.R")
 
 # make lat-lon box for the GOA
 lonrange <- c(188, 235)
 latrange <- c(52, 62)
+
+# For a particular exposure factor, process GFDL data, extract necessary parts, 
+# and save as a data frame for exposure analysis.
+# 
+# exposure_factor: Character exposure factor name.
+# data: List of OPeNDAP urls (that link to NetCDF files) from historical or future time periods.
+# run: Either "historical" or "ssp585" (future).
+# esm_slice: "surface" 
+get_gfdl <- function(exposure_factor, data, run, esm_slice){
+  # loop over esm files
+  this_esm_scenario <- list()
+  for(i in 1:length(data)){
+    esm_file <- data[[i]] # input list of urls to pull ESM data from
+    esm_data <- tidync(esm_file)  
+    
+    origin <- ncmeta::nc_atts(esm_file, "time") %>% 
+      mutate(across(variable:value, as.character)) |> # fixes classes to pull origin
+      tidyr::unnest(cols = c(value)) %>%
+      filter(name == 'units') %>%
+      select(value) %>%
+      mutate(value = str_replace(value, 'days since ', '')) %>%
+      pull(value) %>%
+      as.Date()
+    
+    # now pull data from netcdf
+    this_esm_data <- esm_data %>% hyper_filter(lon = lon > lonrange[1] & lon <= lonrange[2], 
+                                               lat = lat > latrange[1] & lat <= latrange[2]) 
+    
+    # get surface slice
+    if(esm_slice == "surface"){
+      this_esm_data <- this_esm_data %>%
+        hyper_tibble |> # added to make group_by work ?
+        group_by(time, lon, lat) %>%
+        slice_min(lev) %>%
+        ungroup()
+      
+      this_esm_data$time <- as.Date(this_esm_data$time)
+      
+      # add time and cell index
+      this_esm_data <- this_esm_data %>% 
+        mutate(year = year(time),
+               month = month(time),
+               cell_id = paste(lon, lat, sep = '_'))
+    }
+    else{
+      this_esm_data$time <- as.Date(this_esm_data$time)
+      
+      this_esm_data <- this_esm_data %>% 
+        hyper_tibble |>
+        mutate(year = year(time),
+               month = month(time),
+               cell_id = paste(lon, lat, sep = '_'))
+    }
+    
+    # standardize exposure factor value
+    if(exposure_factor == "PH"){ # ph
+      this_esm_data <- this_esm_data |>
+        mutate(value = ph) |>
+        select(-ph)
+    }
+    else if(exposure_factor == "O2"){ # oxygen
+      this_esm_data <- this_esm_data |>
+        mutate(value = o2) |>
+        select(-o2)
+    }
+    else if(exposure_factor == "AT"){ # air temperature
+      this_esm_data <- this_esm_data |>
+        mutate(value = tas) |>
+        select(-tas)
+    }
+    else if(exposure_factor == "PR"){ # precipitation
+      this_esm_data <- this_esm_data |>
+        mutate(value = pr) |>
+        select(-pr)
+    }
+    else{}
+    
+    # now group by time step and average ph weighting by cell area
+    mean_value <- this_esm_data %>%
+      group_by(year, month, lat, lon, cell_id) %>% # lat, lon, and cell_id will be the same for each point, but want to keep in df
+      summarise(mean = mean(value)) %>%
+      ungroup() |>
+      mutate(run = run,
+             slice = esm_slice)
+    
+    this_esm_scenario[[i]] <- mean_value
+  }
+  this_esm_scenario_df <- rbindlist(this_esm_scenario)
+  
+  return(this_esm_scenario_df)
+}
 
 ########## PH (OCEAN ACIDIFICATION) #########
 # load future data (scenario ssp585) for ph
