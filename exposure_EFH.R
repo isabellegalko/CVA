@@ -208,3 +208,110 @@ for (i in 1:length(species_layers)) {
 
 # save csv with exposure scores
 write.csv(layer_names, "exposure_factor_scores.csv", row.names = FALSE)
+
+# reformat data frame
+indv_exposure_results <- layer_names |>
+  pivot_longer(cols=c("SST", "BT", "SS", "BS", "PhT", "ZP", "PH", "O2", "AT", "PR"),
+               names_to = "exposure_factor_short",
+               values_to = "score") |>
+  mutate(exposure_factor = recode(exposure_factor_short,
+                                  "SST" = "Sea surface temperature",
+                                  "BT" = "Bottom temperature",
+                                  "SS" = "Surface salinity",
+                                  "BS" = "Bottom salinity",
+                                  "PhT" = "Phytoplankton concentration",
+                                  "ZP" = "Zooplankton concentration",
+                                  "PH" = "pH",
+                                  "O2" = "Oxygen concentration",
+                                  "AT" = "Air temperature",
+                                  "PR" = "Precipitation"))
+
+# apply logic rule
+exposure_results <- indv_exposure_results |>
+  group_by(group, species_name) |>
+  summarize(
+    above_3.5 = sum(score >= 3.5), # number of mean scores above 3.5 - "very high" 
+    above_3 = sum(score >= 3), # number of mean scores above 3 - "high" 
+    above_2.5 = sum(score >=2.5), # number of mean scores above 2.5 - "moderate" 
+    exposure = ifelse(above_3.5 >= 3, "very high", ifelse(above_3 >= 2, "high", ifelse(above_2.5 >= 2, "moderate", "low"))),
+  ) |>
+  ungroup() |>
+  select(!c(above_3.5, above_3, above_2.5))
+
+# apply ALTERNATIVE logic rule
+alt_exposure_results <- indv_exposure_results |>
+  group_by(group, species_name) |>
+  summarize(
+    above_3.5 = sum(score >= 3.5),
+    above_2.5 = sum(score >= 2.5), # mean scores between 2.5 and 3.5 would be considered as “high"
+    above_1.5 = sum(score >=1.5), # mean scores between 1.5 and 2.5 would be considered as “moderate”
+    exposure = ifelse(above_3.5 >= 3, "very high", ifelse(above_2.5 >= 2, "high", ifelse(above_1.5 >= 2, "moderate", "low"))),
+  ) |>
+  ungroup() |>
+  select(!c(above_3.5, above_2.5, above_1.5))
+
+exposure_results$exposure  = ordered(exposure_results$exposure, 
+                                     levels = c("low",
+                                                "moderate",
+                                                "high",
+                                                "very high"))
+# add number for each exposure score
+exposure_results <- exposure_results |>
+  mutate(exposure_number = recode(exposure, 
+                                  "low" = "1",
+                                  "moderate" = "2", 
+                                  "high" = "3", 
+                                  "very high" = "4"))
+
+# save csv of final exposure scores for vulnerability calculation
+write.csv(exposure_results, "exposure_scores_final.csv", row.names = FALSE)
+
+# ============================================================================
+# SECTION 5: More plots
+# ============================================================================
+# 
+# ============================================================================
+
+# exposure_plot <- assign_exposure_levels("GOA_adult_walleyepollock_efh_level2_abundance_summer", "Walleye pollock", SST_anomaly, "SST")
+
+# plot distribution of exposure scores for all exposure factors for each species
+sp_exposure_histograms <- function(species_layer, species_name){
+  exposure_plot_list = list() # create list
+  for(i in 1:length(exposure_factors)){
+    exposure_plot <- assign_exposure_levels(species_layer, species_name, anomaly[[i]], exposure_factors[i])
+    exposure_plot <- exposure_plot |>
+      mutate(exposure_factor = exposure_factors[i])
+    # assign(paste(exposure_factors[i], "_exposure_plot", sep = ""), exposure_plot, envir = .GlobalEnv)
+    exposure_plot_list[[i]] <- exposure_plot # add it to the list
+  }
+  # create single data frame with every df from the for loop
+  # combine all exposure factor results into a single df per species
+  group_exposure_plot <- do.call(rbind, exposure_plot_list) 
+  
+  # exp_fact_mean <- calculate_exposure_score(species_layer, species_name, anomaly_data, exposure_factor_name)
+  # find way to add specific exposure scores to each facet
+  
+  group_plot <- ggplot(group_exposure_plot) +
+    geom_col(mapping = aes(x = exposure_score, y = prop, fill = exposure_score), position = "dodge", linewidth = 0.25, colour="black", width = 0.8, show.legend = FALSE) +
+    facet_wrap(~exposure_factor) +
+    scale_x_discrete(labels = c("L", "M", "H", "V")) +
+    scale_y_continuous(labels = scales::percent) +
+    ylab("Percent") +
+    xlab("Exposure Score") +
+    scale_fill_manual(values = c("green", "yellow", "orange", "red")) +
+    #annotate("text", x = I(0.8), y = I(0.8), label = paste("Exposure = ", exp_fact_mean, sep = "")) + # add exposure score in top right corner
+    theme_bw() +
+    theme(strip.text = element_text(hjust = 0, size = 10),
+          strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+          plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+          panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
+  
+  ggsave(paste(species_layer, "exposure_scores.png", sep="_"), path = here(paste("plots/Exposure plots/", species_name, sep ="")), plot = group_plot, device = "png",width = 7, height = 5, bg = "transparent", dpi = 300)
+}
+
+# test
+sp_exposure_histograms("GOA_adult_walleyepollock_efh_level2_abundance_summer", "Walleye pollock")
+
+for (i in 1:length(species_layers)) {
+  sp_exposure_histograms(species_layers[i], species_name[i])
+}
