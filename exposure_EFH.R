@@ -116,6 +116,7 @@ PR_anomaly <- create_anomaly_gfdl("PR", pr_ssp585, pr_historical) # precipitatio
 PR_anomaly <- PR_anomaly |> mutate(type = "PR")
 
 anomaly <- list(SST_anomaly, BT_anomaly, SS_anomaly, BS_anomaly, PhT_anomaly, ZP_anomaly, PH_anomaly, O2_anomaly, AT_anomaly, PR_anomaly) # combine all anomaly data frames
+names(anomaly) <- c("SST_anomaly", "BT_anomaly", "SS_anomaly", "BS_anomaly", "PhT_anomaly", "ZP_anomaly", "PH_anomaly", "O2_anomaly", "AT_anomaly", "PR_anomaly")
 
 sf::sf_use_s2(FALSE) # IMPORTANT - turns off spherical geometry
 
@@ -134,6 +135,8 @@ GOA = ne_countries(scale = "medium",
 canada = ne_countries(scale = "medium", country = "Canada", returnclass = "sf") |>
   st_crop(xmin = -170, xmax = -130, ymin = 50, ymax = 62) %>%  # Crop to GOA region
   st_shift_longitude()  # Convert to 0-360° longitude 
+
+create_anomaly_plot(AT_anomaly, "AT")
 
 # create anomaly plots for all exposure factors and save locally
 # function from exposure_functions.R
@@ -158,9 +161,14 @@ layers <- vector_layers(gdb_path)
 print(layers)
 
 # list of all the species layers we have EFH for 
-layer_names <- read_excel(here("goa_efh_spp_lifestages.xlsx"), sheet = "groundfish",
-                           col_names = c("group", "species_name", "layer_name"))
-species_layers <- unique(layer_names$layer_name)
+layer_names <- read_excel(here("goa_efh_spp_lifestages.xlsx"), sheet = "groundfish", skip = 1,
+                           col_names = c("group", "species_name", "layer", "sea_temperature", 
+                                         "salinity", "ph", "phytoplankton", "zooplankton",
+                                         "oxygen", "air_temperature", "precipitation")) |>
+  drop_na(layer)
+layer_names$air_temperature[layer_names$air_temperature == "NA"] <- NA
+layer_names$precipitation[layer_names$precipitation == "NA"] <- NA
+species_layers <- unique(layer_names$layer)
 species_name <- unique(layer_names$species_name)
 
 # test plot
@@ -187,20 +195,34 @@ for (i in 1:length(species_layers)) {
 # calculate_exposure_score() calculates exposure scores and puts them in the layer_names data frame
 
 # test out some plots
-create_exposure_plots("GOA_adult_alaskaplaice_efh_level2_abundance_summer", "Alaska plaice", SST_anomaly, "SST")
+create_exposure_plots("GOA_adult_alaskaplaice_efh_level2_abundance_summer", "Alaska plaice", BT_anomaly, "BT")
 create_exposure_plots("GOA_adult_alaskaskate_efh_level2_abundance_summer", "Alaska skate", PH_anomaly, "PH")
 create_exposure_plots("GOA_adult_starryflounder_efh_level2_abundance_summer", "Starry flounder", AT_anomaly, "AT")
 
-# create 3 exposure plots for all EFH species and exposure factors
+# example code
+# exposure_factors_list <- layer_names[20,4:11]
+# these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
+# these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
+
+# create 3 exposure plots for all EFH species and assigned exposure factors
 for (i in 1:length(species_layers)) {
-  for(k in 1:length(exposure_factors)){
-    create_exposure_plots(species_layers[i], species_name[i], anomaly[[k]], exposure_factors[k])
+  # identify appropriate list of exposure factors for each species
+  exposure_factors_list <- layer_names[i,4:11]
+  these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
+  these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
+  
+  for(k in 1:length(these_exposure_factors$V1)){
+    create_exposure_plots(species_layers[i], species_name[i], anomaly[[paste(these_exposure_factors$V1[k], "_anomaly", sep = "")]], these_exposure_factors$V1[k])
   }
 }
 
 # calculate exposure scores for all species and exposure factors and place them in the layer_names df
 for (i in 1:length(species_layers)) {
-  for(k in 1:length(exposure_factors)){
+  # identify appropriate list of exposure factors for each species
+  exposure_factors_list <- layer_names[i,4:11]
+  these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
+  these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
+  for(k in 1:length(these_exposure_factors)){
   exposure_score <- calculate_exposure_score(species_layers[i], species_name[i], anomaly[[k]], exposure_factors[k])
   layer_names[i,exposure_factors[k]] <- exposure_score
 }

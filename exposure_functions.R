@@ -181,11 +181,17 @@ create_anomaly_gfdl <- function(exposure_factor, future_data, historical_data) {
 #' @return NA
 create_anomaly_plot <- function(data, exposure_factor_name) {
   plot <- ggplot() + # plot climate anomaly
-    geom_sf(data = data, aes(color = anomaly, geometry=geometry), size = 0.5, alpha = 0.8) +
+    geom_sf(data = data, aes(color = anomaly, fill = anomaly, geometry=geometry), size = 0.5, alpha = 0.8) +
     geom_sf(data = GOA, size=0.2, fill="gray85") +
     geom_sf(data = canada, size=0.2, fill="gray95") +
     scale_color_gradientn(
-      colors = c("red", "orange", "yellow", "green", "yellow", "orange", "red"), # set colors for scoring categories
+      colors = c("purple", "blue", "cyan", "green", "yellow", "orange", "red"), # set colors for scoring categories
+      values = scales::rescale(c(-5, -2, -1.5, -0.5, 0, 0.5, 1.5, 2, 5)),
+      limits = c(-10, 10),
+      name = "Anomaly"
+    ) +
+    scale_fill_gradientn(
+      colors = c("purple", "blue", "cyan", "green", "yellow", "orange", "red"), # set colors for scoring categories
       values = scales::rescale(c(-5, -2, -1.5, -0.5, 0, 0.5, 1.5, 2, 5)),
       limits = c(-10, 10),
       name = "Anomaly"
@@ -390,13 +396,19 @@ create_exposure_plots <- function(species_layer, species_name, anomaly_data, exp
   
   # plot exposure map
   plot2 <- ggplot() + 
-    geom_sf(data = original_exposure_data, aes(color = anomaly, geometry=geometry), size = 1, alpha = 0.8) +
+    geom_sf(data = original_exposure_data, aes(color = anomaly, fill = anomaly, geometry=geometry), size = 1, alpha = 0.8) +
     geom_sf(data = GOA, size=0.2, fill="gray85") +
     geom_sf(data = canada, size=0.2, fill="gray95") +
     scale_color_gradientn(
-      colors = c("red", "orange", "yellow", "green", "yellow", "orange", "red"), # set colors for scoring categories
+      colors = c("purple", "blue", "cyan", "green", "yellow", "orange", "red"), # set colors for scoring categories
       values = scales::rescale(c(-10, -2, -1.5, -0.5, 0, 0.5, 1.5, 2, 10)),
       limits = c(-10, 10)
+    ) +
+    scale_fill_gradientn(
+      colors = c("purple", "blue", "cyan", "green", "yellow", "orange", "red"), # set colors for scoring categories
+      values = scales::rescale(c(-10, -2, -1.5, -0.5, 0, 0.5, 1.5, 2, 10)),
+      limits = c(-10, 10),
+      guide = "none"
     ) +
     labs(x = "Longitude",
          y = "Latitude",
@@ -414,7 +426,7 @@ create_exposure_plots <- function(species_layer, species_name, anomaly_data, exp
       plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
       panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5)
     )
-  ggsave(paste(species_layer, "exposure_map.png", sep="_"), path = here(paste("plots/Exposure plots/", species_name, "/", exposure_factor_name, sep ="")), plot = plot2, device = "png", width = 8, height = 5, dpi = 300)
+  ggsave(paste(species_name, exposure_factor_name, "exposure_map.png", sep="_"), path = here("plots/Exposure plots/"), plot = plot2, device = "png", width = 8, height = 5, dpi = 300)
   
   # make histogram of anomalies
   plot3 <- ggplot(original_exposure_data) +
@@ -434,7 +446,7 @@ create_exposure_plots <- function(species_layer, species_name, anomaly_data, exp
     theme_bw() +
     theme(rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
           panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-  ggsave(paste(species_layer, exposure_factor_name, "anomaly_histogram.png", sep="_"), path = here(paste("plots/Exposure plots/", species_name, "/", exposure_factor_name, sep ="")), plot = plot3, device = "png")
+  ggsave(paste(species_name, exposure_factor_name, "anomaly_histogram.png", sep="_"), path = here("plots/Exposure plots/"), plot = plot3, device = "png")
   
   exp_fact_mean <- calculate_exposure_score(species_layer, species_name, anomaly_data, exposure_factor_name)
   
@@ -446,13 +458,13 @@ create_exposure_plots <- function(species_layer, species_name, anomaly_data, exp
     ylab("Percent") +
     xlab("Exposure Score") +
     scale_fill_manual(values = c("green", "yellow", "orange", "red")) +
-    annotate("text", x = I(0.8), y = I(0.8), label = paste("Exposure = ", exp_fact_mean, sep = "")) + # add exposure score in top right corner
+    annotate("text", x = I(0.6), y = I(0.9), label = paste("Exposure = ", exp_fact_mean, sep = "")) + # add exposure score in top right corner
     theme_bw() +
     theme(strip.text = element_text(hjust = 0, size = 10),
           strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
           plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
           panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-  ggsave(paste(species_layer, exposure_factor_name, "exposure_scores.png", sep="_"), path = here(paste("plots/Exposure plots/", species_name, "/", exposure_factor_name, sep ="")), plot = plot4, device = "png",width = 7, height = 5, bg = "transparent", dpi = 300)
+  ggsave(paste(species_name, exposure_factor_name, "exposure_scores.png", sep="_"), path = here("plots/Exposure plots/"), plot = plot4, device = "png",width = 7, height = 5, bg = "transparent", dpi = 300)
   
 }
 
