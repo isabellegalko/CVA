@@ -8,7 +8,9 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 - **Exposure factors** – environmental variables that are of interest to the list of species
 
 ## Data sources 
-**Species distributions** – geodatabase of Essential Fish Habitat (EFH) predictions for the GOA Region
+**Species distributions** 
+- Essential Fish Habitat (EFH) predictions for federally-managed species in the GOA. File geodatabases for species in the Groundfish and Scallop Fishery Management Plans (FMP) were downloaded from: https://www.fisheries.noaa.gov/resource/map/alaska-essential-fish-habitat-efh-species-shapefiles.
+- Distributions and densities estimated from bottom trawl survey data. Standardized survey data (1990-2025) were collected by the Resource Assessment and Conservation Engineering (RACE) Division of the Alaska Fisheries Science Center (AFSC), NOAA and downloaded from: https://www.fisheries.noaa.gov/foss/.
 
 **Exposure factors**
 - ROMS ocean model outputs for the GOA region (temperature, salinity, phytoplankton concentration, zooplankton concentration)
