@@ -9,6 +9,31 @@ EFH_cols <- c(
   "5" = "#FFFF00"  #value <= 5
 )
 
+sf_plot_theme = function() {
+  theme_bw() +
+  theme(legend.position = c(0.6, 0.15), legend.direction = "horizontal", 
+        legend.text = element_text(size = 8), legend.title = element_text(size = 10), 
+        legend.key.size = unit(0.7, "cm"), legend.key.spacing = unit(0.12, "cm"),
+        legend.frame = element_rect(color = "black", linewidth = 0.25),
+        legend.background = element_rect(fill = "transparent"),
+        legend.ticks = element_line(color = "black", linewidth = 0.25),
+        strip.text = element_text(hjust = 0, size = 10),
+        strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+        plot.background = element_rect(fill = "transparent", linewidth = 0),
+        panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
+}
+
+# previous theme for exposure maps
+# theme_bw() +
+#   theme(legend.position = c(0.61, 0.2), legend.direction = "vertical", 
+#         legend.text = element_text(size = 8), legend.title = element_text(size = 10), 
+#         legend.key.size = unit(0.5, "cm"), legend.key.spacing = unit(0.12, "cm"),
+#         legend.background = element_rect(fill = "transparent"),
+#         strip.text = element_text(hjust = 0, size = 10),
+#         strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+#         plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+#         panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
+
 #' For each exposure factor sourced from ROMS, load bias-corrected parquet, 
 #' filter to correct future and reference time periods, and collect data. 
 #'
@@ -52,7 +77,7 @@ create_anomaly_roms <- function(future_data, hindcast_data) {
       by = join_by(lon_rho, lat_rho)
     ) |>
     mutate(anomaly = (average_future-average_hist)/sd_hist) |> # calculate anomaly 
-    select(!c(average_future, average_hist, sd_hist))
+    dplyr::select(!c(average_future, average_hist, sd_hist))
   
   anomalies <- calculate_anomaly |> 
     st_as_sf(coords = c("lon_rho", "lat_rho"))
@@ -101,7 +126,7 @@ create_anomaly_gfdl <- function(exposure_factor, future_data, historical_data) {
       by = join_by(lon, lat)
     ) |>
     mutate(anomaly = (average_future-average_hist)/sd_hist) |> # calculate anomaly 
-    select(!c(average_future, average_hist, sd_hist))
+    dplyr::select(!c(average_future, average_hist, sd_hist))
   
   # ESM outputs are quite granular and single points don't intersect with EFH polygons well to compute exposure 
   # write a function that, for each ESM cell, constructs the geometry of the cell around the centroids reported in the nc files
@@ -143,14 +168,14 @@ create_anomaly_gfdl <- function(exposure_factor, future_data, historical_data) {
     esm_sf <- calculate_anomaly %>%
       nest(coords = c(lat, lon)) %>%
       mutate(geometry = purrr::map(coords, make_cell_geom)) %>%
-      select(-coords) %>%
+      dplyr::select(-coords) %>%
       st_as_sf(crs = 4326)
   }
   else if(exposure_factor == "AT" | exposure_factor == "PR"){
     esm_sf <- calculate_anomaly %>%
       nest(coords = c(lat, lon)) %>%
       mutate(geometry = purrr::map(coords, make_cell_geom_land)) %>%
-      select(-coords) %>%
+      dplyr::select(-coords) %>%
       st_as_sf(crs = 4326)
   }
   
@@ -199,19 +224,9 @@ create_anomaly_plot <- function(data, exposure_factor_name) {
     labs(x = "Longitude",
          y = "Latitude",
          color = "standardized anomaly") +
-    theme_bw() +
-    guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5)) +
-    theme(legend.position = c(0.6, 0.15), legend.direction = "horizontal", 
-          legend.text = element_text(size = 8), legend.title = element_text(size = 10), 
-          legend.key.size = unit(0.7, "cm"), legend.key.spacing = unit(0.12, "cm"),
-          legend.frame = element_rect(color = "black", linewidth = 0.25),
-          legend.background = element_rect(fill = "transparent"),
-          legend.ticks = element_line(color = "black", linewidth = 0.25),
-          strip.text = element_text(hjust = 0, size = 10),
-          strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-          plot.background = element_rect(fill = "transparent", linewidth = 0),
-          panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
-  print(plot)
+    sf_plot_theme() +
+    guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
+
   ggsave(paste(exposure_factor_name, "anomaly.png", sep="_"), path = here("plots/Anomaly plots"), device = "png", dpi = 300, width=8, height=5)
 }
 
@@ -221,31 +236,95 @@ create_anomaly_plot <- function(data, exposure_factor_name) {
 #' non-EFH layer code "1", validates geometry, and shifts longitudes to match
 #' 0-360 grids used by ROMS-style products.
 #' 
+#' @param path Path to EFH geodatabase files.
 #' @param species_layer A `terra::SpatVector` containing EFH polygons and a `layer` field. 
+#' @param level EFH level (either 1 (presence-absence) or 2 (population percentiles)).
 #'
 #' @return An `sf` polygon object with valid geometry and character `layer` values.
-create_EFH_layer <- function(species_layer){
+create_EFH_layer <- function(path, species_layer, level){
   #load a specific layer
-  filtered <- vect(gdb_path, layer = species_layer)  
+  filtered <- vect(get(path), layer = species_layer)  
   # adjust the EFH map 
-  filtered <- project(filtered, "epsg:4326") # project EFH map onto same crs as ROMS 
-  sf_filtered <- st_as_sf(filtered, crs = 4326) |> # convert terra vector -> sf for sf-based spatial joins/intersections
-    filter(layer != "1") |> # drop layer 1 - non-EFH areas
-    st_make_valid() # repair invalid polygon geometries so spatial operations do not fail
-  sf_use_s2(FALSE) # don't use spherical geometry 
-  sf_filtered <- sf_filtered |> st_shift_longitude() # shift longitudes from -180..180 to 0..360 to match ROMS grid convention
-  sf_filtered$layer <- as.character(sf_filtered$layer) # keep EFH designations as character labels for filtering/legend mapping
+  if(level == "2"){ # population percentiles EFH maps (level 2)
+    filtered <- project(filtered, "epsg:4326") # project EFH map onto same crs as ROMS 
+    sf_filtered <- st_as_sf(filtered, crs = 4326) |> # convert terra vector -> sf for sf-based spatial joins/intersections
+      filter(layer == "5" | layer == "4")  |> # filter to core habitat
+      st_make_valid() # repair invalid polygon geometries so spatial operations do not fail
+    sf_use_s2(FALSE) # don't use spherical geometry 
+    sf_filtered <- sf_filtered |> 
+      st_shift_longitude() # shift longitudes from -180..180 to 0..360 to match ROMS grid convention
+    sf_filtered$layer <- as.character(sf_filtered$layer) # keep EFH designations as character labels for filtering/legend mapping
+    }
+  else{ # presence-absence EFH maps (level 1)
+    filtered <- project(filtered, "epsg:4326") # project EFH map onto same crs as ROMS 
+    sf_filtered <- st_as_sf(filtered, crs = 4326) |> # make sf object
+      st_make_valid() # make geometry valid (not sure why)
+    sf_use_s2(FALSE) # don't use spherical geometry (not sure why)
+    sf_filtered <- sf_filtered |> st_shift_longitude() # Convert to 0-360° longitude to match ROMS data
+  }
+  return(sf_filtered)
+}
+
+#' Prepare bottom trawl survey SDMs for exposure analysis.
+#' 
+#' Loads an .rda data structure, converts to `sf` and to a target CRS, and  
+#' filters to "core" habitat area (population percentiles <50%).
+#' 
+#' @param path Path to .rda SDM predictions.
+#'
+#' @return An `sf` polygon object with valid geometry and character `layer` values.
+create_BTS_SDM_layer <- function(path, species_layer){
+  return(create_BTS_SDM_layer_cached(path, species_layer, TRUE))
+}
+
+# caches processed BTS data to disk and returns if already cached rather than processing again
+create_BTS_SDM_layer_cached <- function(path, species_layer, use_cache = TRUE) {
+  cache_path <- paste("data/bts_filtered/", species_layer, sep = "")
   
+  # check if this request is already cached
+  if(file.exists(cache_path) && use_cache) {
+    # if it is and we're using the cache, load the cached data and return it
+    load(cache_path)
+    return(sf_filtered)
+  }
+  
+  # otherwise, load the unfiltered data and process it
+  load(paste(get(path), species_layer, sep = ""))
+  sf_filtered <- st_as_sf(EFH.data, coords = c("lon", "lat"), 
+                          crs = 4326) |>
+    st_shift_longitude() |> 
+    mutate(layer = recode(EFH.area,   "25" = "5",
+                          "50" = "4",
+                          "75" = "3",
+                          "95" = "2")) |>
+    filter(layer == "5" | layer == "4") |>
+    dplyr::select(!c(depth, BT, area.swept, BT.plot, fit, se.fit, pop.perc, EFH.area))
+  
+  # save the filtered data to the cache for next time
+  save(sf_filtered, file=cache_path)
   return(sf_filtered)
 }
 
 #' Save plot of EFH area for a single species to plots/EFH plots.
 #' 
-#' @param species_layer A `terra::SpatVector` containing EFH polygons and a `layer` field. 
+#' @param path Path to EFH or SDM files.
+#' @param species_layer Either: 
+#'     1. A `terra::SpatVector` containing polygons and an EFH `layer` field, or;
+#'     2. An rda data structure containing points and an EFH `layer` field.
+#' @param level EFH level (either 1 (presence-absence) or 2 (population percentiles)).
 #'
 #' @return NA
-plot_EFH_layer <- function(species_layer){
-  sf_filtered = create_EFH_layer(species_layer)
+plot_EFH_layer <- function(path, species_layer, level){
+  # load correct species distribution
+  if(path == "gdb_path" | path == "scallop_path"){
+    sf_filtered = create_EFH_layer(path, species_layer, level)
+  }
+  else if(path == "bts_sdm_path"){
+    sf_filtered = create_BTS_SDM_layer(path, species_layer)
+  }
+  
+  #create plot
+  if(path == "gdb_path"){
   plot <- ggplot() +
     geom_sf(data = sf_filtered, aes(color = layer, geometry = geometry), size = 0.5, alpha = 0.8) +
     geom_sf(data = coast, color = "black", linewidth = 0.3) +
@@ -263,15 +342,36 @@ plot_EFH_layer <- function(species_layer){
     labs(x = "Longitude",
          y = "Latitude",
          color = "EFH area") +
-    theme_bw() +
-    theme(legend.position = c(0.61, 0.2), legend.direction = "vertical", 
-          legend.text = element_text(size = 8), legend.title = element_text(size = 10), 
-          legend.key.size = unit(0.5, "cm"), legend.key.spacing = unit(0.12, "cm"),
-          legend.background = element_rect(fill = "transparent"),
-          strip.text = element_text(hjust = 0, size = 10),
-          strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-          plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-          panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
+    sf_plot_theme()
+  }
+  else if(path == "scallop_path"){
+  plot <- ggplot() +
+    geom_sf(data = sf_filtered, aes(geometry = geometry), size = 0.5, alpha = 0.8) +
+    geom_sf(data = coast, color = "black", linewidth = 0.3) +
+    labs(x = "Longitude",
+         y = "Latitude") +
+    sf_plot_theme()
+  }
+  else if(path == "bts_sdm_path"){
+  plot <- ggplot() +
+      geom_sf(data = sf_filtered, aes(geometry = geometry, color = layer), size = 0.3, alpha = 0.8) +
+      geom_sf(data=coast, color="black", linewidth = 0.3) +
+      scale_color_manual(
+        values = c(
+          "4" = "#3CB371", # layer <= 4
+          "5" = "#FFFF00"  # layer <= 5
+        ),
+        labels = c(
+          "4" = "50% Core EFH Area",
+          "5" = "25% EFH Hot Spots"
+        ),
+        name = "Population \n Percentile",
+        breaks = c("4", "5")
+      ) +
+      labs(x = "Longitude",
+           y = "Latitude") +
+      sf_plot_theme()
+  }
   ggsave(paste(species_layer, "EFH.png", sep="_"), device = "png", path = here("plots/EFH plots"), plot = plot, width=8, height=5, dpi = 300)
 }
 
@@ -280,32 +380,51 @@ plot_EFH_layer <- function(species_layer){
 #' Reprojects anomaly points to EFH CRS, computes point-in-polygon overlaps,
 #' and stores matching a EFH layer value per point.
 #' 
+#' @param path Path to EFH or SDM files.
 #' @param species_layer A `terra::SpatVector` containing EFH polygons and a `layer` field. 
+#' @param level EFH level (either 1 (presence-absence) or 2 (population percentiles)).
 #' @param species_name Character species name.
 #' @param anomaly_data A data frame with calculated anomalies for each point in the GOA.
 #' @param exposure_factor_name Character exposure factor name.
 #'
 #' @return Filtered `sf` points representing exposure within EFH.
-create_overlap <- function(species_layer, species_name, anomaly_data, exposure_factor_name){
-  sf_filtered <- create_EFH_layer(species_layer)
-  
-  anomaly_data = st_transform(anomaly_data, crs = st_crs(sf_filtered)) # transform points to exact CRS used by EFH polygons
-  
-  # spatial join - assign EFH layer to each ROMS point
-  # st_intersects() creates a polygon x point logical matrix:
-  # apply(..., 2, ...) loops across columns (one point at a time)
-  # for each point-column, which(col) finds intersecting polygon row indices,
-  # then sf_filtered[which(col), ]$layer returns that point's EFH layer label(s)
-  anomaly_data$EFH <- apply(st_intersects(sf_filtered, anomaly_data, sparse = FALSE), 2, 
-                            function(col) {sf_filtered[which(col), ]$layer}) 
-  
-  # remove points outside of the target species distribution
-  if(exposure_factor_name == "PH" | exposure_factor_name == "O2" | exposure_factor_name == "AT" | exposure_factor_name == "PR"){ # gfdl exposure factors only
-  anomaly_data[apply(anomaly_data, 2, function(x) lapply(x, length) == 0)] <- NA # replace empty lists with NA (no EFH area associated with it)
-  exposure <- anomaly_data |> drop_na(EFH) # drop rows with no EFH
+create_overlap <- function(path, species_layer, level, species_name, anomaly_data, exposure_factor_name){
+  if(path == "gdb_path" | path == "scallop_path"){
+    sf_filtered = create_EFH_layer(path, species_layer, level)
+
+    anomaly_data = st_transform(anomaly_data, crs = st_crs(sf_filtered)) # transform points to exact CRS used by EFH polygons
+    
+    # spatial join - assign EFH layer to each ROMS point
+    # st_intersects() creates a polygon x point logical matrix:
+    # apply(..., 2, ...) loops across columns (one point at a time)
+    # for each point-column, which(col) finds intersecting polygon row indices,
+    # then sf_filtered[which(col), ]$layer returns that point's EFH layer label(s)
+    
+    if(level == "2"){ # for species with EFH designations
+      anomaly_data$EFH <- apply(st_intersects(sf_filtered, anomaly_data, sparse = FALSE), 2, 
+                                function(col) {sf_filtered[which(col), ]$layer}) 
+      
+      # remove points outside of the target species distribution
+      if(exposure_factor_name == "PH" | exposure_factor_name == "O2" | exposure_factor_name == "AT" | exposure_factor_name == "PR"){ # gfdl exposure factors only
+        anomaly_data[apply(anomaly_data, 2, function(x) lapply(x, length) == 0)] <- NA # replace empty lists with NA (no EFH area associated with it)
+        exposure <- anomaly_data |> drop_na(EFH) # drop rows with no EFH
+      }
+      else{
+        exposure <- anomaly_data |> filter(EFH == "4" | EFH == "5") # filter to core habitat (50% EFH Area)
+      }
+    }
+    else{ # for species with presence-absence maps (e.g., weathervane scallop)
+      anomaly_data$EFH <- apply(st_intersects(sf_filtered, anomaly_data, sparse = FALSE), 2, 
+                                function(col) {sf_filtered[which(col), ]$geometry}) 
+      
+      exposure <- anomaly_data |> mutate(na=map_lgl(.x = EFH, .f = is_empty)) # identify rows not not included in the presence-absence polygon
+      exposure <- exposure |> filter(na == FALSE)    
+    }
   }
-  else{ # roms exposure factors only
-    exposure <- anomaly_data |> filter(EFH == "4" | EFH == "5") # filter to core habitat (50% EFH Area)
+  else if(path == "bts_sdm_path"){ # for BTS SDMs
+    sf_filtered = create_BTS_SDM_layer(path, species_layer)
+    nearest_points <- st_nearest_feature(sf_filtered, anomaly_data)
+    exposure <- cbind(sf_filtered, st_drop_geometry(anomaly_data)[nearest_points, ])
   }
   
   return(exposure)
@@ -316,14 +435,16 @@ create_overlap <- function(species_layer, species_name, anomaly_data, exposure_f
 #' Assigns each point an exposure level: low, moderate, high, or very high 
 #' according to previous CVA methods (see Loughran et al. 2025).
 #' 
+#' @param path Path to EFH or SDM files.
 #' @param species_layer A `terra::SpatVector` containing EFH polygons and a `layer` field. 
+#' @param level EFH level (either 1 (presence-absence) or 2 (population percentiles)).
 #' @param species_name Character species name.
 #' @param anomaly_data A data frame with calculated anomalies for each point in the GOA.
 #' @param exposure_factor_name Character exposure factor name.
 #'
 #' @return Data frame with count of anomalies in each exposure category.
-assign_exposure_levels <- function(species_layer, species_name, anomaly_data, exposure_factor_name){
-  exposure <- create_overlap(species_layer, species_name, anomaly_data, exposure_factor_name)
+assign_exposure_levels <- function(data){
+  exposure <- data
   # assign scoring categories from low - very high to the anomaly values
   exposure_plot <- exposure |> 
     mutate(
@@ -354,17 +475,19 @@ assign_exposure_levels <- function(species_layer, species_name, anomaly_data, ex
 
 #' Calculate an exposure score for a particular species and exposure factor.
 #' 
+#' @param path Path to EFH or SDM files.
 #' @param species_layer A `terra::SpatVector` containing EFH polygons and a `layer` field. 
+#' @param level EFH level (either 1 (presence-absence) or 2 (population percentiles)).
 #' @param species_name Character species name.
 #' @param anomaly_data A data frame with calculated anomalies for each point in the GOA.
 #' @param exposure_factor_name Character exposure factor name.
 #'
 #' @return An integer (an exposure score for a single species/exposure factor).
-calculate_exposure_score <- function(species_layer, species_name, anomaly_data, exposure_factor_name){
-  exposure_plot <- assign_exposure_levels(species_layer, species_name, anomaly_data, exposure_factor_name)
+calculate_exposure_score <- function(original_exposure_data, path, species_layer, level, species_name, anomaly_data, exposure_factor_name){
+  exposure_plot <- assign_exposure_levels(original_exposure_data)
   # calculate weighted mean
   exp_fact_mean <- exposure_plot |>
-    select(!c(prop,total)) |>
+    dplyr::select(!c(prop,total)) |>
     pivot_wider(names_from = "exposure_score",
                 values_from = "count")|>
     mutate(
@@ -381,18 +504,20 @@ calculate_exposure_score <- function(species_layer, species_name, anomaly_data, 
 #' 2. A histogram of binned anomalies from the exposure map.
 #' 3. The distribution of the exposure scores across the four scoring categories.
 #' 
+#' @param path Path to EFH or SDM files.
 #' @param species_layer A `terra::SpatVector` containing EFH polygons and a `layer` field. 
+#' @param level EFH level (either 1 (presence-absence) or 2 (population percentiles)).
 #' @param species_name Character species name.
 #' @param anomaly_data A data frame with calculated anomalies for each point in the GOA.
 #' @param exposure_factor_name Character exposure factor name.
 #'
 #' @return NA
-create_exposure_plots <- function(species_layer, species_name, anomaly_data, exposure_factor_name) {
+create_exposure_plots <- function(path, species_layer, level, species_name, anomaly_data, exposure_factor_name) {
   # only do first time!
-  # dir.create(here(paste("plots/Exposure plots/", species_name, "/", exposure_factor_name, sep ="")), recursive = TRUE)
+  # dir.create(here("plots/Exposure plots/"), recursive = TRUE)
   
-  original_exposure_data <- create_overlap(species_layer, species_name, anomaly_data, exposure_factor_name)
-  exposure_plot <- assign_exposure_levels(species_layer, species_name, anomaly_data, exposure_factor_name)
+  original_exposure_data <- create_overlap(path, species_layer, level, species_name, anomaly_data, exposure_factor_name)
+  exposure_plot <- assign_exposure_levels(original_exposure_data)
   
   # plot exposure map
   plot2 <- ggplot() + 
@@ -448,7 +573,7 @@ create_exposure_plots <- function(species_layer, species_name, anomaly_data, exp
           panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
   ggsave(paste(species_name, exposure_factor_name, "anomaly_histogram.png", sep="_"), path = here("plots/Exposure plots/"), plot = plot3, device = "png")
   
-  exp_fact_mean <- calculate_exposure_score(species_layer, species_name, anomaly_data, exposure_factor_name)
+  exp_fact_mean <- calculate_exposure_score(original_exposure_data, path, species_layer, level, species_name, anomaly_data, exposure_factor_name)
   
   # plot distribution of exposure scores
   plot4 <- ggplot(exposure_plot) +
