@@ -151,9 +151,10 @@ for (k in 1:length(exposure_factors)){
 # sf objects. 
 # ============================================================================
 
-# tell R where EFH  files are 
+# tell R where EFH files are 
 gdb_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/GOA_groundfish_2023.gdb"
-# scallop_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/EFH_2018_Scallop.gdb"
+scallop_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/EFH_2018_Scallop.gdb"
+bts_sdm_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/sdms/"
 # salmon_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/Salmon_2023.gdb"
 
 # list all vector layers in the .gdb
@@ -162,7 +163,7 @@ print(layers)
 
 # list of all the species layers we have EFH for 
 layer_names <- read_excel(here("goa_efh_spp_lifestages.xlsx"), sheet = "groundfish", skip = 1,
-                           col_names = c("group", "species_name", "layer", "sea_temperature", 
+                           col_names = c("group", "species_name", "path", "EFH_level", "layer", "sea_temperature", 
                                          "salinity", "ph", "phytoplankton", "zooplankton",
                                          "oxygen", "air_temperature", "precipitation")) |>
   drop_na(layer)
@@ -170,14 +171,21 @@ layer_names$air_temperature[layer_names$air_temperature == "NA"] <- NA
 layer_names$precipitation[layer_names$precipitation == "NA"] <- NA
 species_layers <- unique(layer_names$layer)
 species_name <- unique(layer_names$species_name)
+paths <- layer_names$path
+EFH_level <- layer_names$EFH_level
 
 # test plot
-plot_EFH_layer("GOA_adult_alaskaplaice_efh_level2_abundance_summer")
+plot_EFH_layer("gdb_path", "GOA_adult_alaskaplaice_efh_level2_abundance_summer", "2")
+plot_EFH_layer("scallop_path", "_Weathervane_scallop_adult_EFH_Level1", "1")
+plot_EFH_layer("bts_sdm_path", "predictions_Pacific.capelin.rda", "2")
 
 # for loop to create EFH plots for all species (30) 
 # function from exposure_functions.R
 for (i in 1:length(species_layers)) {
-  plot_EFH_layer(species_layers[i])
+  this_path_name <- paths[i]
+  this_species_layer <- species_layers[i]
+  this_EFH_level <- EFH_level[i]
+  plot_EFH_layer(this_path_name, this_species_layer, this_EFH_level)
 }
 
 # ============================================================================
@@ -194,42 +202,68 @@ for (i in 1:length(species_layers)) {
 # 3. distribution of exposure scores and weighted average 
 # calculate_exposure_score() calculates exposure scores and puts them in the layer_names data frame
 
+capelin <- create_overlap("bts_sdm_path", "predictions_Pacific.capelin.rda", "2", "Capelin", SST_anomaly, "SST")
+alaska_plaice <- create_overlap("gdb_path", "GOA_adult_alaskaplaice_efh_level2_abundance_summer", "2", "Alaska plaice", BT_anomaly, "BT")
+
 # test out some plots
-create_exposure_plots("GOA_adult_alaskaplaice_efh_level2_abundance_summer", "Alaska plaice", BT_anomaly, "BT")
+create_exposure_plots("gdb_path", "GOA_adult_alaskaplaice_efh_level2_abundance_summer", "2", "Alaska plaice", BT_anomaly, "BT")
 create_exposure_plots("GOA_adult_alaskaskate_efh_level2_abundance_summer", "Alaska skate", PH_anomaly, "PH")
 create_exposure_plots("GOA_adult_starryflounder_efh_level2_abundance_summer", "Starry flounder", AT_anomaly, "AT")
+create_exposure_plots("bts_sdm_path", "predictions_Pacific.capelin.rda", "2", "Capelin", PH_anomaly, "PH")
 
 # example code
-# exposure_factors_list <- layer_names[20,4:11]
-# these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
-# these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
+ exposure_factors_list <- layer_names[20,6:13]
+ these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
+ these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
 
 # create 3 exposure plots for all EFH species and assigned exposure factors
 for (i in 1:length(species_layers)) {
   # identify appropriate list of exposure factors for each species
-  exposure_factors_list <- layer_names[i,4:11]
+  exposure_factors_list <- layer_names[i,6:13]
   these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
   these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
   
+  this_path_name <- paths[i]
+  this_species_layer <- species_layers[i]
+  this_EFH_level <- EFH_level[i]
   for(k in 1:length(these_exposure_factors$V1)){
-    create_exposure_plots(species_layers[i], species_name[i], anomaly[[paste(these_exposure_factors$V1[k], "_anomaly", sep = "")]], these_exposure_factors$V1[k])
+    create_exposure_plots(this_path_name, this_species_layer, this_EFH_level, species_name[i], anomaly[[paste(these_exposure_factors$V1[k], "_anomaly", sep = "")]], these_exposure_factors$V1[k])
   }
 }
 
-# calculate exposure scores for all species and exposure factors and place them in the layer_names df
+# exposure_scores <- data.frame(species = character(), exposure_factor = character(), score = numeric())
+
+# create data frame
+exposure_scores <- layer_names |>
+  dplyr::select(!c(path, EFH_level, layer)) |>
+  pivot_longer(cols=c("sea_temperature", "salinity", "ph", "phytoplankton", "zooplankton",
+                      "oxygen", "air_temperature", "precipitation"),
+                               names_to = "variable",
+                               values_to = "exposure_factor") |>
+  dplyr::select(!variable) |>
+  drop_na(exposure_factor) 
+
+# calculate exposure scores for all species and exposure factors and place them in the df
+row_pointer <- 1
+
 for (i in 1:length(species_layers)) {
   # identify appropriate list of exposure factors for each species
-  exposure_factors_list <- layer_names[i,4:11]
+  exposure_factors_list <- layer_names[i,6:13]
   these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
   these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
-  for(k in 1:length(these_exposure_factors)){
-  exposure_score <- calculate_exposure_score(species_layers[i], species_name[i], anomaly[[k]], exposure_factors[k])
-  layer_names[i,exposure_factors[k]] <- exposure_score
-}
+
+  for(k in 1:length(these_exposure_factors$V1)){
+    original_exposure_data <- create_overlap(paths[i], species_layers[i], EFH_level[i], species_name[i], anomaly[[paste(these_exposure_factors$V1[k], "_anomaly", sep = "")]], these_exposure_factors$V1[k])
+    score <- calculate_exposure_score(original_exposure_data, paths[i], species_layers[i], EFH_level[i], species_name[i], anomaly[[paste(these_exposure_factors$V1[k], "_anomaly", sep = "")]], these_exposure_factors$V1[k])
+  
+    exposure_scores[row_pointer,"score"] <- score
+  
+    row_pointer <- row_pointer + 1
+  }
 }
 
 # save csv with exposure scores
-write.csv(layer_names, "exposure_factor_scores.csv", row.names = FALSE)
+write.csv(exposure_scores, "exposure_factor_scores.csv", row.names = FALSE)
 
 # format exposure scores for vulnerability calculation below 
 
@@ -260,7 +294,7 @@ write.csv(layer_names, "exposure_factor_scores.csv", row.names = FALSE)
 #     exposure = ifelse(above_3.5 >= 3, "very high", ifelse(above_3 >= 2, "high", ifelse(above_2.5 >= 2, "moderate", "low"))),
 #   ) |>
 #   ungroup() |>
-#   select(!c(above_3.5, above_3, above_2.5))
+#   dplyr::select(!c(above_3.5, above_3, above_2.5))
 # 
 # # apply ALTERNATIVE logic rule
 # alt_exposure_results <- indv_exposure_results |>
@@ -272,7 +306,7 @@ write.csv(layer_names, "exposure_factor_scores.csv", row.names = FALSE)
 #     exposure = ifelse(above_3.5 >= 3, "very high", ifelse(above_2.5 >= 2, "high", ifelse(above_1.5 >= 2, "moderate", "low"))),
 #   ) |>
 #   ungroup() |>
-#   select(!c(above_3.5, above_2.5, above_1.5))
+#   dplyr::select(!c(above_3.5, above_2.5, above_1.5))
 # 
 # exposure_results$exposure  = ordered(exposure_results$exposure, 
 #                                      levels = c("low",
@@ -298,12 +332,18 @@ write.csv(layer_names, "exposure_factor_scores.csv", row.names = FALSE)
 # ============================================================================
 
 # plot distribution of exposure scores for all exposure factors for each species
-sp_exposure_histograms <- function(species_layer, species_name){
+sp_exposure_histograms <- function(path, species_layer, EFH_level, species_name){
   exposure_plot_list = list() # create list
-  for(i in 1:length(exposure_factors)){
-    exposure_plot <- assign_exposure_levels(species_layer, species_name, anomaly[[i]], exposure_factors[i])
+  # select correct exposure factors for each species
+  exposure_factors_list <- layer_names[i,6:13]
+  these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
+  these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
+  
+  for(i in 1:length(these_exposure_factors$V1)){
+    original_exposure_data <- create_overlap(path, species_layer, EFH_level, species_name, anomaly[[paste(these_exposure_factors$V1[i], "_anomaly", sep = "")]], these_exposure_factors$V1[i])
+    exposure_plot <- assign_exposure_levels(original_exposure_data)
     exposure_plot <- exposure_plot |>
-      mutate(exposure_factor = exposure_factors[i])
+      mutate(exposure_factor = these_exposure_factors$V1[i])
     # assign(paste(exposure_factors[i], "_exposure_plot", sep = ""), exposure_plot, envir = .GlobalEnv)
     exposure_plot_list[[i]] <- exposure_plot # add it to the list
   }
@@ -329,13 +369,13 @@ sp_exposure_histograms <- function(species_layer, species_name){
           plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
           panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
   
-  ggsave(paste(species_layer, "exposure_scores.png", sep="_"), path = here(paste("plots/Exposure plots/", species_name, sep ="")), plot = group_plot, device = "png",width = 7, height = 5, bg = "transparent", dpi = 300)
+  ggsave(paste(species_name, "all_exposure_scores.png", sep="_"), path = here("plots/Exposure plots/"), plot = group_plot, device = "png",width = 7, height = 5, bg = "transparent", dpi = 300)
 }
 
 # test plot
-sp_exposure_histograms("GOA_adult_walleyepollock_efh_level2_abundance_summer", "Walleye pollock")
+sp_exposure_histograms("gdb_path", "GOA_adult_walleyepollock_efh_level2_abundance_summer", "2", "Walleye pollock")
 
 # for to create plot for all species
 for (i in 1:length(species_layers)) {
-  sp_exposure_histograms(species_layers[i], species_name[i])
+  sp_exposure_histograms(paths[i], species_layers[i], EFH_level[i], species_name[i])
 }
