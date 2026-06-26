@@ -50,7 +50,7 @@ load_roms <- function(depth, variable_name) {
     filter(date < as.Date("2059-12-31")) |>  # Restrict to earlier than 2059
     collect()  # now load the filtered data into RAM
   hindcast <- variable |> filter(run == "hindcast") |> # hindcasts
-    filter(date > as.Date("1993-01-01")) |>  # Restrict dates to later than 1993
+    filter(date > as.Date("2005-01-01")) |>  # Restrict dates to later than
     filter(date < as.Date("2020-12-31")) |>  # Restrict to 2020
     collect()  # now load the filtered data into RAM
   
@@ -111,8 +111,8 @@ create_anomaly_gfdl <- function(exposure_factor, future_data, historical_data) {
     filter(year <= 2059) |> # Restrict dates to earlier than 2059
     collect() # load filtered data into RAM
   hist <- historical_data |> # parquet file
-    filter(year >= 1993) |> # Restrict dates to later than 1993
-    filter(year <= 2020) |> # Restrict dates to earlier than 2020
+    filter(year >= 2005) |> # Restrict dates to later than 
+    filter(year <= 2020) |> # Restrict dates to earlier than 
     collect() # load filtered data into RAM
   
   # calculate climate anomaly (future mean - historical mean / historical standard deviation)
@@ -128,63 +128,86 @@ create_anomaly_gfdl <- function(exposure_factor, future_data, historical_data) {
     mutate(anomaly = (average_future-average_hist)/sd_hist) |> # calculate anomaly 
     dplyr::select(!c(average_future, average_hist, sd_hist))
   
-  # ESM outputs are quite granular and single points don't intersect with EFH polygons well to compute exposure 
-  # write a function that, for each ESM cell, constructs the geometry of the cell around the centroids reported in the nc files
-  make_cell_geom <- function(coords) {
-    lat = as.numeric(coords$lat) # must turn character into numeric
-    lon = as.numeric(coords$lon) # must turn character into numeric
-    this_cell <- st_polygon(
-      list(matrix(c(
-        lon-0.5, lat-0.5,
-        lon+0.5, lat-0.5,
-        lon+0.5, lat+0.5,
-        lon-0.5, lat+0.5,
-        lon-0.5, lat-0.5
-      ), ncol = 2, byrow = T))
-    )
-    
-    return(this_cell)
-  }
+  # COMMENT IF INTERPOLATING
+  # # ESM outputs are quite granular and single points don't intersect with EFH polygons well to compute exposure 
+  # # write a function that, for each ESM cell, constructs the geometry of the cell around the centroids reported in the nc files
+  # make_cell_geom <- function(coords) {
+  #   lat = as.numeric(coords$lat) # must turn character into numeric
+  #   lon = as.numeric(coords$lon) # must turn character into numeric
+  #   this_cell <- st_polygon(
+  #     list(matrix(c(
+  #       lon-0.5, lat-0.5,
+  #       lon+0.5, lat-0.5,
+  #       lon+0.5, lat+0.5,
+  #       lon-0.5, lat+0.5,
+  #       lon-0.5, lat-0.5
+  #     ), ncol = 2, byrow = T))
+  #   )
+  #   
+  #   return(this_cell)
+  # }
+  # 
+  # # same function as above but with slightly altered geometry for air temp and precip data
+  # make_cell_geom_land <- function(coords) {
+  #   lat = as.numeric(coords$lat) # must turn character into numeric
+  #   lon = as.numeric(coords$lon) # must turn character into numeric
+  #   this_cell <- st_polygon(
+  #     list(matrix(c(
+  #       lon-0.625, lat-0.5,
+  #       lon+0.625, lat-0.5,
+  #       lon+0.625, lat+0.5,
+  #       lon-0.625, lat+0.5,
+  #       lon-0.625, lat-0.5
+  #     ), ncol = 2, byrow = T))
+  #   )
+  #   
+  #   return(this_cell)
+  # }
+  # 
+  # if(exposure_factor == "PH" | exposure_factor == "O2"){
+  #   # construct cell geometry
+  #   esm_sf <- calculate_anomaly %>%
+  #     nest(coords = c(lat, lon)) %>%
+  #     mutate(geometry = purrr::map(coords, make_cell_geom)) %>%
+  #     dplyr::select(-coords) %>%
+  #     st_as_sf(crs = 4326)
+  # }
+  # else if(exposure_factor == "AT" | exposure_factor == "PR"){
+  #   esm_sf <- calculate_anomaly %>%
+  #     nest(coords = c(lat, lon)) %>%
+  #     mutate(geometry = purrr::map(coords, make_cell_geom_land)) %>%
+  #     dplyr::select(-coords) %>%
+  #     st_as_sf(crs = 4326)
+  # }
   
-  # same function as above but with slightly altered geometry for air temp and precip data
-  make_cell_geom_land <- function(coords) {
-    lat = as.numeric(coords$lat) # must turn character into numeric
-    lon = as.numeric(coords$lon) # must turn character into numeric
-    this_cell <- st_polygon(
-      list(matrix(c(
-        lon-0.625, lat-0.5,
-        lon+0.625, lat-0.5,
-        lon+0.625, lat+0.5,
-        lon-0.625, lat+0.5,
-        lon-0.625, lat-0.5
-      ), ncol = 2, byrow = T))
-    )
-    
-    return(this_cell)
-  }
-  
-  if(exposure_factor == "PH" | exposure_factor == "O2"){
-    # construct cell geometry
-    esm_sf <- calculate_anomaly %>%
-      nest(coords = c(lat, lon)) %>%
-      mutate(geometry = purrr::map(coords, make_cell_geom)) %>%
-      dplyr::select(-coords) %>%
-      st_as_sf(crs = 4326)
-  }
-  else if(exposure_factor == "AT" | exposure_factor == "PR"){
-    esm_sf <- calculate_anomaly %>%
-      nest(coords = c(lat, lon)) %>%
-      mutate(geometry = purrr::map(coords, make_cell_geom_land)) %>%
-      dplyr::select(-coords) %>%
-      st_as_sf(crs = 4326)
-  }
+  # if interpolating
+  esm_sf <- calculate_anomaly |>
+    sf::st_as_sf(coords = c("lon", "lat"), crs = 4326)
   
   # esm_sf %>% ggplot()+geom_sf()
   
   # anomalies <- calculate_anomaly |> 
   #   st_as_sf(coords = c("lon", "lat"))
   # st_crs(anomalies)= 4326
-  anomalies <- esm_sf |>
+  # anomalies <- esm_sf |>
+  #   mutate( # set scoring categories
+  #     anomaly_bins = case_when(anomaly >= -10 & anomaly < -2 ~"very high",
+  #                              anomaly >= -2 & anomaly < -1.5 ~"high",
+  #                              anomaly >= -1.5 & anomaly < -0.5 ~"moderate",
+  #                              anomaly >= -0.5 & anomaly < 0.5 ~"low",
+  #                              anomaly >= 0.5 & anomaly < 1.5 ~"moderate",
+  #                              anomaly >= 1.5 & anomaly < 2 ~"high",
+  #                              anomaly >=2 & anomaly <= 10 ~"very high")
+  #   )
+  # return(anomalies)
+  vgm = variogram(anomaly ~ 1, data = esm_sf)
+  vgm_fit = fit.variogram(vgm, model=vgm(psill=8, model="Gau", 
+                                               range=400, nugget=0.25)); plot(vgm, vgm_fit)
+  krig = as.data.frame(krige(anomaly ~ 1, esm_sf, grid_sf, model = vgm_fit))
+  
+  anomalies <- krig |>
+    sf::st_as_sf(crs = 4326) |>
+    rename(anomaly = var1.pred, variance = var1.var) |>
     mutate( # set scoring categories
       anomaly_bins = case_when(anomaly >= -10 & anomaly < -2 ~"very high",
                                anomaly >= -2 & anomaly < -1.5 ~"high",
@@ -194,6 +217,7 @@ create_anomaly_gfdl <- function(exposure_factor, future_data, historical_data) {
                                anomaly >= 1.5 & anomaly < 2 ~"high",
                                anomaly >=2 & anomaly <= 10 ~"very high")
     )
+  
   return(anomalies)
 }
 
@@ -227,7 +251,7 @@ create_anomaly_plot <- function(data, exposure_factor_name) {
     sf_plot_theme() +
     guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
 
-  ggsave(paste(exposure_factor_name, "anomaly.png", sep="_"), path = here("plots/Anomaly plots"), device = "png", dpi = 300, width=8, height=5)
+   ggsave(paste(exposure_factor_name, "anomaly.png", sep="_"), path = here("plots/Anomaly plots"), device = "png", dpi = 300, width=8, height=5)
 }
 
 #' Prepare EFH polygons for overlap work.
@@ -244,23 +268,22 @@ create_anomaly_plot <- function(data, exposure_factor_name) {
 create_EFH_layer <- function(path, species_layer, level){
   #load a specific layer
   filtered <- vect(get(path), layer = species_layer)  
+  sf_use_s2(FALSE) # don't use spherical geometry 
   # adjust the EFH map 
   if(level == "2"){ # population percentiles EFH maps (level 2)
     filtered <- project(filtered, "epsg:4326") # project EFH map onto same crs as ROMS 
     sf_filtered <- st_as_sf(filtered, crs = 4326) |> # convert terra vector -> sf for sf-based spatial joins/intersections
       filter(layer == "5" | layer == "4")  |> # filter to core habitat
-      st_make_valid() # repair invalid polygon geometries so spatial operations do not fail
-    sf_use_s2(FALSE) # don't use spherical geometry 
-    sf_filtered <- sf_filtered |> 
+      st_make_valid() |> # repair invalid polygon geometries so spatial operations do not fail
       st_shift_longitude() # shift longitudes from -180..180 to 0..360 to match ROMS grid convention
     sf_filtered$layer <- as.character(sf_filtered$layer) # keep EFH designations as character labels for filtering/legend mapping
-    }
+  }
+  
   else{ # presence-absence EFH maps (level 1)
     filtered <- project(filtered, "epsg:4326") # project EFH map onto same crs as ROMS 
     sf_filtered <- st_as_sf(filtered, crs = 4326) |> # make sf object
-      st_make_valid() # make geometry valid (not sure why)
-    sf_use_s2(FALSE) # don't use spherical geometry (not sure why)
-    sf_filtered <- sf_filtered |> st_shift_longitude() # Convert to 0-360° longitude to match ROMS data
+      st_make_valid() |> # make geometry valid (not sure why)
+      st_shift_longitude() # Convert to 0-360° longitude to match ROMS data
   }
   return(sf_filtered)
 }
@@ -279,7 +302,7 @@ create_BTS_SDM_layer <- function(path, species_layer){
 
 # caches processed BTS data to disk and returns if already cached rather than processing again
 create_BTS_SDM_layer_cached <- function(path, species_layer, use_cache = TRUE) {
-  cache_path <- paste("data/bts_filtered/", species_layer, sep = "")
+  cache_path <- paste("data/filtered_sdms/", species_layer, sep = "")
   
   # check if this request is already cached
   if(file.exists(cache_path) && use_cache) {
@@ -305,6 +328,46 @@ create_BTS_SDM_layer_cached <- function(path, species_layer, use_cache = TRUE) {
   return(sf_filtered)
 }
 
+#' Prepare diet-derived SDMs for exposure analysis.
+#' 
+#' Loads an .rda data structure, converts to `sf` and to a target CRS, and  
+#' filters to "core" habitat area (population percentiles <50%).
+#' 
+#' @param path Path to .rda predictions derived from diet data.
+#'
+#' @return An `sf` polygon object with valid geometry and character `layer` values.
+create_diet_derived_layer <- function(path, species_layer){
+  return(create_diet_derived_layer_cached(path, species_layer, TRUE))
+}
+
+# caches processed BTS data to disk and returns if already cached rather than processing again
+create_diet_derived_layer_cached <- function(path, species_layer, use_cache = TRUE) {
+  cache_path <- paste("data/filtered_sdms/", species_layer, sep = "")
+  
+  # check if this request is already cached
+  if(file.exists(cache_path) && use_cache) {
+    # if it is and we're using the cache, load the cached data and return it
+    load(cache_path)
+    return(sf_filtered)
+  }
+  
+  # otherwise, load the unfiltered data and process it
+  load(paste(get(path), species_layer, sep = ""))
+  sf_filtered <- st_as_sf(prediction_data, coords = c("lon", "lat"), 
+                          crs = 4326) |>
+    st_shift_longitude() |> 
+    mutate(layer = recode(EFH.perc,   "25" = "5",
+                          "50" = "4",
+                          "75" = "3",
+                          "95" = "2")) |>
+    filter(layer == "5" | layer == "4") |>
+    dplyr::select(!c(NMFS_AREA, species, var, fit, se.fit, pop.perc, EFH.perc))
+  
+  # save the filtered data to the cache for next time
+  save(sf_filtered, file=cache_path)
+  return(sf_filtered)
+}
+
 #' Save plot of EFH area for a single species to plots/EFH plots.
 #' 
 #' @param path Path to EFH or SDM files.
@@ -314,7 +377,7 @@ create_BTS_SDM_layer_cached <- function(path, species_layer, use_cache = TRUE) {
 #' @param level EFH level (either 1 (presence-absence) or 2 (population percentiles)).
 #'
 #' @return NA
-plot_EFH_layer <- function(path, species_layer, level){
+plot_species_distribution <- function(path, species_layer, level, species_name){
   # load correct species distribution
   if(path == "gdb_path" | path == "scallop_path"){
     sf_filtered = create_EFH_layer(path, species_layer, level)
@@ -322,27 +385,33 @@ plot_EFH_layer <- function(path, species_layer, level){
   else if(path == "bts_sdm_path"){
     sf_filtered = create_BTS_SDM_layer(path, species_layer)
   }
+  else if(path == "diet_derived"){
+    sf_filtered = create_diet_derived_layer(path, species_layer)
+  }
   
   #create plot
   if(path == "gdb_path"){
   plot <- ggplot() +
-    geom_sf(data = sf_filtered, aes(color = layer, geometry = geometry), size = 0.5, alpha = 0.8) +
+    geom_sf(data = sf_filtered, aes(color = layer, fill = layer, geometry = geometry), size = 0.5, alpha = 0.8) +
     geom_sf(data = coast, color = "black", linewidth = 0.3) +
     scale_color_manual(
       values = EFH_cols,
-      labels = c(
-        "2" = "95% EFH Area",
-        "3" = "75% Principal EFH Area",
-        "4" = "50% Core EFH Area",
-        "5" = "25% EFH Hot Spots"
-      ),
-      # 2. Control the legend breaks and order
-      breaks = c("2", "3", "4", "5")
+      guide = "none"
     ) +
+    scale_fill_manual(values = EFH_cols,
+                      labels = c(
+                        "2" = "95% EFH Area",
+                        "3" = "75% Principal EFH Area",
+                        "4" = "50% Core EFH Area",
+                        "5" = "25% EFH Hot Spots"
+                      ),
+                      # 2. Control the legend breaks and order
+                      breaks = c("2", "3", "4", "5")) +
     labs(x = "Longitude",
          y = "Latitude",
-         color = "EFH area") +
-    sf_plot_theme()
+         fill = "EFH area") +
+    sf_plot_theme() +
+    theme(panel.grid = element_blank())
   }
   else if(path == "scallop_path"){
   plot <- ggplot() +
@@ -352,7 +421,7 @@ plot_EFH_layer <- function(path, species_layer, level){
          y = "Latitude") +
     sf_plot_theme()
   }
-  else if(path == "bts_sdm_path"){
+  else if(path == "bts_sdm_path" | path == "diet_derived_path"){
   plot <- ggplot() +
       geom_sf(data = sf_filtered, aes(geometry = geometry, color = layer), size = 0.3, alpha = 0.8) +
       geom_sf(data=coast, color="black", linewidth = 0.3) +
@@ -372,7 +441,7 @@ plot_EFH_layer <- function(path, species_layer, level){
            y = "Latitude") +
       sf_plot_theme()
   }
-  ggsave(paste(species_layer, "EFH.png", sep="_"), device = "png", path = here("plots/EFH plots"), plot = plot, width=8, height=5, dpi = 300)
+  ggsave(paste(species_name, "distribution.png", sep="_"), device = "png", path = here("plots/EFH plots"), plot = plot, width=8, height=5, dpi = 300)
 }
 
 #' Keep points that intersect species EFH polygons.
@@ -403,17 +472,10 @@ create_overlap <- function(path, species_layer, level, species_name, anomaly_dat
     if(level == "2"){ # for species with EFH designations
       anomaly_data$EFH <- apply(st_intersects(sf_filtered, anomaly_data, sparse = FALSE), 2, 
                                 function(col) {sf_filtered[which(col), ]$layer}) 
-      
-      # remove points outside of the target species distribution
-      if(exposure_factor_name == "PH" | exposure_factor_name == "O2" | exposure_factor_name == "AT" | exposure_factor_name == "PR"){ # gfdl exposure factors only
-        anomaly_data[apply(anomaly_data, 2, function(x) lapply(x, length) == 0)] <- NA # replace empty lists with NA (no EFH area associated with it)
-        exposure <- anomaly_data |> drop_na(EFH) # drop rows with no EFH
-      }
-      else{
-        exposure <- anomaly_data |> filter(EFH == "4" | EFH == "5") # filter to core habitat (50% EFH Area)
-      }
+      exposure <- anomaly_data |> 
+        filter(EFH == "4" | EFH == "5") # filter to core habitat (50% EFH Area)
     }
-    else{ # for species with presence-absence maps (e.g., weathervane scallop)
+    else{ # for species with EFH presence-absence maps (e.g., weathervane scallop)
       anomaly_data$EFH <- apply(st_intersects(sf_filtered, anomaly_data, sparse = FALSE), 2, 
                                 function(col) {sf_filtered[which(col), ]$geometry}) 
       
@@ -421,8 +483,13 @@ create_overlap <- function(path, species_layer, level, species_name, anomaly_dat
       exposure <- exposure |> filter(na == FALSE)    
     }
   }
-  else if(path == "bts_sdm_path"){ # for BTS SDMs
+  else if(path == "bts_sdm_path"){ # for SDMs
     sf_filtered = create_BTS_SDM_layer(path, species_layer)
+    nearest_points <- st_nearest_feature(sf_filtered, anomaly_data)
+    exposure <- cbind(sf_filtered, st_drop_geometry(anomaly_data)[nearest_points, ])
+  }
+  else if(path == "diet_derived_path"){ # for SDMs
+    sf_filtered = create_diet_derived_layer(path, species_layer)
     nearest_points <- st_nearest_feature(sf_filtered, anomaly_data)
     exposure <- cbind(sf_filtered, st_drop_geometry(anomaly_data)[nearest_points, ])
   }
