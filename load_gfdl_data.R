@@ -16,7 +16,7 @@ latrange <- c(52, 62)
 # exposure_factor: Character exposure factor name.
 # data: List of OPeNDAP urls (that link to NetCDF files) from historical or future time periods.
 # run: Either "historical" or "ssp585" (future).
-# esm_slice: "surface" 
+# esm_slice: "surface" or "bottom" 
 get_gfdl <- function(exposure_factor, data, run, esm_slice){
   # loop over esm files
   this_esm_scenario <- list()
@@ -25,24 +25,24 @@ get_gfdl <- function(exposure_factor, data, run, esm_slice){
     esm_data <- tidync(esm_file)  
     
     origin <- ncmeta::nc_atts(esm_file, "time") %>% 
-      mutate(across(variable:value, as.character)) |> # fixes classes to pull origin
+      mutate(across(variable:value, as.character)) %>% # fixes classes to pull origin
       tidyr::unnest(cols = c(value)) %>%
       filter(name == 'units') %>%
-      select(value) %>%
+      dplyr::select(value) %>%
       mutate(value = str_replace(value, 'days since ', '')) %>%
       pull(value) %>%
       as.Date()
     
-    # now pull data from netcdf
+    # pull data from particular latitude and longitude
     this_esm_data <- esm_data %>% hyper_filter(lon = lon > lonrange[1] & lon <= lonrange[2], 
                                                lat = lat > latrange[1] & lat <= latrange[2]) 
     
-    # get surface slice
+    # get surface or bottom slice
     if(esm_slice == "surface"){
       this_esm_data <- this_esm_data %>%
-        hyper_tibble |> # added to make group_by work ?
+        hyper_tibble %>% # added to make group_by work 
         group_by(time, lon, lat) %>%
-        slice_min(lev) %>%
+        slice_min(lev) %>% # take surface slice
         ungroup()
       
       this_esm_data$time <- as.Date(this_esm_data$time)
@@ -53,25 +53,40 @@ get_gfdl <- function(exposure_factor, data, run, esm_slice){
                month = month(time),
                cell_id = paste(lon, lat, sep = '_'))
     }
-    else{
+    else if(esm_slice == "bottom"){
+      this_esm_data <- this_esm_data %>%
+        hyper_tibble %>% # added to make group_by work 
+        group_by(time, lon, lat) %>%
+        slice_max(lev) %>% # take bottom slice
+        ungroup()
+      
+      this_esm_data$time <- as.Date(this_esm_data$time)
+      
+      # add time and cell index
+      this_esm_data <- this_esm_data %>% 
+        mutate(year = year(time),
+               month = month(time),
+               cell_id = paste(lon, lat, sep = '_'))
+    }
+    else{ # for non-ocean variables (no surface or bottom slice needed)
       this_esm_data$time <- as.Date(this_esm_data$time)
       
       this_esm_data <- this_esm_data %>% 
-        hyper_tibble |>
+        hyper_tibble %>%
         mutate(year = year(time),
                month = month(time),
                cell_id = paste(lon, lat, sep = '_'))
     }
     
     # standardize exposure factor column name
-    this_esm_data <- this_esm_data |>
+    this_esm_data <- this_esm_data %>%
       rename(any_of(c(value = "ph", value = "o2", value = "tas", value = "pr")))
     
     # now group by time step and average ph weighting by cell area
     mean_value <- this_esm_data %>%
       group_by(year, month, lat, lon, cell_id) %>% # lat, lon, and cell_id will be the same for each point, but want to keep in df
       summarise(mean = mean(value)) %>%
-      ungroup() |>
+      ungroup() %>%
       mutate(run = run,
              slice = esm_slice)
     
@@ -104,12 +119,15 @@ ph_historical_files <- list(ph_hist_2010_2014_url, ph_hist_1990_2009_url, ph_ssp
 
 # run functions to put GFDL pH data into a data frame for correct coords and surface layer, and compute means by month and year
 ph_ssp585_surface <- get_gfdl("PH", ph_ssp585_files, "ssp585", "surface")
-test <- get_gfdl("PH", ph_ssp585_files, "ssp585", "surface")
+ph_ssp585_bottom <- get_gfdl("PH", ph_ssp585_files, "ssp585", "bottom")
 ph_historical_surface <- get_gfdl("PH", ph_historical_files, "historical", "surface")
+ph_historical_bottom <- get_gfdl("PH", ph_historical_files, "historical", "bottom")
 
 # write parquet files into folder
 write_parquet(ph_ssp585_surface, "data/pH/ph_ssp585_surface.parquet")
-write_parquet(ph_historical_surface, "data/pH/ph_historical_surface_2020.parquet")
+write_parquet(ph_historical_surface, "data/pH/ph_historical_surface.parquet")
+write_parquet(ph_ssp585_bottom, "data/pH/ph_ssp585_bottom.parquet")
+write_parquet(ph_historical_bottom, "data/pH/ph_historical_bottom.parquet")
 
 ########## OXYGEN CONCENTRATION #########
 # load future (ssp585) data for o2
@@ -132,9 +150,13 @@ o2_historical_files <- list(o2_hist_2010_2014_url, o2_hist_1990_2009_url, o2_ssp
 
 o2_ssp585_surface <- get_gfdl("O2", o2_ssp585_files, "ssp585", "surface")
 o2_historical_surface <- get_gfdl("O2", o2_historical_files, "historical", "surface")
+o2_ssp585_bottom <- get_gfdl("O2", o2_ssp585_files, "ssp585", "bottom")
+o2_historical_bottom <- get_gfdl("O2", o2_historical_files, "historical", "bottom")
 
 write_parquet(o2_ssp585_surface, "data/o2/o2_ssp585_surface.parquet")
-write_parquet(o2_historical_surface, "data/o2/o2_historical_surface_2020.parquet")
+write_parquet(o2_historical_surface, "data/o2/o2_historical_surface.parquet")
+write_parquet(o2_ssp585_bottom, "data/o2/o2_ssp585_bottom.parquet")
+write_parquet(o2_historical_bottom, "data/o2/o2_historical_bottom.parquet")
 
 ########## AIR TEMPERATURE #########
 # load future data
