@@ -10,7 +10,7 @@ gc()
 
 # Load required packages
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(tidyverse, tidync, ncdf4, lubridate, here, sf, rnaturalearth, arrow, dplyr, here, terra, readxl, data.table, gstat)
+pacman::p_load(ggplot2, tidyverse, tidync, ncdf4, lubridate, here, sf, rnaturalearth, arrow, dplyr, terra, readxl, data.table, gstat, ggpubr)
 pacman::p_load_gh("ropensci/rnaturalearthhires")  # High-resolution coastline data
 here::i_am("exposure_EFH.R")
 
@@ -185,7 +185,7 @@ diet_derived_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/da
 layer_names <- read_excel(here("goa_efh_spp_lifestages.xlsx"), sheet = "groundfish", skip = 1,
                            col_names = c("group", "species_name", "path", "EFH_level", "layer", "sea_temperature", 
                                          "salinity", "ph", "phytoplankton", "zooplankton",
-                                         "oxygen", "air_temperature", "precipitation")) |>
+                                         "oxygen", "air_temperature", "precipitation", "data_quality")) |>
   drop_na(layer)
 layer_names$air_temperature[layer_names$air_temperature == "NA"] <- NA
 layer_names$precipitation[layer_names$precipitation == "NA"] <- NA
@@ -359,10 +359,12 @@ write.csv(alt_exposure_results, "exposure_scores_alternative.csv", row.names = F
 
 
 # ============================================================================
-# SECTION 5: More plots
+# SECTION 5: Summary plots
 # ============================================================================
-# Create plot that includes distribution of exposure scores for all exposure 
-# factors for each species.
+# For each species, create plot that includes distribution of exposure scores 
+# for all exposure factors for each species. Create a plot that shows all 
+# exposure maps and histograms for a single species as an example of the 
+# exposure process.
 # ============================================================================
 
 # plot distribution of exposure scores for all exposure factors for each species
@@ -422,3 +424,116 @@ sp_exposure_histograms("gdb_path", "GOA_adult_walleyepollock_efh_level2_abundanc
 for (i in 1:length(species_layers)) {
   sp_exposure_histograms(paths[i], species_layers[i], EFH_level[i], species_name[i])
 }
+
+# create plot with two columns
+# one column has all the exposure maps for a species
+# the second column has all the exposure score histograms associated with those maps
+# species: shortraker rockfish
+
+##### first plot
+exposure_plot_list = list() # create list
+exposure_factors_list <- layer_names[44,6:13]
+these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
+these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
+
+# create data frame to put exposure score numbers in
+species_scores <- data.frame(
+  exposure_factor = unlist(these_exposure_factors$V1)
+)
+
+for(i in 1:length(these_exposure_factors$V1)){
+  original_exposure_data <- create_overlap("gdb_path", "GOA_adult_shortrakerrockfish_efh_level2_abundance_summer", "2", "Shortraker rockfish", anomaly[[paste(these_exposure_factors$V1[i], "_anomaly", sep = "")]], these_exposure_factors$V1[i])
+  exposure_plot <- assign_exposure_levels(original_exposure_data)
+  exposure_plot <- exposure_plot |>
+    mutate(exposure_factor = these_exposure_factors$V1[i])
+  # assign(paste(exposure_factors[i], "_exposure_plot", sep = ""), exposure_plot, envir = .GlobalEnv)
+  exposure_plot_list[[i]] <- exposure_plot # add it to the list
+  
+  # calculate exposure score for each exposure factor
+  score <- calculate_exposure_score(original_exposure_data, "gdb_path", "GOA_adult_shortrakerrockfish_efh_level2_abundance_summer", "2", "Shortraker rockfish", anomaly[[paste(these_exposure_factors$V1[i], "_anomaly", sep = "")]], these_exposure_factors$V1[i])
+  species_scores[i,"score"] <- score
+}
+
+group_exposure_plot <- do.call(rbind, exposure_plot_list) 
+
+shortraker_exposure_hist <- ggplot(group_exposure_plot) +
+  geom_col(mapping = aes(x = exposure_score, y = prop, fill = exposure_score), 
+           position = "dodge", linewidth = 0.25, colour="black", width = 0.8, show.legend = FALSE) +
+  geom_text(data = species_scores, aes(x = I(0.8), y = I(0.8), label = score), size = 3) +
+  facet_wrap(~exposure_factor, ncol = 1) +
+  scale_x_discrete(labels = c("L", "M", "H", "V")) +
+  scale_y_continuous(labels = scales::percent) +
+  ylab("Percent") +
+  xlab("Exposure Score") +
+  scale_fill_manual(values = c("green", "yellow", "orange", "red")) +
+  #annotate("text", x = I(0.8), y = I(0.8), label = paste("Exposure = ", exp_fact_mean, sep = "")) + # add exposure score in top right corner
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        strip.text = element_text(hjust = 0, size = 10),
+        strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+        plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+        panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
+
+
+##### second plot
+exposure_map_list = list() # create second list
+
+for(i in 1:length(these_exposure_factors$V1)){
+  original_exposure_data <- create_overlap("gdb_path", "GOA_adult_shortrakerrockfish_efh_level2_abundance_summer", "2", "Shortraker rockfish", anomaly[[paste(these_exposure_factors$V1[i], "_anomaly", sep = "")]], these_exposure_factors$V1[i])
+  original_exposure_data <- original_exposure_data |>
+    dplyr::select(anomaly, geometry, anomaly_bins, type) |>
+    rename(variable = type)
+  exposure_map_list[[i]] <- original_exposure_data # add it to the list
+}
+
+group_exposure_maps <- do.call(rbind, exposure_map_list) 
+
+shortraker_exposure_maps <- ggplot() + 
+  geom_sf(data = group_exposure_maps, aes(color = anomaly, fill = anomaly, geometry = geometry), size = 1, alpha = 0.8) +
+    coord_sf(xlim = c(-170, -130), ylim = c(50, 62)) +
+  facet_wrap(~variable, ncol = 1) +
+  geom_sf(data = GOA, size=0.2, fill="gray85") +
+  geom_sf(data = canada, size=0.2, fill="gray95") +
+  scale_color_gradientn(
+    colors = c("purple", "blue", "cyan", "green", "yellow", "orange", "red"), # set colors for scoring categories
+    values = scales::rescale(c(-10, -2, -1.5, -0.5, 0, 0.5, 1.5, 2, 10)),
+    limits = c(-10, 10)
+  ) +
+  scale_fill_gradientn(
+    colors = c("purple", "blue", "cyan", "green", "yellow", "orange", "red"), # set colors for scoring categories
+    values = scales::rescale(c(-10, -2, -1.5, -0.5, 0, 0.5, 1.5, 2, 10)),
+    limits = c(-10, 10),
+    guide = "none"
+  ) +
+  labs(x = "Longitude",
+       y = "Latitude",
+       color = "Anomaly") +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        legend.position = c(0.5, 0.02), legend.direction = "horizontal", 
+        legend.text = element_text(size = 6), legend.title = element_text(size = 8, margin = margin(r = 5)), 
+        legend.key.size = unit(0.2, "cm"), legend.key.spacing = unit(0.05, "cm"),
+        legend.frame = element_rect(color = "black", linewidth = 0.25),
+        legend.background = element_rect(fill = "transparent"),
+        legend.ticks = element_line(color = "black", linewidth = 0.25),
+        strip.text = element_text(hjust = 0, size = 10),
+        strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+        plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+        panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5)
+  )
+
+plot_shortraker_exposure <- patchwork::wrap_plots(shortraker_exposure_maps, shortraker_exposure_hist, ncol = 2, widths = c(2, 1))
+ggsave(filename="shortraker_exposure.png", path = here("plots/"), plot = plot_shortraker_exposure, device = "png", width = 4, height = 7, bg = "transparent", dpi = 400)
+
+# ============================================================================
+# SECTION 6: Data quality
+# ============================================================================
+# Analyze data quality scores.
+# ============================================================================
+
+data_quality <- layer_names |>
+  dplyr::select(!c(sea_temperature, salinity, ph, phytoplankton, zooplankton, oxygen, air_temperature, precipitation)) |>
+  mutate(data_quality = as.factor(data_quality))
+
+dq_counts <- data_quality |>
+  summarize(count = n(), .by = c(data_quality))
