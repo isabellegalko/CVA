@@ -145,8 +145,6 @@ alternative_sensitivity_scores <- function(data) {
   return(calculated)
 }
 
-
-
 # calculations from functions 1 and 2
 # sum_scores <- calculate_sum_scores(final_scores)
 sensitivity_scores <- calculate_sensitivity_scores(final_scores)
@@ -191,8 +189,7 @@ sum_scores <- sum_scores |>
     prop_vh = sum_vh/total_tallies
   )
 
-# distribution plots of sensitivity scoring for each species
-
+# distribution plots of sensitivity scoring for each species (for workshops)
 workshop_plots <- function(data, species_name) {
   ## summary of tallies barplot
   filtered <- data |>
@@ -247,17 +244,7 @@ ggplot(group_scores) +
         strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
         rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
         panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-ggsave(filename="group_sensitivity_scores.png", plot = get_last_plot(), device = "png",width = 7, height = 5, bg = "transparent", dpi = 300)
-
-# plot for Katherine Coppock
-#   rockfish1, flatfish1, salmon, elasmobranch, crustacean
-#   average scores for each sensitivity attribute in each workshop
-katherine <- sum_scores |> filter(workshop == "Salmon" | workshop == "Rockfish1" | workshop == "Flatfish1" | workshop == "Elasmobranch" | workshop == "Crustacean") |>
-  select(!c(prop_low, prop_moderate, prop_high, prop_vh, total_tallies)) |>
-  group_by(workshop, attribute_name) |>
-  summarize(sum = mean(weighted_mean)) |>
-  print()
-
+ggsave(filename="group_sensitivity_scores.png", plot = get_last_plot(), device = "png", width = 7, height = 5, bg = "transparent", dpi = 300)
 
 # ============================================================================
 # SECTION 2: Calculate Potential for Distributional Shift
@@ -407,7 +394,7 @@ ggsave(filename="group_directional_effect.png", plot = get_last_plot(), device =
 
 # join and export distribution and directional effect scores
 
-additional_scores <- left_join(dist_sensitivity_scores, average_de, by = "species")
+additional_scores <- left_join(dist_sensitivity_scores, average_de |> select(-group), by = "species") 
 write.csv(additional_scores, "additional_scores.csv", row.names = FALSE)
 
 # ============================================================================
@@ -504,7 +491,17 @@ for (i in 1:length(workshop_name)) {
 }
 
 # ============================================================================
-# SECTION 5: Other plots
+# SECTION 5: Data quality scores
+# ============================================================================
+# Calculate average data quality score for each species.
+# ============================================================================
+
+data_quality_sensitivity <- final_scores |>
+  summarize(mean = mean(data_quality), .by = c(species)) |>
+  mutate(across(where(is.numeric), round, digits = 1))
+
+# ============================================================================
+# SECTION 6: Other plots
 # ============================================================================
 # Individual plots for each species' sensitivity attribute.
 # ============================================================================
