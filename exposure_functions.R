@@ -368,6 +368,42 @@ create_diet_derived_layer_cached <- function(path, species_layer, use_cache = TR
   return(sf_filtered)
 }
 
+#' Prepare diet-derived SDMs for exposure analysis.
+#' 
+#' Loads an .rda data structure, converts to `sf` and to a target CRS, and  
+#' filters to "core" habitat area (population percentiles <50%).
+#' 
+#' @param path Path to .rda predictions derived from diet data.
+#'
+#' @return An `sf` polygon object with valid geometry and character `layer` values.
+create_depth_temp_layer <- function(path, species_layer){
+  return(create_depth_temp_layer_cached(path, species_layer, TRUE))
+}
+
+# caches processed BTS data to disk and returns if already cached rather than processing again
+create_depth_temp_layer_cached <- function(path, species_layer, use_cache = TRUE) {
+  cache_path <- paste("data/filtered_sdms/", species_layer, sep = "")
+  
+  # check if this request is already cached
+  if(file.exists(cache_path) && use_cache) {
+    # if it is and we're using the cache, load the cached data and return it
+    load(cache_path)
+    return(sf_filtered)
+  }
+  
+  # otherwise, load the unfiltered data and process it
+  prediction_data <- load(paste(get(path), species_layer, sep = ""))
+  sf_filtered <- st_as_sf(get(prediction_data), coords = c("lon", "lat"), 
+                          crs = 4326) |>
+    st_shift_longitude() |> 
+    dplyr::select(!c(depth, BT, species, area.swept)) |>
+    mutate(layer = "5") # note: this is not EFH layer 5, but I am making it 5 to work with the analysis
+  
+  # save the filtered data to the cache for next time
+  save(sf_filtered, file=cache_path)
+  return(sf_filtered)
+}
+
 #' Save plot of EFH area for a single species to plots/EFH plots.
 #' 
 #' @param path Path to EFH or SDM files.
@@ -385,12 +421,15 @@ plot_species_distribution <- function(path, species_layer, level, species_name){
   else if(path == "bts_sdm_path"){
     sf_filtered = create_BTS_SDM_layer(path, species_layer)
   }
-  else if(path == "diet_derived"){
+  else if(path == "diet_derived_path"){
     sf_filtered = create_diet_derived_layer(path, species_layer)
+  }
+  else if(path == "depth_temp_path"){
+    sf_filtered = create_depth_temp_layer(path, species_layer)
   }
   
   #create plot
-  if(path == "gdb_path"){
+  if(path == "gdb_path"){ # for EFH predictions
   plot <- ggplot() +
     geom_sf(data = sf_filtered, aes(color = layer, fill = layer, geometry = geometry), size = 0.5, alpha = 0.8) +
     geom_sf(data = coast, color = "black", linewidth = 0.3) +
@@ -413,7 +452,7 @@ plot_species_distribution <- function(path, species_layer, level, species_name){
     sf_plot_theme() +
     theme(panel.grid = element_blank())
   }
-  else if(path == "scallop_path"){
+  else if(path == "scallop_path" | path == "depth_temp_path"){ # for presence-absence SDMs
   plot <- ggplot() +
     geom_sf(data = sf_filtered, aes(geometry = geometry), size = 0.5, alpha = 0.8) +
     geom_sf(data = coast, color = "black", linewidth = 0.3) +
@@ -421,7 +460,7 @@ plot_species_distribution <- function(path, species_layer, level, species_name){
          y = "Latitude") +
     sf_plot_theme()
   }
-  else if(path == "bts_sdm_path" | path == "diet_derived_path"){
+  else if(path == "bts_sdm_path" | path == "diet_derived_path"){ # for EFH predictions from BTS or diet data
   plot <- ggplot() +
       geom_sf(data = sf_filtered, aes(geometry = geometry, color = layer), size = 0.3, alpha = 0.8) +
       geom_sf(data=coast, color="black", linewidth = 0.3) +
@@ -490,6 +529,11 @@ create_overlap <- function(path, species_layer, level, species_name, anomaly_dat
   }
   else if(path == "diet_derived_path"){ # for SDMs
     sf_filtered = create_diet_derived_layer(path, species_layer)
+    nearest_points <- st_nearest_feature(sf_filtered, anomaly_data)
+    exposure <- cbind(sf_filtered, st_drop_geometry(anomaly_data)[nearest_points, ])
+  }
+  else if(path == "depth_temp_path"){ # for SDMs
+    sf_filtered = create_depth_temp_layer(path, species_layer)
     nearest_points <- st_nearest_feature(sf_filtered, anomaly_data)
     exposure <- cbind(sf_filtered, st_drop_geometry(anomaly_data)[nearest_points, ])
   }

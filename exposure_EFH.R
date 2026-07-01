@@ -111,7 +111,7 @@ ZP_anomaly <- ZP_anomaly |> mutate(type = "ZP")
 # calculate anomaly for ESM variables (note different function in exposure_functions.R)
 # include spatial interpolation using kriging
 
-# load prediction grid - TO-DO: find prediction grid at same scale as ROMS
+# load prediction grid 
 load("10km_grid.rda")
 prediction.grid = as.data.frame(grid)
 grid_sf = st_as_sf(prediction.grid, coords = c("lon_rho", "lat_rho"), crs = 4326) |>
@@ -176,6 +176,7 @@ gdb_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/GOA_gr
 scallop_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/EFH_2018_Scallop.gdb"
 bts_sdm_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/bts_sdms/"
 diet_derived_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/diet_sdms/"
+depth_temp_path <- "/Users/isabellegalko/Documents/OSU/GOA CVA/Exposure/CVA/data/depth_temp_sdms/"
 
 # # list all vector layers in the .gdb
 # layers <- vector_layers(gdb_path)
@@ -197,9 +198,9 @@ EFH_level <- layer_names$EFH_level
 # test plot
 plot_species_distribution("gdb_path", "GOA_adult_redbandedrockfish_efh_level2_abundance_summer", "2", "Redbanded rockfish")
 plot_species_distribution("scallop_path", "_Weathervane_scallop_adult_EFH_Level1", "1", "Weathervane scallop")
-plot_species_distribution("bts_sdm_path", "predictions_Pacific.capelin.rda", "2", "Capelin")
 plot_species_distribution("bts_sdm_path", "predictions_king.crabs.rda", "2", "Red king crab")
 plot_species_distribution("diet_derived_path", "predictions_Pandalid shrimps_diet_derived.rda", "2", "Spot shrimp")
+plot_species_distribution("depth_temp_path", "geoduck_clam_predictions.rda", "1", "Geoduck clam")
 
 # for loop to create EFH plots for all species 
 # function from exposure_functions.R
@@ -226,7 +227,7 @@ for (i in 1:length(species_layers)) {
 # calculate_exposure_score() calculates exposure scores and puts them in the layer_names data frame
 
 # test overlap function
-alaska_plaice <- create_overlap("gdb_path", "GOA_adult_alaskaplaice_efh_level2_abundance_summer", "2", "Alaska plaice", SPH_anomaly, "SPH")
+geoduck_clam <- create_overlap("depth_temp_path", "geoduck_clam_predictions.rda", "1", "Geoduck clam", BT_anomaly, "BT")
 
 # test out some plots
 create_exposure_plots("gdb_path", "GOA_adult_alaskaplaice_efh_level2_abundance_summer", "2", "Alaska plaice", BPH_anomaly, "BPH")
@@ -247,8 +248,6 @@ for (i in 1:length(species_layers)) {
     create_exposure_plots(this_path_name, this_species_layer, this_EFH_level, species_name[i], anomaly[[paste(these_exposure_factors$V1[k], "_anomaly", sep = "")]], these_exposure_factors$V1[k])
   }
 }
-
-# exposure_scores <- data.frame(species = character(), exposure_factor = character(), score = numeric())
 
 # create data frame to place exposure scores in 
 exposure_scores <- layer_names |>
@@ -280,91 +279,15 @@ for (i in 1:length(species_layers)) {
 
 # save csv with exposure scores
 # note: currently set to reference period of 2005-2020
-write.csv(exposure_scores, "exposure_factor_scores_2005-2020.csv", row.names = FALSE)
+write.csv(exposure_scores, "results/exposure_factor_scores_2005-2020.csv", row.names = FALSE)
 
 # exposure_scores <- read.csv("exposure_factor_scores.csv") # if need to read back in file to not re-run scores in the future
-
-# format exposure scores for vulnerability calculation below
-
-# reformat data frame
-indv_exposure_results <- exposure_scores |>
-  # pivot_longer(cols=c("SST", "BT", "SS", "BS", "PhT", "ZP", "SPH", "BPH", "SO2", "BO2", "AT", "PR"), # already did above!
-  #              names_to = "exposure_factor_short",
-  #              values_to = "score") |>
-  mutate(exposure_factor_full = recode(exposure_factor,
-                                  "SST" = "Sea surface temperature",
-                                  "BT" = "Bottom temperature",
-                                  "SS" = "Surface salinity",
-                                  "BS" = "Bottom salinity",
-                                  "PhT" = "Phytoplankton concentration",
-                                  "ZP" = "Zooplankton concentration",
-                                  "SPH" = "Surface pH",
-                                  "BPH" = "Bottom pH",
-                                  "SO2" = "Surface oxygen concentration",
-                                  "BO2" = "Bottom oxygen concentration",
-                                  "AT" = "Air temperature",
-                                  "PR" = "Precipitation"))
-
-# apply logic rule
-exposure_results <- indv_exposure_results |>
-  group_by(group, species_name) |>
-  summarize(
-    above_3.5 = sum(score >= 3.5), # number of mean scores above 3.5 - "very high" 
-    above_3 = sum(score >= 3), # number of mean scores above 3 - "high" 
-    above_2.5 = sum(score >=2.5), # number of mean scores above 2.5 - "moderate" 
-    exposure = ifelse(above_3.5 >= 3, "very high", ifelse(above_3 >= 2, "high", ifelse(above_2.5 >= 2, "moderate", "low"))),
-  ) |>
-  ungroup() |>
-  dplyr::select(!c(above_3.5, above_3, above_2.5))
-
-# apply ALTERNATIVE logic rule
-alt_exposure_results <- indv_exposure_results |>
-  group_by(group, species_name) |>
-  summarize(
-    above_3.5 = sum(score >= 3.5),
-    above_2.5 = sum(score >= 2.5), # mean scores between 2.5 and 3.5 would be considered as “high"
-    above_1.5 = sum(score >=1.5), # mean scores between 1.5 and 2.5 would be considered as “moderate”
-    exposure = ifelse(above_3.5 >= 3, "very high", ifelse(above_2.5 >= 2, "high", ifelse(above_1.5 >= 2, "moderate", "low"))),
-  ) |>
-  ungroup() |>
-  dplyr::select(!c(above_3.5, above_2.5, above_1.5))
-
-exposure_results$exposure  = ordered(exposure_results$exposure,
-                                     levels = c("low",
-                                                "moderate",
-                                                "high",
-                                                "very high"))
-alt_exposure_results$exposure  = ordered(alt_exposure_results$exposure,
-                                     levels = c("low",
-                                                "moderate",
-                                                "high",
-                                                "very high"))
-# add number for each exposure score
-exposure_results <- exposure_results |>
-  mutate(exposure_number = recode(exposure,
-                                  "low" = "1",
-                                  "moderate" = "2",
-                                  "high" = "3",
-                                  "very high" = "4"))
-alt_exposure_results <- alt_exposure_results |>
-  mutate(exposure_number = recode(exposure,
-                                  "low" = "1",
-                                  "moderate" = "2",
-                                  "high" = "3",
-                                  "very high" = "4"))
-
-# save csv of original and alternative exposure scores for vulnerability calculation
-write.csv(exposure_results, "exposure_scores_original.csv", row.names = FALSE)
-write.csv(alt_exposure_results, "exposure_scores_alternative.csv", row.names = FALSE)
-
 
 # ============================================================================
 # SECTION 5: Summary plots
 # ============================================================================
 # For each species, create plot that includes distribution of exposure scores 
-# for all exposure factors for each species. Create a plot that shows all 
-# exposure maps and histograms for a single species as an example of the 
-# exposure process.
+# for all exposure factors for each species. 
 # ============================================================================
 
 # plot distribution of exposure scores for all exposure factors for each species
@@ -417,20 +340,28 @@ sp_exposure_histograms <- function(path, species_layer, EFH_level, species_name)
   ggsave(paste(species_name, "all_exposure_scores.png", sep="_"), path = here("plots/Exposure plots/"), plot = group_plot, device = "png", width = 7, height = 5, bg = "transparent", dpi = 300)
 }
 
-# test plot
+# test plots
 sp_exposure_histograms("gdb_path", "GOA_adult_walleyepollock_efh_level2_abundance_summer", "2", "Walleye pollock")
+sp_exposure_histograms("depth_temp_path", "geoduck_clam_predictions.rda", "1", "Geoduck clam")
 
 # create series of plots for all species
 for (i in 1:length(species_layers)) {
   sp_exposure_histograms(paths[i], species_layers[i], EFH_level[i], species_name[i])
 }
 
+# ============================================================================
+# SECTION 6: Manuscript plots
+# ============================================================================
+# Create a plot that shows all exposure maps and histograms for a single species 
+# as an example of the exposure process.
+# ============================================================================
+
 # create plot with two columns
 # one column has all the exposure maps for a species
 # the second column has all the exposure score histograms associated with those maps
 # species: shortraker rockfish
 
-##### first plot
+##### first column of plots
 exposure_plot_list = list() # create list
 exposure_factors_list <- layer_names[44,6:13]
 these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
@@ -475,7 +406,7 @@ shortraker_exposure_hist <- ggplot(group_exposure_plot) +
         panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
 
 
-##### second plot
+##### second column of plots
 exposure_map_list = list() # create second list
 
 for(i in 1:length(these_exposure_factors$V1)){
@@ -525,15 +456,3 @@ shortraker_exposure_maps <- ggplot() +
 plot_shortraker_exposure <- patchwork::wrap_plots(shortraker_exposure_maps, shortraker_exposure_hist, ncol = 2, widths = c(2, 1))
 ggsave(filename="shortraker_exposure.png", path = here("plots/"), plot = plot_shortraker_exposure, device = "png", width = 4, height = 7, bg = "transparent", dpi = 400)
 
-# ============================================================================
-# SECTION 6: Data quality
-# ============================================================================
-# Analyze data quality scores.
-# ============================================================================
-
-data_quality <- layer_names |>
-  dplyr::select(!c(sea_temperature, salinity, ph, phytoplankton, zooplankton, oxygen, air_temperature, precipitation)) |>
-  mutate(data_quality = as.factor(data_quality))
-
-dq_counts <- data_quality |>
-  summarize(count = n(), .by = c(data_quality))
