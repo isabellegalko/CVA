@@ -1,4 +1,8 @@
 # Sensitivity analysis for GOA CVA
+# Saves three csv results files:
+#   1. Sensitivity scores
+#   2. Additional scores (distribution shift potential and directional effect)
+#   3. Data quality scores
 
 # load required packages
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
