@@ -63,7 +63,7 @@ mhw_hindcast <- readRDS(here("data/mhw/processed_mhw_hindcast.RDS"))
 # ============================================================================
 
 # load prediction grid (10 km^2 resolution)
-load("10km_grid.rda")
+load(here::here("data", "10km_grid.rda"))
 prediction.grid = as.data.frame(grid)
 grid_sf = st_as_sf(prediction.grid, coords = c("lon_rho", "lat_rho"), crs = 4326) |>
   st_shift_longitude()
