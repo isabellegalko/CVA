@@ -6,8 +6,6 @@
 plots/
 ~$*
 .positai
-BTS_SDMs/
-Diet_SDMs/
 data/EFH_2018_Scallop.gdb
 data/GOA_groundfish_2023.gdb
 data/NEP_grid_5a.nc
