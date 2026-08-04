@@ -1,0 +1,685 @@
+"workshop","group","species","attribute_short","attribute_name","sum_low","sum_moderate","sum_high","sum_vh","weighted_mean"
+"Crustacean","Crustacean","Dungeness crab","AM","Adult Movement",3,16,11,0,2.26666666666667
+"Crustacean","Crustacean","Dungeness crab","DC","Dispersal Capability",20,8,2,0,1.4
+"Crustacean","Crustacean","Dungeness crab","FS","Foraging Strategy",21,8,1,0,1.33333333333333
+"Crustacean","Crustacean","Dungeness crab","GD","Genetic Diversity",8,20,2,0,1.8
+"Crustacean","Crustacean","Dungeness crab","HS","Habitat Specificity",11,16,3,0,1.73333333333333
+"Crustacean","Crustacean","Dungeness crab","LH","Life History Strategy",17,8,3,2,1.66666666666667
+"Crustacean","Crustacean","Dungeness crab","PI","Parental Investment",4,24,2,0,1.93333333333333
+"Crustacean","Crustacean","Dungeness crab","RP","Reproductive Plasticity",10,11,9,0,1.96666666666667
+"Crustacean","Crustacean","Dungeness crab","OA","Sensitivity to OA",0,7,10,13,3.2
+"Crustacean","Crustacean","Dungeness crab","SD","Spawning Duration",5,8,9,8,2.66666666666667
+"Crustacean","Crustacean","Dungeness crab","SS","Stock Status",13,12,5,0,1.73333333333333
+"Crustacean","Crustacean","Dungeness crab","TT","Thermal Tolerance",8,16,6,0,1.93333333333333
+"Crustacean","Crustacean","Golden king crab","AM","Adult Movement",4,15,11,0,2.23333333333333
+"Crustacean","Crustacean","Golden king crab","DC","Dispersal Capability",5,14,9,2,2.26666666666667
+"Crustacean","Crustacean","Golden king crab","FS","Foraging Strategy",23,6,1,0,1.26666666666667
+"Crustacean","Crustacean","Golden king crab","GD","Genetic Diversity",1,10,16,3,2.7
+"Crustacean","Crustacean","Golden king crab","HS","Habitat Specificity",6,16,7,1,2.1
+"Crustacean","Crustacean","Golden king crab","LH","Life History Strategy",0,11,16,3,2.73333333333333
+"Crustacean","Crustacean","Golden king crab","PI","Parental Investment",7,21,2,0,1.83333333333333
+"Crustacean","Crustacean","Golden king crab","RP","Reproductive Plasticity",14,12,4,0,1.66666666666667
+"Crustacean","Crustacean","Golden king crab","OA","Sensitivity to OA",3,7,9,11,2.93333333333333
+"Crustacean","Crustacean","Golden king crab","SD","Spawning Duration",19,11,0,0,1.36666666666667
+"Crustacean","Crustacean","Golden king crab","SS","Stock Status",9,13,6,2,2.03333333333333
+"Crustacean","Crustacean","Golden king crab","TT","Thermal Tolerance",0,2,14,14,3.4
+"Crustacean","Crustacean","Red king crab","AM","Adult Movement",4,18,8,0,2.13333333333333
+"Crustacean","Crustacean","Red king crab","DC","Dispersal Capability",19,9,2,0,1.43333333333333
+"Crustacean","Crustacean","Red king crab","FS","Foraging Strategy",20,10,0,0,1.33333333333333
+"Crustacean","Crustacean","Red king crab","GD","Genetic Diversity",19,10,1,0,1.4
+"Crustacean","Crustacean","Red king crab","HS","Habitat Specificity",8,14,8,0,2
+"Crustacean","Crustacean","Red king crab","LH","Life History Strategy",0,12,15,3,2.7
+"Crustacean","Crustacean","Red king crab","PI","Parental Investment",7,21,2,0,1.83333333333333
+"Crustacean","Crustacean","Red king crab","RP","Reproductive Plasticity",3,8,16,3,2.63333333333333
+"Crustacean","Crustacean","Red king crab","OA","Sensitivity to OA",3,9,9,9,2.8
+"Crustacean","Crustacean","Red king crab","SD","Spawning Duration",3,8,11,8,2.8
+"Crustacean","Crustacean","Red king crab","SS","Stock Status",1,4,9,16,3.33333333333333
+"Crustacean","Crustacean","Red king crab","TT","Thermal Tolerance",6,8,12,4,2.46666666666667
+"Crustacean","Crustacean","Sidestriped shrimp","AM","Adult Movement",3,9,11,2,2.48
+"Crustacean","Crustacean","Sidestriped shrimp","DC","Dispersal Capability",14,7,3,1,1.64
+"Crustacean","Crustacean","Sidestriped shrimp","FS","Foraging Strategy",18,5,1,1,1.4
+"Crustacean","Crustacean","Sidestriped shrimp","GD","Genetic Diversity",3,16,3,3,2.24
+"Crustacean","Crustacean","Sidestriped shrimp","HS","Habitat Specificity",12,9,4,0,1.68
+"Crustacean","Crustacean","Sidestriped shrimp","LH","Life History Strategy",16,7,2,0,1.44
+"Crustacean","Crustacean","Sidestriped shrimp","PI","Parental Investment",2,16,5,2,2.28
+"Crustacean","Crustacean","Sidestriped shrimp","RP","Reproductive Plasticity",2,11,10,2,2.48
+"Crustacean","Crustacean","Sidestriped shrimp","OA","Sensitivity to OA",2,6,9,8,2.92
+"Crustacean","Crustacean","Sidestriped shrimp","SD","Spawning Duration",0,5,12,8,3.12
+"Crustacean","Crustacean","Sidestriped shrimp","SS","Stock Status",5,11,7,2,2.24
+"Crustacean","Crustacean","Sidestriped shrimp","TT","Thermal Tolerance",1,4,15,5,2.96
+"Crustacean","Crustacean","Spot shrimp","AM","Adult Movement",0,8,17,0,2.68
+"Crustacean","Crustacean","Spot shrimp","DC","Dispersal Capability",7,13,5,0,1.92
+"Crustacean","Crustacean","Spot shrimp","FS","Foraging Strategy",17,6,1,1,1.44
+"Crustacean","Crustacean","Spot shrimp","GD","Genetic Diversity",3,13,6,3,2.36
+"Crustacean","Crustacean","Spot shrimp","HS","Habitat Specificity",9,8,8,0,1.96
+"Crustacean","Crustacean","Spot shrimp","LH","Life History Strategy",10,12,3,0,1.72
+"Crustacean","Crustacean","Spot shrimp","PI","Parental Investment",5,19,1,0,1.84
+"Crustacean","Crustacean","Spot shrimp","RP","Reproductive Plasticity",3,11,10,1,2.36
+"Crustacean","Crustacean","Spot shrimp","OA","Sensitivity to OA",2,8,11,4,2.68
+"Crustacean","Crustacean","Spot shrimp","SD","Spawning Duration",0,3,15,7,3.16
+"Crustacean","Crustacean","Spot shrimp","SS","Stock Status",0,9,12,4,2.8
+"Crustacean","Crustacean","Spot shrimp","TT","Thermal Tolerance",9,10,5,1,1.92
+"Crustacean","Crustacean","Tanner crab","AM","Adult Movement",4,19,7,0,2.1
+"Crustacean","Crustacean","Tanner crab","DC","Dispersal Capability",20,9,1,0,1.36666666666667
+"Crustacean","Crustacean","Tanner crab","FS","Foraging Strategy",17,12,1,0,1.46666666666667
+"Crustacean","Crustacean","Tanner crab","GD","Genetic Diversity",3,5,16,6,2.83333333333333
+"Crustacean","Crustacean","Tanner crab","HS","Habitat Specificity",13,12,5,0,1.73333333333333
+"Crustacean","Crustacean","Tanner crab","LH","Life History Strategy",3,14,12,1,2.36666666666667
+"Crustacean","Crustacean","Tanner crab","PI","Parental Investment",7,21,2,0,1.83333333333333
+"Crustacean","Crustacean","Tanner crab","RP","Reproductive Plasticity",7,15,8,0,2.03333333333333
+"Crustacean","Crustacean","Tanner crab","OA","Sensitivity to OA",0,5,9,16,3.36666666666667
+"Crustacean","Crustacean","Tanner crab","SD","Spawning Duration",4,9,13,4,2.56666666666667
+"Crustacean","Crustacean","Tanner crab","SS","Stock Status",1,11,13,5,2.73333333333333
+"Crustacean","Crustacean","Tanner crab","TT","Thermal Tolerance",5,15,10,0,2.16666666666667
+"Elasmobranch","Elasmobranch","Alaska skate","AM","Adult Movement",7,14,4,0,1.88
+"Elasmobranch","Elasmobranch","Alaska skate","DC","Dispersal Capability",0,4,10,11,3.28
+"Elasmobranch","Elasmobranch","Alaska skate","FS","Foraging Strategy",21,4,0,0,1.16
+"Elasmobranch","Elasmobranch","Alaska skate","GD","Genetic Diversity",11,10,4,0,1.72
+"Elasmobranch","Elasmobranch","Alaska skate","HS","Habitat Specificity",8,12,5,0,1.88
+"Elasmobranch","Elasmobranch","Alaska skate","LH","Life History Strategy",0,2,12,11,3.36
+"Elasmobranch","Elasmobranch","Alaska skate","PI","Parental Investment",17,5,3,0,1.44
+"Elasmobranch","Elasmobranch","Alaska skate","RP","Reproductive Plasticity",1,8,13,3,2.72
+"Elasmobranch","Elasmobranch","Alaska skate","OA","Sensitivity to OA",10,9,6,0,1.84
+"Elasmobranch","Elasmobranch","Alaska skate","SD","Spawning Duration",19,6,0,0,1.24
+"Elasmobranch","Elasmobranch","Alaska skate","SS","Stock Status",15,9,1,0,1.44
+"Elasmobranch","Elasmobranch","Alaska skate","TT","Thermal Tolerance",0,4,13,8,3.16
+"Elasmobranch","Elasmobranch","Big skate","AM","Adult Movement",8,14,3,0,1.8
+"Elasmobranch","Elasmobranch","Big skate","DC","Dispersal Capability",0,5,11,9,3.16
+"Elasmobranch","Elasmobranch","Big skate","FS","Foraging Strategy",17,7,1,0,1.36
+"Elasmobranch","Elasmobranch","Big skate","GD","Genetic Diversity",6,14,5,0,1.96
+"Elasmobranch","Elasmobranch","Big skate","HS","Habitat Specificity",9,10,6,0,1.88
+"Elasmobranch","Elasmobranch","Big skate","LH","Life History Strategy",0,3,7,15,3.48
+"Elasmobranch","Elasmobranch","Big skate","PI","Parental Investment",18,4,3,0,1.4
+"Elasmobranch","Elasmobranch","Big skate","RP","Reproductive Plasticity",4,11,7,3,2.36
+"Elasmobranch","Elasmobranch","Big skate","OA","Sensitivity to OA",8,10,7,0,1.96
+"Elasmobranch","Elasmobranch","Big skate","SD","Spawning Duration",20,5,0,0,1.2
+"Elasmobranch","Elasmobranch","Big skate","SS","Stock Status",13,11,1,0,1.52
+"Elasmobranch","Elasmobranch","Big skate","TT","Thermal Tolerance",16,8,1,0,1.4
+"Elasmobranch","Elasmobranch","Longnose skate","AM","Adult Movement",8,13,4,0,1.84
+"Elasmobranch","Elasmobranch","Longnose skate","DC","Dispersal Capability",0,5,11,9,3.16
+"Elasmobranch","Elasmobranch","Longnose skate","FS","Foraging Strategy",21,3,1,0,1.2
+"Elasmobranch","Elasmobranch","Longnose skate","GD","Genetic Diversity",7,13,5,0,1.92
+"Elasmobranch","Elasmobranch","Longnose skate","HS","Habitat Specificity",11,12,2,0,1.64
+"Elasmobranch","Elasmobranch","Longnose skate","LH","Life History Strategy",0,1,7,17,3.64
+"Elasmobranch","Elasmobranch","Longnose skate","PI","Parental Investment",18,4,3,0,1.4
+"Elasmobranch","Elasmobranch","Longnose skate","RP","Reproductive Plasticity",3,11,8,3,2.44
+"Elasmobranch","Elasmobranch","Longnose skate","OA","Sensitivity to OA",8,10,7,0,1.96
+"Elasmobranch","Elasmobranch","Longnose skate","SD","Spawning Duration",16,9,0,0,1.36
+"Elasmobranch","Elasmobranch","Longnose skate","SS","Stock Status",13,11,1,0,1.52
+"Elasmobranch","Elasmobranch","Longnose skate","TT","Thermal Tolerance",7,13,5,0,1.92
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","AM","Adult Movement",16,8,1,0,1.4
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","DC","Dispersal Capability",4,8,11,2,2.44
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","FS","Foraging Strategy",23,2,0,0,1.08
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","GD","Genetic Diversity",4,19,2,0,1.92
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","HS","Habitat Specificity",19,6,0,0,1.24
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","LH","Life History Strategy",0,0,5,20,3.8
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","PI","Parental Investment",25,0,0,0,1
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","RP","Reproductive Plasticity",8,10,6,1,2
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","OA","Sensitivity to OA",17,7,1,0,1.36
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","SD","Spawning Duration",13,12,0,0,1.48
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","SS","Stock Status",2,18,5,0,2.12
+"Elasmobranch","Elasmobranch","Pacific spiny dogfish","TT","Thermal Tolerance",13,11,1,0,1.52
+"Flatfish1","Flatfish","Alaska plaice","AM","Adult Movement",4,13,3,0,1.95
+"Flatfish1","Flatfish","Alaska plaice","DC","Dispersal Capability",12,8,0,0,1.4
+"Flatfish1","Flatfish","Alaska plaice","FS","Foraging Strategy",11,8,1,0,1.5
+"Flatfish1","Flatfish","Alaska plaice","GD","Genetic Diversity",3,15,2,0,1.95
+"Flatfish1","Flatfish","Alaska plaice","HS","Habitat Specificity",2,8,10,0,2.4
+"Flatfish1","Flatfish","Alaska plaice","LH","Life History Strategy",1,4,8,7,3.05
+"Flatfish1","Flatfish","Alaska plaice","PI","Parental Investment",0,0,0,20,4
+"Flatfish1","Flatfish","Alaska plaice","RP","Reproductive Plasticity",8,7,5,0,1.85
+"Flatfish1","Flatfish","Alaska plaice","OA","Sensitivity to OA",11,7,2,0,1.55
+"Flatfish1","Flatfish","Alaska plaice","SD","Spawning Duration",0,2,15,3,3.05
+"Flatfish1","Flatfish","Alaska plaice","SS","Stock Status",15,4,1,0,1.3
+"Flatfish1","Flatfish","Alaska plaice","TT","Thermal Tolerance",0,3,9,8,3.25
+"Flatfish1","Flatfish","Northern rock sole","AM","Adult Movement",4,15,1,0,1.85
+"Flatfish1","Flatfish","Northern rock sole","DC","Dispersal Capability",5,9,4,2,2.15
+"Flatfish1","Flatfish","Northern rock sole","FS","Foraging Strategy",14,6,0,0,1.3
+"Flatfish1","Flatfish","Northern rock sole","GD","Genetic Diversity",3,15,2,0,1.95
+"Flatfish1","Flatfish","Northern rock sole","HS","Habitat Specificity",8,9,3,0,1.75
+"Flatfish1","Flatfish","Northern rock sole","LH","Life History Strategy",5,9,5,1,2.1
+"Flatfish1","Flatfish","Northern rock sole","PI","Parental Investment",0,0,6,14,3.7
+"Flatfish1","Flatfish","Northern rock sole","RP","Reproductive Plasticity",10,6,4,0,1.7
+"Flatfish1","Flatfish","Northern rock sole","OA","Sensitivity to OA",10,7,3,0,1.65
+"Flatfish1","Flatfish","Northern rock sole","SD","Spawning Duration",0,7,11,2,2.75
+"Flatfish1","Flatfish","Northern rock sole","SS","Stock Status",10,10,0,0,1.5
+"Flatfish1","Flatfish","Northern rock sole","TT","Thermal Tolerance",2,8,9,1,2.45
+"Flatfish1","Flatfish","Southern rock sole","AM","Adult Movement",4,15,1,0,1.85
+"Flatfish1","Flatfish","Southern rock sole","DC","Dispersal Capability",0,11,7,2,2.55
+"Flatfish1","Flatfish","Southern rock sole","FS","Foraging Strategy",14,6,0,0,1.3
+"Flatfish1","Flatfish","Southern rock sole","GD","Genetic Diversity",3,15,2,0,1.95
+"Flatfish1","Flatfish","Southern rock sole","HS","Habitat Specificity",10,8,2,0,1.6
+"Flatfish1","Flatfish","Southern rock sole","LH","Life History Strategy",4,11,4,1,2.1
+"Flatfish1","Flatfish","Southern rock sole","PI","Parental Investment",0,0,6,14,3.7
+"Flatfish1","Flatfish","Southern rock sole","RP","Reproductive Plasticity",5,11,4,0,1.95
+"Flatfish1","Flatfish","Southern rock sole","OA","Sensitivity to OA",10,7,3,0,1.65
+"Flatfish1","Flatfish","Southern rock sole","SD","Spawning Duration",0,0,14,6,3.3
+"Flatfish1","Flatfish","Southern rock sole","SS","Stock Status",14,4,1,1,1.45
+"Flatfish1","Flatfish","Southern rock sole","TT","Thermal Tolerance",7,7,6,0,1.95
+"Flatfish1","Flatfish","Starry flounder","AM","Adult Movement",2,14,4,0,2.1
+"Flatfish1","Flatfish","Starry flounder","DC","Dispersal Capability",10,8,2,0,1.6
+"Flatfish1","Flatfish","Starry flounder","FS","Foraging Strategy",13,6,1,0,1.4
+"Flatfish1","Flatfish","Starry flounder","GD","Genetic Diversity",3,15,2,0,1.95
+"Flatfish1","Flatfish","Starry flounder","HS","Habitat Specificity",7,11,2,0,1.75
+"Flatfish1","Flatfish","Starry flounder","LH","Life History Strategy",2,10,8,0,2.3
+"Flatfish1","Flatfish","Starry flounder","PI","Parental Investment",0,0,0,20,4
+"Flatfish1","Flatfish","Starry flounder","RP","Reproductive Plasticity",11,7,2,0,1.55
+"Flatfish1","Flatfish","Starry flounder","OA","Sensitivity to OA",8,9,3,0,1.75
+"Flatfish1","Flatfish","Starry flounder","SD","Spawning Duration",0,7,13,0,2.65
+"Flatfish1","Flatfish","Starry flounder","SS","Stock Status",15,4,1,0,1.3
+"Flatfish1","Flatfish","Starry flounder","TT","Thermal Tolerance",6,10,4,0,1.9
+"Flatfish1","Flatfish","Yellowfin sole","AM","Adult Movement",4,15,1,0,1.85
+"Flatfish1","Flatfish","Yellowfin sole","DC","Dispersal Capability",7,10,3,0,1.8
+"Flatfish1","Flatfish","Yellowfin sole","FS","Foraging Strategy",14,6,0,0,1.3
+"Flatfish1","Flatfish","Yellowfin sole","GD","Genetic Diversity",4,13,3,0,1.95
+"Flatfish1","Flatfish","Yellowfin sole","HS","Habitat Specificity",13,7,0,0,1.35
+"Flatfish1","Flatfish","Yellowfin sole","LH","Life History Strategy",3,9,5,3,2.4
+"Flatfish1","Flatfish","Yellowfin sole","PI","Parental Investment",0,0,0,20,4
+"Flatfish1","Flatfish","Yellowfin sole","RP","Reproductive Plasticity",7,9,4,0,1.85
+"Flatfish1","Flatfish","Yellowfin sole","OA","Sensitivity to OA",9,7,4,0,1.75
+"Flatfish1","Flatfish","Yellowfin sole","SD","Spawning Duration",0,2,16,2,3
+"Flatfish1","Flatfish","Yellowfin sole","SS","Stock Status",4,7,8,1,2.3
+"Flatfish1","Flatfish","Yellowfin sole","TT","Thermal Tolerance",3,8,7,2,2.4
+"Flatfish2","Flatfish","Arrowtooth flounder","AM","Adult Movement",10,18,2,0,1.73333333333333
+"Flatfish2","Flatfish","Arrowtooth flounder","DC","Dispersal Capability",18,10,2,0,1.46666666666667
+"Flatfish2","Flatfish","Arrowtooth flounder","FS","Foraging Strategy",23,6,1,0,1.26666666666667
+"Flatfish2","Flatfish","Arrowtooth flounder","GD","Genetic Diversity",8,18,4,0,1.86666666666667
+"Flatfish2","Flatfish","Arrowtooth flounder","HS","Habitat Specificity",25,5,0,0,1.16666666666667
+"Flatfish2","Flatfish","Arrowtooth flounder","LH","Life History Strategy",1,16,10,3,2.5
+"Flatfish2","Flatfish","Arrowtooth flounder","PI","Parental Investment",0,0,0,30,4
+"Flatfish2","Flatfish","Arrowtooth flounder","RP","Reproductive Plasticity",7,20,3,0,1.86666666666667
+"Flatfish2","Flatfish","Arrowtooth flounder","OA","Sensitivity to OA",10,15,5,0,1.83333333333333
+"Flatfish2","Flatfish","Arrowtooth flounder","SD","Spawning Duration",13,12,5,0,1.73333333333333
+"Flatfish2","Flatfish","Arrowtooth flounder","SS","Stock Status",27,3,0,0,1.1
+"Flatfish2","Flatfish","Arrowtooth flounder","TT","Thermal Tolerance",5,12,12,1,2.3
+"Flatfish2","Flatfish","Dover sole","AM","Adult Movement",10,20,0,0,1.66666666666667
+"Flatfish2","Flatfish","Dover sole","DC","Dispersal Capability",23,7,0,0,1.23333333333333
+"Flatfish2","Flatfish","Dover sole","FS","Foraging Strategy",16,13,1,0,1.5
+"Flatfish2","Flatfish","Dover sole","GD","Genetic Diversity",13,14,3,0,1.66666666666667
+"Flatfish2","Flatfish","Dover sole","HS","Habitat Specificity",21,9,0,0,1.3
+"Flatfish2","Flatfish","Dover sole","LH","Life History Strategy",3,12,10,5,2.56666666666667
+"Flatfish2","Flatfish","Dover sole","PI","Parental Investment",5,0,0,25,3.5
+"Flatfish2","Flatfish","Dover sole","RP","Reproductive Plasticity",5,21,4,0,1.96666666666667
+"Flatfish2","Flatfish","Dover sole","OA","Sensitivity to OA",5,14,11,0,2.2
+"Flatfish2","Flatfish","Dover sole","SD","Spawning Duration",1,22,7,0,2.2
+"Flatfish2","Flatfish","Dover sole","SS","Stock Status",28,2,0,0,1.06666666666667
+"Flatfish2","Flatfish","Dover sole","TT","Thermal Tolerance",3,13,12,2,2.43333333333333
+"Flatfish2","Flatfish","Flathead sole","AM","Adult Movement",10,20,0,0,1.66666666666667
+"Flatfish2","Flatfish","Flathead sole","DC","Dispersal Capability",23,7,0,0,1.23333333333333
+"Flatfish2","Flatfish","Flathead sole","FS","Foraging Strategy",20,9,1,0,1.36666666666667
+"Flatfish2","Flatfish","Flathead sole","GD","Genetic Diversity",5,23,2,0,1.9
+"Flatfish2","Flatfish","Flathead sole","HS","Habitat Specificity",19,11,0,0,1.36666666666667
+"Flatfish2","Flatfish","Flathead sole","LH","Life History Strategy",1,13,14,2,2.56666666666667
+"Flatfish2","Flatfish","Flathead sole","PI","Parental Investment",0,0,0,30,4
+"Flatfish2","Flatfish","Flathead sole","RP","Reproductive Plasticity",11,16,3,0,1.73333333333333
+"Flatfish2","Flatfish","Flathead sole","OA","Sensitivity to OA",4,15,11,0,2.23333333333333
+"Flatfish2","Flatfish","Flathead sole","SD","Spawning Duration",1,12,17,0,2.53333333333333
+"Flatfish2","Flatfish","Flathead sole","SS","Stock Status",30,0,0,0,1
+"Flatfish2","Flatfish","Flathead sole","TT","Thermal Tolerance",5,21,4,0,1.96666666666667
+"Flatfish2","Flatfish","Pacific halibut","AM","Adult Movement",16,14,0,0,1.46666666666667
+"Flatfish2","Flatfish","Pacific halibut","DC","Dispersal Capability",29,1,0,0,1.03333333333333
+"Flatfish2","Flatfish","Pacific halibut","FS","Foraging Strategy",26,3,1,0,1.16666666666667
+"Flatfish2","Flatfish","Pacific halibut","GD","Genetic Diversity",10,15,5,0,1.83333333333333
+"Flatfish2","Flatfish","Pacific halibut","HS","Habitat Specificity",20,7,3,0,1.43333333333333
+"Flatfish2","Flatfish","Pacific halibut","LH","Life History Strategy",0,5,11,14,3.3
+"Flatfish2","Flatfish","Pacific halibut","PI","Parental Investment",0,0,0,30,4
+"Flatfish2","Flatfish","Pacific halibut","RP","Reproductive Plasticity",5,19,6,0,2.03333333333333
+"Flatfish2","Flatfish","Pacific halibut","OA","Sensitivity to OA",7,16,7,0,2
+"Flatfish2","Flatfish","Pacific halibut","SD","Spawning Duration",0,10,20,0,2.66666666666667
+"Flatfish2","Flatfish","Pacific halibut","SS","Stock Status",1,4,9,16,3.33333333333333
+"Flatfish2","Flatfish","Pacific halibut","TT","Thermal Tolerance",4,15,11,0,2.23333333333333
+"Flatfish2","Flatfish","Petrale sole","AM","Adult Movement",9,21,0,0,1.7
+"Flatfish2","Flatfish","Petrale sole","DC","Dispersal Capability",17,11,2,0,1.5
+"Flatfish2","Flatfish","Petrale sole","FS","Foraging Strategy",22,7,1,0,1.3
+"Flatfish2","Flatfish","Petrale sole","GD","Genetic Diversity",8,21,1,0,1.76666666666667
+"Flatfish2","Flatfish","Petrale sole","HS","Habitat Specificity",15,13,2,0,1.56666666666667
+"Flatfish2","Flatfish","Petrale sole","LH","Life History Strategy",0,14,13,3,2.63333333333333
+"Flatfish2","Flatfish","Petrale sole","PI","Parental Investment",0,0,0,30,4
+"Flatfish2","Flatfish","Petrale sole","RP","Reproductive Plasticity",3,18,8,1,2.23333333333333
+"Flatfish2","Flatfish","Petrale sole","OA","Sensitivity to OA",8,17,5,0,1.9
+"Flatfish2","Flatfish","Petrale sole","SD","Spawning Duration",2,13,14,1,2.46666666666667
+"Flatfish2","Flatfish","Petrale sole","SS","Stock Status",12,11,2,0,1.6
+"Flatfish2","Flatfish","Petrale sole","TT","Thermal Tolerance",10,10,10,0,2
+"Flatfish2","Flatfish","Rex sole","AM","Adult Movement",13,17,0,0,1.56666666666667
+"Flatfish2","Flatfish","Rex sole","DC","Dispersal Capability",28,2,0,0,1.06666666666667
+"Flatfish2","Flatfish","Rex sole","FS","Foraging Strategy",20,9,1,0,1.36666666666667
+"Flatfish2","Flatfish","Rex sole","GD","Genetic Diversity",7,15,8,0,2.03333333333333
+"Flatfish2","Flatfish","Rex sole","HS","Habitat Specificity",21,9,0,0,1.3
+"Flatfish2","Flatfish","Rex sole","LH","Life History Strategy",8,12,8,2,2.13333333333333
+"Flatfish2","Flatfish","Rex sole","PI","Parental Investment",0,0,0,30,4
+"Flatfish2","Flatfish","Rex sole","RP","Reproductive Plasticity",14,12,3,1,1.7
+"Flatfish2","Flatfish","Rex sole","OA","Sensitivity to OA",4,17,9,0,2.16666666666667
+"Flatfish2","Flatfish","Rex sole","SD","Spawning Duration",7,19,4,0,1.9
+"Flatfish2","Flatfish","Rex sole","SS","Stock Status",30,0,0,0,1
+"Flatfish2","Flatfish","Rex sole","TT","Thermal Tolerance",9,14,7,0,1.93333333333333
+"Forage","Forage Fish","Capelin","AM","Adult Movement",7,17,1,0,1.76
+"Forage","Forage Fish","Capelin","DC","Dispersal Capability",13,12,0,0,1.48
+"Forage","Forage Fish","Capelin","FS","Foraging Strategy",3,16,6,0,2.12
+"Forage","Forage Fish","Capelin","GD","Genetic Diversity",7,17,1,0,1.76
+"Forage","Forage Fish","Capelin","HS","Habitat Specificity",4,11,10,0,2.24
+"Forage","Forage Fish","Capelin","LH","Life History Strategy",18,7,0,0,1.28
+"Forage","Forage Fish","Capelin","PI","Parental Investment",0,0,18,7,3.28
+"Forage","Forage Fish","Capelin","RP","Reproductive Plasticity",0,6,12,7,3.04
+"Forage","Forage Fish","Capelin","OA","Sensitivity to OA",1,15,9,0,2.32
+"Forage","Forage Fish","Capelin","SD","Spawning Duration",2,11,11,1,2.44
+"Forage","Forage Fish","Capelin","SS","Stock Status",4,9,10,2,2.4
+"Forage","Forage Fish","Capelin","TT","Thermal Tolerance",0,6,16,3,2.88
+"Forage","Forage Fish","Eulachon","AM","Adult Movement",5,13,7,0,2.08
+"Forage","Forage Fish","Eulachon","DC","Dispersal Capability",12,12,1,0,1.56
+"Forage","Forage Fish","Eulachon","FS","Foraging Strategy",0,6,17,2,2.84
+"Forage","Forage Fish","Eulachon","GD","Genetic Diversity",15,9,1,0,1.44
+"Forage","Forage Fish","Eulachon","HS","Habitat Specificity",1,5,16,3,2.84
+"Forage","Forage Fish","Eulachon","LH","Life History Strategy",19,6,0,0,1.24
+"Forage","Forage Fish","Eulachon","PI","Parental Investment",0,0,13,12,3.48
+"Forage","Forage Fish","Eulachon","RP","Reproductive Plasticity",0,1,13,11,3.4
+"Forage","Forage Fish","Eulachon","OA","Sensitivity to OA",1,12,12,0,2.44
+"Forage","Forage Fish","Eulachon","SD","Spawning Duration",0,3,4,18,3.6
+"Forage","Forage Fish","Eulachon","SS","Stock Status",3,10,10,2,2.44
+"Forage","Forage Fish","Eulachon","TT","Thermal Tolerance",3,4,13,5,2.8
+"Forage","Forage Fish","Pacific herring","AM","Adult Movement",3,20,2,0,1.96
+"Forage","Forage Fish","Pacific herring","DC","Dispersal Capability",11,13,1,0,1.6
+"Forage","Forage Fish","Pacific herring","FS","Foraging Strategy",14,10,1,0,1.48
+"Forage","Forage Fish","Pacific herring","GD","Genetic Diversity",10,14,1,0,1.64
+"Forage","Forage Fish","Pacific herring","HS","Habitat Specificity",4,14,6,1,2.16
+"Forage","Forage Fish","Pacific herring","LH","Life History Strategy",17,8,0,0,1.32
+"Forage","Forage Fish","Pacific herring","PI","Parental Investment",0,0,15,10,3.4
+"Forage","Forage Fish","Pacific herring","RP","Reproductive Plasticity",0,9,11,5,2.84
+"Forage","Forage Fish","Pacific herring","OA","Sensitivity to OA",4,18,3,0,1.96
+"Forage","Forage Fish","Pacific herring","SD","Spawning Duration",0,7,14,4,2.88
+"Forage","Forage Fish","Pacific herring","SS","Stock Status",4,12,8,1,2.24
+"Forage","Forage Fish","Pacific herring","TT","Thermal Tolerance",13,9,2,1,1.64
+"Forage","Forage Fish","Pacific sand lance","AM","Adult Movement",1,7,16,1,2.68
+"Forage","Forage Fish","Pacific sand lance","DC","Dispersal Capability",3,13,9,0,2.24
+"Forage","Forage Fish","Pacific sand lance","FS","Foraging Strategy",8,13,4,0,1.84
+"Forage","Forage Fish","Pacific sand lance","GD","Genetic Diversity",15,8,2,0,1.48
+"Forage","Forage Fish","Pacific sand lance","HS","Habitat Specificity",3,7,14,1,2.52
+"Forage","Forage Fish","Pacific sand lance","LH","Life History Strategy",22,3,0,0,1.12
+"Forage","Forage Fish","Pacific sand lance","PI","Parental Investment",0,0,18,7,3.28
+"Forage","Forage Fish","Pacific sand lance","RP","Reproductive Plasticity",0,7,13,5,2.92
+"Forage","Forage Fish","Pacific sand lance","OA","Sensitivity to OA",0,7,18,0,2.72
+"Forage","Forage Fish","Pacific sand lance","SD","Spawning Duration",0,7,16,2,2.8
+"Forage","Forage Fish","Pacific sand lance","SS","Stock Status",0,9,7,9,3
+"Forage","Forage Fish","Pacific sand lance","TT","Thermal Tolerance",1,9,10,5,2.76
+"Forage","Forage Fish","Pacific sandfish","AM","Adult Movement",3,15,7,0,2.16
+"Forage","Forage Fish","Pacific sandfish","DC","Dispersal Capability",7,14,4,0,1.88
+"Forage","Forage Fish","Pacific sandfish","FS","Foraging Strategy",13,10,2,0,1.56
+"Forage","Forage Fish","Pacific sandfish","GD","Genetic Diversity",3,17,3,2,2.16
+"Forage","Forage Fish","Pacific sandfish","HS","Habitat Specificity",10,9,6,0,1.84
+"Forage","Forage Fish","Pacific sandfish","LH","Life History Strategy",12,9,2,2,1.76
+"Forage","Forage Fish","Pacific sandfish","PI","Parental Investment",0,0,16,9,3.36
+"Forage","Forage Fish","Pacific sandfish","RP","Reproductive Plasticity",1,12,10,2,2.52
+"Forage","Forage Fish","Pacific sandfish","OA","Sensitivity to OA",4,15,6,0,2.08
+"Forage","Forage Fish","Pacific sandfish","SD","Spawning Duration",3,8,13,1,2.48
+"Forage","Forage Fish","Pacific sandfish","SS","Stock Status",5,11,8,1,2.2
+"Forage","Forage Fish","Pacific sandfish","TT","Thermal Tolerance",6,9,7,3,2.28
+"Groundfish","Groundfish","Atka mackerel","AM","Adult Movement",2,15,8,0,2.24
+"Groundfish","Groundfish","Atka mackerel","DC","Dispersal Capability",18,6,1,0,1.32
+"Groundfish","Groundfish","Atka mackerel","FS","Foraging Strategy",7,13,5,0,1.92
+"Groundfish","Groundfish","Atka mackerel","GD","Genetic Diversity",2,6,5,12,3.08
+"Groundfish","Groundfish","Atka mackerel","HS","Habitat Specificity",0,5,16,4,2.96
+"Groundfish","Groundfish","Atka mackerel","LH","Life History Strategy",1,16,7,1,2.32
+"Groundfish","Groundfish","Atka mackerel","PI","Parental Investment",0,23,2,0,2.08
+"Groundfish","Groundfish","Atka mackerel","RP","Reproductive Plasticity",5,12,7,1,2.16
+"Groundfish","Groundfish","Atka mackerel","OA","Sensitivity to OA",5,12,7,1,2.16
+"Groundfish","Groundfish","Atka mackerel","SD","Spawning Duration",0,14,11,0,2.44
+"Groundfish","Groundfish","Atka mackerel","SS","Stock Status",4,9,10,2,2.4
+"Groundfish","Groundfish","Atka mackerel","TT","Thermal Tolerance",1,6,12,6,2.92
+"Groundfish","Groundfish","Giant grenadier","AM","Adult Movement",6,12,6,1,2.08
+"Groundfish","Groundfish","Giant grenadier","DC","Dispersal Capability",11,11,2,1,1.72
+"Groundfish","Groundfish","Giant grenadier","FS","Foraging Strategy",17,8,0,0,1.32
+"Groundfish","Groundfish","Giant grenadier","GD","Genetic Diversity",0,20,4,1,2.24
+"Groundfish","Groundfish","Giant grenadier","HS","Habitat Specificity",14,6,3,2,1.72
+"Groundfish","Groundfish","Giant grenadier","LH","Life History Strategy",0,0,0,25,4
+"Groundfish","Groundfish","Giant grenadier","PI","Parental Investment",0,0,2,23,3.92
+"Groundfish","Groundfish","Giant grenadier","RP","Reproductive Plasticity",8,6,6,5,2.32
+"Groundfish","Groundfish","Giant grenadier","OA","Sensitivity to OA",6,13,6,0,2
+"Groundfish","Groundfish","Giant grenadier","SD","Spawning Duration",15,8,1,1,1.52
+"Groundfish","Groundfish","Giant grenadier","SS","Stock Status",4,9,9,3,2.44
+"Groundfish","Groundfish","Giant grenadier","TT","Thermal Tolerance",0,2,6,17,3.6
+"Groundfish","Groundfish","Lingcod","AM","Adult Movement",0,7,18,0,2.72
+"Groundfish","Groundfish","Lingcod","DC","Dispersal Capability",7,12,6,0,1.96
+"Groundfish","Groundfish","Lingcod","FS","Foraging Strategy",22,3,0,0,1.12
+"Groundfish","Groundfish","Lingcod","GD","Genetic Diversity",2,10,11,2,2.52
+"Groundfish","Groundfish","Lingcod","HS","Habitat Specificity",1,10,13,1,2.56
+"Groundfish","Groundfish","Lingcod","LH","Life History Strategy",6,10,9,0,2.12
+"Groundfish","Groundfish","Lingcod","PI","Parental Investment",0,21,4,0,2.16
+"Groundfish","Groundfish","Lingcod","RP","Reproductive Plasticity",3,10,6,6,2.6
+"Groundfish","Groundfish","Lingcod","OA","Sensitivity to OA",16,9,0,0,1.36
+"Groundfish","Groundfish","Lingcod","SD","Spawning Duration",0,0,16,9,3.36
+"Groundfish","Groundfish","Lingcod","SS","Stock Status",3,8,7,7,2.72
+"Groundfish","Groundfish","Lingcod","TT","Thermal Tolerance",1,7,10,7,2.92
+"Groundfish","Groundfish","Pacific cod","AM","Adult Movement",11,13,1,0,1.6
+"Groundfish","Groundfish","Pacific cod","DC","Dispersal Capability",7,12,6,0,1.96
+"Groundfish","Groundfish","Pacific cod","FS","Foraging Strategy",20,5,0,0,1.2
+"Groundfish","Groundfish","Pacific cod","GD","Genetic Diversity",9,15,1,0,1.68
+"Groundfish","Groundfish","Pacific cod","HS","Habitat Specificity",4,8,10,3,2.48
+"Groundfish","Groundfish","Pacific cod","LH","Life History Strategy",0,14,11,0,2.44
+"Groundfish","Groundfish","Pacific cod","PI","Parental Investment",0,0,11,14,3.56
+"Groundfish","Groundfish","Pacific cod","RP","Reproductive Plasticity",0,4,9,12,3.32
+"Groundfish","Groundfish","Pacific cod","OA","Sensitivity to OA",5,16,4,0,1.96
+"Groundfish","Groundfish","Pacific cod","SD","Spawning Duration",0,7,10,8,3.04
+"Groundfish","Groundfish","Pacific cod","SS","Stock Status",0,25,0,0,2
+"Groundfish","Groundfish","Pacific cod","TT","Thermal Tolerance",1,6,11,7,2.96
+"Groundfish","Groundfish","Plain sculpin","AM","Adult Movement",0,5,12,8,3.12
+"Groundfish","Groundfish","Plain sculpin","DC","Dispersal Capability",2,6,11,6,2.84
+"Groundfish","Groundfish","Plain sculpin","FS","Foraging Strategy",21,4,0,0,1.16
+"Groundfish","Groundfish","Plain sculpin","GD","Genetic Diversity",6,15,4,0,1.92
+"Groundfish","Groundfish","Plain sculpin","HS","Habitat Specificity",3,18,4,0,2.04
+"Groundfish","Groundfish","Plain sculpin","LH","Life History Strategy",6,8,8,3,2.32
+"Groundfish","Groundfish","Plain sculpin","PI","Parental Investment",0,18,7,0,2.28
+"Groundfish","Groundfish","Plain sculpin","RP","Reproductive Plasticity",5,9,6,5,2.44
+"Groundfish","Groundfish","Plain sculpin","OA","Sensitivity to OA",15,9,1,0,1.44
+"Groundfish","Groundfish","Plain sculpin","SD","Spawning Duration",0,2,6,17,3.6
+"Groundfish","Groundfish","Plain sculpin","SS","Stock Status",12,8,4,1,1.76
+"Groundfish","Groundfish","Plain sculpin","TT","Thermal Tolerance",5,8,8,4,2.44
+"Groundfish","Groundfish","Sablefish","AM","Adult Movement",23,2,0,0,1.08
+"Groundfish","Groundfish","Sablefish","DC","Dispersal Capability",24,1,0,0,1.04
+"Groundfish","Groundfish","Sablefish","FS","Foraging Strategy",21,4,0,0,1.16
+"Groundfish","Groundfish","Sablefish","GD","Genetic Diversity",0,15,9,1,2.44
+"Groundfish","Groundfish","Sablefish","HS","Habitat Specificity",21,4,0,0,1.16
+"Groundfish","Groundfish","Sablefish","LH","Life History Strategy",1,7,5,12,3.12
+"Groundfish","Groundfish","Sablefish","PI","Parental Investment",0,0,1,24,3.96
+"Groundfish","Groundfish","Sablefish","RP","Reproductive Plasticity",9,8,6,2,2.04
+"Groundfish","Groundfish","Sablefish","OA","Sensitivity to OA",19,6,0,0,1.24
+"Groundfish","Groundfish","Sablefish","SD","Spawning Duration",0,6,19,0,2.76
+"Groundfish","Groundfish","Sablefish","SS","Stock Status",24,1,0,0,1.04
+"Groundfish","Groundfish","Sablefish","TT","Thermal Tolerance",9,11,5,0,1.84
+"Groundfish","Groundfish","Walleye pollock","AM","Adult Movement",6,18,1,0,1.8
+"Groundfish","Groundfish","Walleye pollock","DC","Dispersal Capability",20,5,0,0,1.2
+"Groundfish","Groundfish","Walleye pollock","FS","Foraging Strategy",9,10,6,0,1.88
+"Groundfish","Groundfish","Walleye pollock","GD","Genetic Diversity",24,1,0,0,1.04
+"Groundfish","Groundfish","Walleye pollock","HS","Habitat Specificity",23,2,0,0,1.08
+"Groundfish","Groundfish","Walleye pollock","LH","Life History Strategy",5,14,6,0,2.04
+"Groundfish","Groundfish","Walleye pollock","PI","Parental Investment",0,0,0,25,4
+"Groundfish","Groundfish","Walleye pollock","RP","Reproductive Plasticity",0,7,14,4,2.88
+"Groundfish","Groundfish","Walleye pollock","OA","Sensitivity to OA",3,12,10,0,2.28
+"Groundfish","Groundfish","Walleye pollock","SD","Spawning Duration",0,2,22,1,2.96
+"Groundfish","Groundfish","Walleye pollock","SS","Stock Status",25,0,0,0,1
+"Groundfish","Groundfish","Walleye pollock","TT","Thermal Tolerance",6,11,7,1,2.12
+"Mollusc","Mollusc","Geoduck clam","AM","Adult Movement",0,0,6,14,3.7
+"Mollusc","Mollusc","Geoduck clam","DC","Dispersal Capability",7,12,1,0,1.7
+"Mollusc","Mollusc","Geoduck clam","FS","Foraging Strategy",12,7,1,0,1.45
+"Mollusc","Mollusc","Geoduck clam","GD","Genetic Diversity",4,12,4,0,2
+"Mollusc","Mollusc","Geoduck clam","HS","Habitat Specificity",6,10,4,0,1.9
+"Mollusc","Mollusc","Geoduck clam","LH","Life History Strategy",1,7,8,4,2.75
+"Mollusc","Mollusc","Geoduck clam","PI","Parental Investment",0,0,5,15,3.75
+"Mollusc","Mollusc","Geoduck clam","RP","Reproductive Plasticity",3,7,7,3,2.5
+"Mollusc","Mollusc","Geoduck clam","OA","Sensitivity to OA",4,9,5,2,2.25
+"Mollusc","Mollusc","Geoduck clam","SD","Spawning Duration",1,9,8,2,2.55
+"Mollusc","Mollusc","Geoduck clam","SS","Stock Status",5,10,4,1,2.05
+"Mollusc","Mollusc","Geoduck clam","TT","Thermal Tolerance",4,12,4,0,2
+"Mollusc","Mollusc","Giant Pacific octopus","AM","Adult Movement",2,5,13,0,2.55
+"Mollusc","Mollusc","Giant Pacific octopus","DC","Dispersal Capability",4,12,4,0,2
+"Mollusc","Mollusc","Giant Pacific octopus","FS","Foraging Strategy",5,10,5,0,2
+"Mollusc","Mollusc","Giant Pacific octopus","GD","Genetic Diversity",10,7,3,0,1.65
+"Mollusc","Mollusc","Giant Pacific octopus","HS","Habitat Specificity",13,5,2,0,1.45
+"Mollusc","Mollusc","Giant Pacific octopus","LH","Life History Strategy",6,5,5,4,2.35
+"Mollusc","Mollusc","Giant Pacific octopus","PI","Parental Investment",8,11,1,0,1.65
+"Mollusc","Mollusc","Giant Pacific octopus","RP","Reproductive Plasticity",9,7,4,0,1.75
+"Mollusc","Mollusc","Giant Pacific octopus","OA","Sensitivity to OA",7,9,4,0,1.85
+"Mollusc","Mollusc","Giant Pacific octopus","SD","Spawning Duration",1,7,8,4,2.75
+"Mollusc","Mollusc","Giant Pacific octopus","SS","Stock Status",6,6,5,3,2.25
+"Mollusc","Mollusc","Giant Pacific octopus","TT","Thermal Tolerance",1,4,11,4,2.9
+"Mollusc","Mollusc","Littleneck clam","AM","Adult Movement",0,0,7,13,3.65
+"Mollusc","Mollusc","Littleneck clam","DC","Dispersal Capability",6,11,3,0,1.85
+"Mollusc","Mollusc","Littleneck clam","FS","Foraging Strategy",12,8,0,0,1.4
+"Mollusc","Mollusc","Littleneck clam","GD","Genetic Diversity",6,9,3,2,2.05
+"Mollusc","Mollusc","Littleneck clam","HS","Habitat Specificity",11,6,3,0,1.6
+"Mollusc","Mollusc","Littleneck clam","LH","Life History Strategy",3,8,5,4,2.5
+"Mollusc","Mollusc","Littleneck clam","PI","Parental Investment",0,0,4,16,3.8
+"Mollusc","Mollusc","Littleneck clam","RP","Reproductive Plasticity",6,10,4,0,1.9
+"Mollusc","Mollusc","Littleneck clam","OA","Sensitivity to OA",1,2,10,7,3.15
+"Mollusc","Mollusc","Littleneck clam","SD","Spawning Duration",2,12,5,1,2.25
+"Mollusc","Mollusc","Littleneck clam","SS","Stock Status",8,7,4,1,1.9
+"Mollusc","Mollusc","Littleneck clam","TT","Thermal Tolerance",7,10,3,0,1.8
+"Mollusc","Mollusc","Magistrate armhook squid","AM","Adult Movement",10,7,3,0,1.65
+"Mollusc","Mollusc","Magistrate armhook squid","DC","Dispersal Capability",13,6,1,0,1.4
+"Mollusc","Mollusc","Magistrate armhook squid","FS","Foraging Strategy",11,8,1,0,1.5
+"Mollusc","Mollusc","Magistrate armhook squid","GD","Genetic Diversity",7,7,4,2,2.05
+"Mollusc","Mollusc","Magistrate armhook squid","HS","Habitat Specificity",6,8,6,0,2
+"Mollusc","Mollusc","Magistrate armhook squid","LH","Life History Strategy",15,5,0,0,1.25
+"Mollusc","Mollusc","Magistrate armhook squid","PI","Parental Investment",0,1,10,9,3.4
+"Mollusc","Mollusc","Magistrate armhook squid","RP","Reproductive Plasticity",6,9,3,2,2.05
+"Mollusc","Mollusc","Magistrate armhook squid","OA","Sensitivity to OA",3,11,5,1,2.2
+"Mollusc","Mollusc","Magistrate armhook squid","SD","Spawning Duration",18,2,0,0,1.1
+"Mollusc","Mollusc","Magistrate armhook squid","SS","Stock Status",13,6,1,0,1.4
+"Mollusc","Mollusc","Magistrate armhook squid","TT","Thermal Tolerance",0,3,11,6,3.15
+"Mollusc","Mollusc","Razor clam","AM","Adult Movement",0,0,8,12,3.6
+"Mollusc","Mollusc","Razor clam","DC","Dispersal Capability",15,5,0,0,1.25
+"Mollusc","Mollusc","Razor clam","FS","Foraging Strategy",11,9,0,0,1.45
+"Mollusc","Mollusc","Razor clam","GD","Genetic Diversity",12,7,1,0,1.45
+"Mollusc","Mollusc","Razor clam","HS","Habitat Specificity",13,6,1,0,1.4
+"Mollusc","Mollusc","Razor clam","LH","Life History Strategy",9,6,4,1,1.85
+"Mollusc","Mollusc","Razor clam","PI","Parental Investment",0,0,5,15,3.75
+"Mollusc","Mollusc","Razor clam","RP","Reproductive Plasticity",0,1,6,13,3.6
+"Mollusc","Mollusc","Razor clam","OA","Sensitivity to OA",1,4,10,5,2.95
+"Mollusc","Mollusc","Razor clam","SD","Spawning Duration",0,12,7,1,2.45
+"Mollusc","Mollusc","Razor clam","SS","Stock Status",0,1,8,11,3.5
+"Mollusc","Mollusc","Razor clam","TT","Thermal Tolerance",9,7,4,0,1.75
+"Mollusc","Mollusc","Weathervane scallop","AM","Adult Movement",0,1,9,10,3.45
+"Mollusc","Mollusc","Weathervane scallop","DC","Dispersal Capability",7,10,3,0,1.8
+"Mollusc","Mollusc","Weathervane scallop","FS","Foraging Strategy",10,8,2,0,1.6
+"Mollusc","Mollusc","Weathervane scallop","GD","Genetic Diversity",12,7,1,0,1.45
+"Mollusc","Mollusc","Weathervane scallop","HS","Habitat Specificity",8,8,4,0,1.8
+"Mollusc","Mollusc","Weathervane scallop","LH","Life History Strategy",4,7,7,2,2.35
+"Mollusc","Mollusc","Weathervane scallop","PI","Parental Investment",0,1,5,14,3.65
+"Mollusc","Mollusc","Weathervane scallop","RP","Reproductive Plasticity",2,6,8,4,2.7
+"Mollusc","Mollusc","Weathervane scallop","OA","Sensitivity to OA",0,5,9,6,3.05
+"Mollusc","Mollusc","Weathervane scallop","SD","Spawning Duration",0,4,12,4,3
+"Mollusc","Mollusc","Weathervane scallop","SS","Stock Status",7,9,4,0,1.85
+"Mollusc","Mollusc","Weathervane scallop","TT","Thermal Tolerance",4,6,6,4,2.5
+"Rockfish1","Rockfish","Black rockfish","AM","Adult Movement",1,6,12,1,2.65
+"Rockfish1","Rockfish","Black rockfish","DC","Dispersal Capability",6,10,3,1,1.95
+"Rockfish1","Rockfish","Black rockfish","FS","Foraging Strategy",14,4,2,0,1.4
+"Rockfish1","Rockfish","Black rockfish","GD","Genetic Diversity",6,9,5,0,1.95
+"Rockfish1","Rockfish","Black rockfish","HS","Habitat Specificity",1,7,9,3,2.7
+"Rockfish1","Rockfish","Black rockfish","LH","Life History Strategy",2,3,6,9,3.1
+"Rockfish1","Rockfish","Black rockfish","PI","Parental Investment",9,3,4,4,2.15
+"Rockfish1","Rockfish","Black rockfish","RP","Reproductive Plasticity",3,7,7,3,2.5
+"Rockfish1","Rockfish","Black rockfish","OA","Sensitivity to OA",11,6,3,0,1.6
+"Rockfish1","Rockfish","Black rockfish","SD","Spawning Duration",0,1,10,9,3.4
+"Rockfish1","Rockfish","Black rockfish","SS","Stock Status",5,6,7,2,2.3
+"Rockfish1","Rockfish","Black rockfish","TT","Thermal Tolerance",2,6,10,2,2.6
+"Rockfish1","Rockfish","Dusky rockfish","AM","Adult Movement",0,5,15,0,2.75
+"Rockfish1","Rockfish","Dusky rockfish","DC","Dispersal Capability",5,10,3,2,2.1
+"Rockfish1","Rockfish","Dusky rockfish","FS","Foraging Strategy",5,13,2,0,1.85
+"Rockfish1","Rockfish","Dusky rockfish","GD","Genetic Diversity",9,9,2,0,1.65
+"Rockfish1","Rockfish","Dusky rockfish","HS","Habitat Specificity",0,3,11,6,3.15
+"Rockfish1","Rockfish","Dusky rockfish","LH","Life History Strategy",0,3,7,10,3.35
+"Rockfish1","Rockfish","Dusky rockfish","PI","Parental Investment",9,3,4,4,2.15
+"Rockfish1","Rockfish","Dusky rockfish","RP","Reproductive Plasticity",3,8,7,2,2.4
+"Rockfish1","Rockfish","Dusky rockfish","OA","Sensitivity to OA",2,9,9,0,2.35
+"Rockfish1","Rockfish","Dusky rockfish","SD","Spawning Duration",0,0,10,10,3.5
+"Rockfish1","Rockfish","Dusky rockfish","SS","Stock Status",16,4,0,0,1.2
+"Rockfish1","Rockfish","Dusky rockfish","TT","Thermal Tolerance",0,4,8,8,3.2
+"Rockfish1","Rockfish","Northern rockfish","AM","Adult Movement",0,3,16,1,2.9
+"Rockfish1","Rockfish","Northern rockfish","DC","Dispersal Capability",3,10,4,3,2.35
+"Rockfish1","Rockfish","Northern rockfish","FS","Foraging Strategy",2,11,7,0,2.25
+"Rockfish1","Rockfish","Northern rockfish","GD","Genetic Diversity",9,8,3,0,1.7
+"Rockfish1","Rockfish","Northern rockfish","HS","Habitat Specificity",0,2,12,6,3.2
+"Rockfish1","Rockfish","Northern rockfish","LH","Life History Strategy",0,3,7,10,3.35
+"Rockfish1","Rockfish","Northern rockfish","PI","Parental Investment",9,3,4,4,2.15
+"Rockfish1","Rockfish","Northern rockfish","RP","Reproductive Plasticity",2,9,6,3,2.5
+"Rockfish1","Rockfish","Northern rockfish","OA","Sensitivity to OA",1,8,11,0,2.5
+"Rockfish1","Rockfish","Northern rockfish","SD","Spawning Duration",0,0,9,11,3.55
+"Rockfish1","Rockfish","Northern rockfish","SS","Stock Status",15,5,0,0,1.25
+"Rockfish1","Rockfish","Northern rockfish","TT","Thermal Tolerance",0,2,10,8,3.3
+"Rockfish1","Rockfish","Pacific ocean perch","AM","Adult Movement",0,10,10,0,2.5
+"Rockfish1","Rockfish","Pacific ocean perch","DC","Dispersal Capability",5,11,3,1,2
+"Rockfish1","Rockfish","Pacific ocean perch","FS","Foraging Strategy",2,15,3,0,2.05
+"Rockfish1","Rockfish","Pacific ocean perch","GD","Genetic Diversity",11,8,1,0,1.5
+"Rockfish1","Rockfish","Pacific ocean perch","HS","Habitat Specificity",0,7,11,2,2.75
+"Rockfish1","Rockfish","Pacific ocean perch","LH","Life History Strategy",1,2,6,11,3.35
+"Rockfish1","Rockfish","Pacific ocean perch","PI","Parental Investment",9,3,4,4,2.15
+"Rockfish1","Rockfish","Pacific ocean perch","RP","Reproductive Plasticity",2,8,7,3,2.55
+"Rockfish1","Rockfish","Pacific ocean perch","OA","Sensitivity to OA",1,9,10,0,2.45
+"Rockfish1","Rockfish","Pacific ocean perch","SD","Spawning Duration",0,0,10,10,3.5
+"Rockfish1","Rockfish","Pacific ocean perch","SS","Stock Status",18,2,0,0,1.1
+"Rockfish1","Rockfish","Pacific ocean perch","TT","Thermal Tolerance",0,2,11,7,3.25
+"Rockfish1","Rockfish","Sharpchin rockfish","AM","Adult Movement",0,5,13,2,2.85
+"Rockfish1","Rockfish","Sharpchin rockfish","DC","Dispersal Capability",3,10,4,3,2.35
+"Rockfish1","Rockfish","Sharpchin rockfish","FS","Foraging Strategy",6,11,3,0,1.85
+"Rockfish1","Rockfish","Sharpchin rockfish","GD","Genetic Diversity",7,6,4,3,2.15
+"Rockfish1","Rockfish","Sharpchin rockfish","HS","Habitat Specificity",0,3,12,5,3.1
+"Rockfish1","Rockfish","Sharpchin rockfish","LH","Life History Strategy",2,3,6,9,3.1
+"Rockfish1","Rockfish","Sharpchin rockfish","PI","Parental Investment",9,3,4,4,2.15
+"Rockfish1","Rockfish","Sharpchin rockfish","RP","Reproductive Plasticity",4,7,5,4,2.45
+"Rockfish1","Rockfish","Sharpchin rockfish","OA","Sensitivity to OA",2,8,9,1,2.45
+"Rockfish1","Rockfish","Sharpchin rockfish","SD","Spawning Duration",0,2,9,9,3.35
+"Rockfish1","Rockfish","Sharpchin rockfish","SS","Stock Status",7,5,5,3,2.2
+"Rockfish1","Rockfish","Sharpchin rockfish","TT","Thermal Tolerance",0,3,8,9,3.3
+"Rockfish1","Rockfish","Shortspine thornyhead","AM","Adult Movement",4,10,6,0,2.1
+"Rockfish1","Rockfish","Shortspine thornyhead","DC","Dispersal Capability",13,7,0,0,1.35
+"Rockfish1","Rockfish","Shortspine thornyhead","FS","Foraging Strategy",4,14,2,0,1.9
+"Rockfish1","Rockfish","Shortspine thornyhead","GD","Genetic Diversity",4,7,8,1,2.3
+"Rockfish1","Rockfish","Shortspine thornyhead","HS","Habitat Specificity",10,8,2,0,1.6
+"Rockfish1","Rockfish","Shortspine thornyhead","LH","Life History Strategy",0,3,3,14,3.55
+"Rockfish1","Rockfish","Shortspine thornyhead","PI","Parental Investment",1,2,10,7,3.15
+"Rockfish1","Rockfish","Shortspine thornyhead","RP","Reproductive Plasticity",5,8,4,3,2.25
+"Rockfish1","Rockfish","Shortspine thornyhead","OA","Sensitivity to OA",0,9,9,2,2.65
+"Rockfish1","Rockfish","Shortspine thornyhead","SD","Spawning Duration",2,10,7,1,2.35
+"Rockfish1","Rockfish","Shortspine thornyhead","SS","Stock Status",3,7,7,3,2.5
+"Rockfish1","Rockfish","Shortspine thornyhead","TT","Thermal Tolerance",0,0,8,12,3.6
+"Rockfish2","Rockfish","Harlequin rockfish","AM","Adult Movement",1,4,15,5,2.96
+"Rockfish2","Rockfish","Harlequin rockfish","DC","Dispersal Capability",8,13,4,0,1.84
+"Rockfish2","Rockfish","Harlequin rockfish","FS","Foraging Strategy",3,12,10,0,2.28
+"Rockfish2","Rockfish","Harlequin rockfish","GD","Genetic Diversity",4,18,3,0,1.96
+"Rockfish2","Rockfish","Harlequin rockfish","HS","Habitat Specificity",1,13,10,1,2.44
+"Rockfish2","Rockfish","Harlequin rockfish","LH","Life History Strategy",0,4,13,8,3.16
+"Rockfish2","Rockfish","Harlequin rockfish","PI","Parental Investment",9,11,5,0,1.84
+"Rockfish2","Rockfish","Harlequin rockfish","RP","Reproductive Plasticity",3,12,9,1,2.32
+"Rockfish2","Rockfish","Harlequin rockfish","OA","Sensitivity to OA",1,14,10,0,2.36
+"Rockfish2","Rockfish","Harlequin rockfish","SD","Spawning Duration",1,8,15,1,2.64
+"Rockfish2","Rockfish","Harlequin rockfish","SS","Stock Status",2,10,12,1,2.48
+"Rockfish2","Rockfish","Harlequin rockfish","TT","Thermal Tolerance",0,9,11,5,2.84
+"Rockfish2","Rockfish","Redbanded rockfish","AM","Adult Movement",3,12,10,0,2.28
+"Rockfish2","Rockfish","Redbanded rockfish","DC","Dispersal Capability",9,12,4,0,1.8
+"Rockfish2","Rockfish","Redbanded rockfish","FS","Foraging Strategy",4,13,8,0,2.16
+"Rockfish2","Rockfish","Redbanded rockfish","GD","Genetic Diversity",4,18,3,0,1.96
+"Rockfish2","Rockfish","Redbanded rockfish","HS","Habitat Specificity",0,11,12,2,2.64
+"Rockfish2","Rockfish","Redbanded rockfish","LH","Life History Strategy",0,1,5,19,3.72
+"Rockfish2","Rockfish","Redbanded rockfish","PI","Parental Investment",9,11,5,0,1.84
+"Rockfish2","Rockfish","Redbanded rockfish","RP","Reproductive Plasticity",3,12,9,1,2.32
+"Rockfish2","Rockfish","Redbanded rockfish","OA","Sensitivity to OA",2,15,8,0,2.24
+"Rockfish2","Rockfish","Redbanded rockfish","SD","Spawning Duration",0,8,16,1,2.72
+"Rockfish2","Rockfish","Redbanded rockfish","SS","Stock Status",5,11,8,1,2.2
+"Rockfish2","Rockfish","Redbanded rockfish","TT","Thermal Tolerance",0,8,12,5,2.88
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","AM","Adult Movement",2,10,13,0,2.44
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","DC","Dispersal Capability",7,14,4,0,1.88
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","FS","Foraging Strategy",4,15,6,0,2.08
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","GD","Genetic Diversity",1,12,12,0,2.44
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","HS","Habitat Specificity",2,12,10,1,2.4
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","LH","Life History Strategy",1,1,7,16,3.52
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","PI","Parental Investment",9,9,6,1,1.96
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","RP","Reproductive Plasticity",2,13,9,1,2.36
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","OA","Sensitivity to OA",2,13,10,0,2.32
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","SD","Spawning Duration",1,14,9,1,2.4
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","SS","Stock Status",14,8,3,0,1.56
+"Rockfish2","Rockfish","Rougheye_blackspotted rockfish","TT","Thermal Tolerance",1,3,14,7,3.08
+"Rockfish2","Rockfish","Shortraker rockfish","AM","Adult Movement",7,13,5,0,1.92
+"Rockfish2","Rockfish","Shortraker rockfish","DC","Dispersal Capability",12,11,2,0,1.6
+"Rockfish2","Rockfish","Shortraker rockfish","FS","Foraging Strategy",7,14,4,0,1.88
+"Rockfish2","Rockfish","Shortraker rockfish","GD","Genetic Diversity",1,11,13,0,2.48
+"Rockfish2","Rockfish","Shortraker rockfish","HS","Habitat Specificity",8,6,10,1,2.16
+"Rockfish2","Rockfish","Shortraker rockfish","LH","Life History Strategy",0,0,8,17,3.68
+"Rockfish2","Rockfish","Shortraker rockfish","PI","Parental Investment",9,9,6,1,1.96
+"Rockfish2","Rockfish","Shortraker rockfish","RP","Reproductive Plasticity",3,11,9,2,2.4
+"Rockfish2","Rockfish","Shortraker rockfish","OA","Sensitivity to OA",2,13,10,0,2.32
+"Rockfish2","Rockfish","Shortraker rockfish","SD","Spawning Duration",0,12,12,1,2.56
+"Rockfish2","Rockfish","Shortraker rockfish","SS","Stock Status",5,14,5,1,2.08
+"Rockfish2","Rockfish","Shortraker rockfish","TT","Thermal Tolerance",1,3,12,9,3.16
+"Rockfish2","Rockfish","Silvergray rockfish","AM","Adult Movement",7,12,5,1,2
+"Rockfish2","Rockfish","Silvergray rockfish","DC","Dispersal Capability",8,14,3,0,1.8
+"Rockfish2","Rockfish","Silvergray rockfish","FS","Foraging Strategy",13,11,1,0,1.52
+"Rockfish2","Rockfish","Silvergray rockfish","GD","Genetic Diversity",3,19,3,0,2
+"Rockfish2","Rockfish","Silvergray rockfish","HS","Habitat Specificity",2,14,9,0,2.28
+"Rockfish2","Rockfish","Silvergray rockfish","LH","Life History Strategy",0,4,6,15,3.44
+"Rockfish2","Rockfish","Silvergray rockfish","PI","Parental Investment",9,9,6,1,1.96
+"Rockfish2","Rockfish","Silvergray rockfish","RP","Reproductive Plasticity",4,11,8,2,2.32
+"Rockfish2","Rockfish","Silvergray rockfish","OA","Sensitivity to OA",8,14,3,0,1.8
+"Rockfish2","Rockfish","Silvergray rockfish","SD","Spawning Duration",2,10,12,1,2.48
+"Rockfish2","Rockfish","Silvergray rockfish","SS","Stock Status",4,15,5,1,2.12
+"Rockfish2","Rockfish","Silvergray rockfish","TT","Thermal Tolerance",3,7,11,4,2.64
+"Rockfish2","Rockfish","Yelloweye rockfish","AM","Adult Movement",2,13,10,0,2.32
+"Rockfish2","Rockfish","Yelloweye rockfish","DC","Dispersal Capability",6,18,1,0,1.8
+"Rockfish2","Rockfish","Yelloweye rockfish","FS","Foraging Strategy",15,10,0,0,1.4
+"Rockfish2","Rockfish","Yelloweye rockfish","GD","Genetic Diversity",4,18,3,0,1.96
+"Rockfish2","Rockfish","Yelloweye rockfish","HS","Habitat Specificity",0,8,14,3,2.8
+"Rockfish2","Rockfish","Yelloweye rockfish","LH","Life History Strategy",0,0,6,19,3.76
+"Rockfish2","Rockfish","Yelloweye rockfish","PI","Parental Investment",9,12,4,0,1.8
+"Rockfish2","Rockfish","Yelloweye rockfish","RP","Reproductive Plasticity",2,15,7,1,2.28
+"Rockfish2","Rockfish","Yelloweye rockfish","OA","Sensitivity to OA",9,15,1,0,1.68
+"Rockfish2","Rockfish","Yelloweye rockfish","SD","Spawning Duration",0,7,17,1,2.76
+"Rockfish2","Rockfish","Yelloweye rockfish","SS","Stock Status",2,13,9,1,2.36
+"Rockfish2","Rockfish","Yelloweye rockfish","TT","Thermal Tolerance",0,11,11,3,2.68
+"Salmon","Salmon","Chinook salmon","AM","Adult Movement",6,13,1,0,1.75
+"Salmon","Salmon","Chinook salmon","DC","Dispersal Capability",3,10,7,0,2.2
+"Salmon","Salmon","Chinook salmon","FS","Foraging Strategy",11,6,2,1,1.65
+"Salmon","Salmon","Chinook salmon","GD","Genetic Diversity",6,9,3,2,2.05
+"Salmon","Salmon","Chinook salmon","HS","Habitat Specificity",3,8,7,2,2.4
+"Salmon","Salmon","Chinook salmon","LH","Life History Strategy",3,11,4,2,2.25
+"Salmon","Salmon","Chinook salmon","PI","Parental Investment",2,7,10,1,2.5
+"Salmon","Salmon","Chinook salmon","RP","Reproductive Plasticity",0,3,14,3,3
+"Salmon","Salmon","Chinook salmon","OA","Sensitivity to OA",7,11,2,0,1.75
+"Salmon","Salmon","Chinook salmon","SD","Spawning Duration",0,7,12,1,2.7
+"Salmon","Salmon","Chinook salmon","SS","Stock Status",0,2,10,8,3.3
+"Salmon","Salmon","Chinook salmon","TT","Thermal Tolerance",3,9,6,2,2.35
+"Salmon","Salmon","Chum salmon","AM","Adult Movement",3,12,5,0,2.1
+"Salmon","Salmon","Chum salmon","DC","Dispersal Capability",4,12,4,0,2
+"Salmon","Salmon","Chum salmon","FS","Foraging Strategy",12,7,1,0,1.45
+"Salmon","Salmon","Chum salmon","GD","Genetic Diversity",3,10,6,1,2.25
+"Salmon","Salmon","Chum salmon","HS","Habitat Specificity",6,9,5,0,1.95
+"Salmon","Salmon","Chum salmon","LH","Life History Strategy",6,9,5,0,1.95
+"Salmon","Salmon","Chum salmon","PI","Parental Investment",1,11,8,0,2.35
+"Salmon","Salmon","Chum salmon","RP","Reproductive Plasticity",0,7,13,0,2.65
+"Salmon","Salmon","Chum salmon","OA","Sensitivity to OA",5,12,3,0,1.9
+"Salmon","Salmon","Chum salmon","SD","Spawning Duration",0,4,15,1,2.85
+"Salmon","Salmon","Chum salmon","SS","Stock Status",4,10,6,0,2.1
+"Salmon","Salmon","Chum salmon","TT","Thermal Tolerance",4,12,4,0,2
+"Salmon","Salmon","Coho salmon","AM","Adult Movement",4,12,4,0,2
+"Salmon","Salmon","Coho salmon","DC","Dispersal Capability",2,10,8,0,2.3
+"Salmon","Salmon","Coho salmon","FS","Foraging Strategy",11,8,1,0,1.5
+"Salmon","Salmon","Coho salmon","GD","Genetic Diversity",5,9,5,1,2.1
+"Salmon","Salmon","Coho salmon","HS","Habitat Specificity",3,10,5,2,2.3
+"Salmon","Salmon","Coho salmon","LH","Life History Strategy",8,7,5,0,1.85
+"Salmon","Salmon","Coho salmon","PI","Parental Investment",1,8,11,0,2.5
+"Salmon","Salmon","Coho salmon","RP","Reproductive Plasticity",0,5,13,2,2.85
+"Salmon","Salmon","Coho salmon","OA","Sensitivity to OA",6,11,3,0,1.85
+"Salmon","Salmon","Coho salmon","SD","Spawning Duration",0,4,16,0,2.8
+"Salmon","Salmon","Coho salmon","SS","Stock Status",3,11,6,0,2.15
+"Salmon","Salmon","Coho salmon","TT","Thermal Tolerance",5,12,3,0,1.9
+"Salmon","Salmon","Pink salmon","AM","Adult Movement",6,10,4,0,1.9
+"Salmon","Salmon","Pink salmon","DC","Dispersal Capability",6,10,4,0,1.9
+"Salmon","Salmon","Pink salmon","FS","Foraging Strategy",11,7,2,0,1.55
+"Salmon","Salmon","Pink salmon","GD","Genetic Diversity",5,10,5,0,2
+"Salmon","Salmon","Pink salmon","HS","Habitat Specificity",7,10,3,0,1.8
+"Salmon","Salmon","Pink salmon","LH","Life History Strategy",9,8,3,0,1.7
+"Salmon","Salmon","Pink salmon","PI","Parental Investment",0,11,9,0,2.45
+"Salmon","Salmon","Pink salmon","RP","Reproductive Plasticity",0,5,13,2,2.85
+"Salmon","Salmon","Pink salmon","OA","Sensitivity to OA",8,11,1,0,1.65
+"Salmon","Salmon","Pink salmon","SD","Spawning Duration",1,3,15,1,2.8
+"Salmon","Salmon","Pink salmon","SS","Stock Status",9,9,2,0,1.65
+"Salmon","Salmon","Pink salmon","TT","Thermal Tolerance",5,10,5,0,2
+"Salmon","Salmon","Sockeye salmon","AM","Adult Movement",5,11,4,0,1.95
+"Salmon","Salmon","Sockeye salmon","DC","Dispersal Capability",3,10,7,0,2.2
+"Salmon","Salmon","Sockeye salmon","FS","Foraging Strategy",9,9,2,0,1.65
+"Salmon","Salmon","Sockeye salmon","GD","Genetic Diversity",9,8,3,0,1.7
+"Salmon","Salmon","Sockeye salmon","HS","Habitat Specificity",4,9,5,2,2.25
+"Salmon","Salmon","Sockeye salmon","LH","Life History Strategy",6,10,4,0,1.9
+"Salmon","Salmon","Sockeye salmon","PI","Parental Investment",0,11,9,0,2.45
+"Salmon","Salmon","Sockeye salmon","RP","Reproductive Plasticity",0,5,13,2,2.85
+"Salmon","Salmon","Sockeye salmon","OA","Sensitivity to OA",4,11,5,0,2.05
+"Salmon","Salmon","Sockeye salmon","SD","Spawning Duration",0,3,17,0,2.85
+"Salmon","Salmon","Sockeye salmon","SS","Stock Status",5,10,5,0,2
+"Salmon","Salmon","Sockeye salmon","TT","Thermal Tolerance",3,11,5,1,2.2
+"Salmon","Salmon","Steelhead trout","AM","Adult Movement",6,10,4,0,1.9
+"Salmon","Salmon","Steelhead trout","DC","Dispersal Capability",3,8,9,0,2.3
+"Salmon","Salmon","Steelhead trout","FS","Foraging Strategy",9,8,3,0,1.7
+"Salmon","Salmon","Steelhead trout","GD","Genetic Diversity",5,10,3,2,2.1
+"Salmon","Salmon","Steelhead trout","HS","Habitat Specificity",4,8,4,4,2.4
+"Salmon","Salmon","Steelhead trout","LH","Life History Strategy",7,10,3,0,1.8
+"Salmon","Salmon","Steelhead trout","PI","Parental Investment",3,11,6,0,2.15
+"Salmon","Salmon","Steelhead trout","RP","Reproductive Plasticity",3,10,7,0,2.2
+"Salmon","Salmon","Steelhead trout","OA","Sensitivity to OA",7,9,3,1,1.9
+"Salmon","Salmon","Steelhead trout","SD","Spawning Duration",1,5,14,0,2.65
+"Salmon","Salmon","Steelhead trout","SS","Stock Status",1,3,10,6,3.05
+"Salmon","Salmon","Steelhead trout","TT","Thermal Tolerance",7,6,6,1,2.05
