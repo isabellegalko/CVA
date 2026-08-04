@@ -39,4 +39,4 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 
 3. `exposure_EFH.R` – Calculates exposure and creates associated plots for all species for which EFH maps are available and all exposure factors. `exposure_functions.R` contains custom functions for this script.
 
-4. `Vulnerability.R` – Calculates vulnerability by combining exposure and sensitivity scores in `results`. Creates plots.
+4. `vulnerability.R` – Calculates vulnerability by combining exposure and sensitivity scores in `results`. Creates plots.
