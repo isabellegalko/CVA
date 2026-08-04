@@ -10,6 +10,9 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 - **Sensitivity attributes** – a set of life history characteristics that characterize a species' potential response to climate change
 
 ## Data sources 
+**Species list** 
+- `exposure_assignments.xlsx`: Full species list, distribution file paths, and exposure assignments.
+
 **Species distributions** 
 - Essential Fish Habitat (EFH) predictions for federally-managed species in the GOA. File geodatabases for species in the Groundfish and Scallop Fishery Management Plans (FMP) were downloaded from: https://www.fisheries.noaa.gov/resource/map/alaska-essential-fish-habitat-efh-species-shapefiles.
 - `data/bts_sdms`: Distributions and densities estimated from bottom trawl survey data using methods modified from Barnes et al. (2018) and Barnes et al. (2022). Standardized survey data (1990-2025) were collected by the Resource Assessment and Conservation Engineering (RACE) Division of the Alaska Fisheries Science Center (AFSC), NOAA and downloaded from: https://www.fisheries.noaa.gov/foss/.
@@ -28,8 +31,10 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 
 ## Current workflow scripts
 
-1. `load_gfdl_data.R` – Pulls data from ESGF using OPeNDAP, separates into surface and bottom variables (as needed), and saves locally as parquet files.
+1. `sensitivity_analysis.R` – Processes sensitivity scoring from CVA workshops. Calculates distribution change potential and directional effect scores.
 
-2. `exposure_EFH.R` – Calculates exposure and creates associated plots for all species for which EFH maps are available and all exposure factors. `exposure_functions.R` contains custom functions for this script.
+2. `load_gfdl_data.R` – Pulls data from ESGF using OPeNDAP, separates into surface and bottom variables (as needed), and saves locally as parquet files.
 
-3. `Vulnerability.R` – Calculates vulnerability by combining exposure and sensitivity scores in `results`. Creates plots.
+3. `exposure_EFH.R` – Calculates exposure and creates associated plots for all species for which EFH maps are available and all exposure factors. `exposure_functions.R` contains custom functions for this script.
+
+4. `Vulnerability.R` – Calculates vulnerability by combining exposure and sensitivity scores in `results`. Creates plots.
