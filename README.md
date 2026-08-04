@@ -17,8 +17,14 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 - `data/depth_temp_sdms`: Data-poor distribution estimates using depth and temperature ranges.
 
 **Exposure factors**
-- ROMS ocean model outputs for the GOA region (temperature, salinity, phytoplankton concentration, zooplankton concentration)
-- GFDL ESM4 outputs (pH, oxygen concentration, air temperature, precipitation)
+- ROMS ocean model outputs: 
+  - temperature, salinity, phytoplankton concentration, zooplankton concentration
+- GFDL ESM4 outputs:
+  - `data/pH`: pH (ocean acidification)
+  - `data/o2`: oxygen concentration
+  - `data/tas`: air temperature
+  - `data/pr`: precipitation
+  
 
 ## Current workflow scripts
 
