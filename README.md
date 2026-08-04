@@ -33,7 +33,7 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
   
 ## Current workflow scripts
 
-1. `sensitivity_analysis.R` – Processes sensitivity scoring from CVA workshops. Calculates distribution change potential and directional effect scores.
+1. `sensitivity_analysis.R` – Processes sensitivity scoring from CVA workshops. Calculates distribution change potential, directional effect, and data quality scores for each species and functional group.
 
 2. `load_gfdl_data.R` – Pulls data from ESGF using OPeNDAP, separates into surface and bottom variables (as needed), and saves locally as parquet files.
 
