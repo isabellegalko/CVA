@@ -355,11 +355,10 @@ for (i in 1:length(species_layers)) {
 }
 
 # remove variability for MHW index
-all_exposure_scores <- rbind(anomaly_scores, variability_scores) |>
-  filter(!(exposure_factor == "MHW" & type == "variability"))
+all_exposure_scores <- rbind(anomaly_scores, variability_scores)
 
 # save csv with exposure scores
-write.csv(all_exposure_scores, "results/exposure_factor_scores_072926.csv", row.names = FALSE)
+write.csv(all_exposure_scores, "results/exposure_factor_scores_final.csv", row.names = FALSE)
 
 # ============================================================================
 # SECTION 5: Summary plots

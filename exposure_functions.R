@@ -521,7 +521,7 @@ create_depth_temp_layer_cached <- function(path, species_layer, use_cache = TRUE
                           crs = 4326) |>
     st_shift_longitude() |> 
     dplyr::select(!c(depth, BT, species, area.swept)) |>
-    mutate(layer = "5") # NOTE: this is NOT EFH layer 5, but I am making it 5 for now to work with later steps in the analysis
+    mutate(layer = "5") # NOTE: this is NOT EFH layer 5, but I am making it 5 to work with later steps in the analysis
   
   # save the filtered data to the cache for next time
   save(sf_filtered, file=cache_path)
@@ -606,7 +606,7 @@ plot_species_distribution <- function(species){
            y = "Latitude") +
       sf_plot_theme()
   }
-  ggsave(paste(species, "distribution.png", sep="_"), device = "png", path = here("plots/EFH plots"), plot = plot, width = 8, height = 5, dpi = 300)
+  ggsave(paste(species, "distribution.png", sep="_"), device = "png", path = here("plots/Distribution plots"), plot = plot, width = 8, height = 5, dpi = 300)
 }
 
 #' Keep points that intersect species EFH polygons.
@@ -852,11 +852,11 @@ exposure_histogram_series <- function(species, type){
   # select correct exposure factors for each species
   exposure_factors_list <- layer_names[layer_names$species_name == species, 6:14]
   
-  # remove MHW variability 
-  if(type == "variability"){
-    exposure_factors_list <- exposure_factors_list |>
-      dplyr::select(!marine_heatwave)
-  }
+  # # remove MHW variability 
+  # if(type == "variability"){
+  #   exposure_factors_list <- exposure_factors_list |>
+  #     dplyr::select(!marine_heatwave)
+  # }
   these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
   these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
   
@@ -915,11 +915,11 @@ group_exposure_plots <- function(species, type){
   exposure_map_list = list()
   exposure_factors_list <- layer_names[layer_names$species_name == species, 6:14] # identify species in layer list 
   
-  # remove MHW variability 
-  if(type == "variability"){
-    exposure_factors_list <- exposure_factors_list |>
-      dplyr::select(!marine_heatwave)
-  }
+  # # remove MHW variability 
+  # if(type == "variability"){
+  #   exposure_factors_list <- exposure_factors_list |>
+  #     dplyr::select(!marine_heatwave)
+  # }
   these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
   these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)]) # identify set of exposure factors for this species
   
