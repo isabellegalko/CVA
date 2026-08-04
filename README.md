@@ -30,7 +30,6 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 
 1. `load_gfdl_data.R` – Pulls data from ESGF using OPeNDAP, separates into surface and bottom variables (as needed), and saves locally as parquet files.
 
-2. `exposure_EFH.R` – Calculates exposure and creates associated plots for all species for which EFH maps are available and all exposure factors.
-  - `exposure_functions.R` – Contains custom functions.
+2. `exposure_EFH.R` – Calculates exposure and creates associated plots for all species for which EFH maps are available and all exposure factors. `exposure_functions.R` contains custom functions for this script.
 
-3. `Vulnerability.R` – Calculates vulnerability by combining exposure and sensitivity scores. Creates plots.
+3. `Vulnerability.R` – Calculates vulnerability by combining exposure and sensitivity scores in `results`. Creates plots.

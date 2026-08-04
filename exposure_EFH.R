@@ -281,7 +281,7 @@ diet_derived_path <- here::here("data", "diet_sdms/")
 depth_temp_path <- here::here("data", "depth_temp_sdms/")
 
 # list of all species, associated distribution file/layer, and exposure assignments
-layer_names <- read_excel(here("goa_efh_spp_lifestages.xlsx"), sheet = "CVA_exposure_assignments", skip = 1,
+layer_names <- read_excel(here("exposure_assignments.xlsx"), sheet = "CVA_exposure_assignments", skip = 1,
                            col_names = c("group", "species_name", "path", "EFH_level", "layer", "sea_temperature", 
                                          "salinity", "ph", "phytoplankton", "zooplankton",
                                          "oxygen", "air_temperature", "precipitation", "marine_heatwave", "data_quality")) |>
