@@ -15,20 +15,22 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 
 **Species distributions** 
 - Essential Fish Habitat (EFH) predictions for federally-managed species in the GOA. File geodatabases for species in the Groundfish and Scallop Fishery Management Plans (FMP) were downloaded from: https://www.fisheries.noaa.gov/resource/map/alaska-essential-fish-habitat-efh-species-shapefiles.
+  - These files are too large for GitHub. Please download them yourself and included the geodatabases in the `data` folder.
 - `data/bts_sdms`: Distributions and densities estimated from bottom trawl survey data using methods modified from Barnes et al. (2018) and Barnes et al. (2022). Standardized survey data (1990-2025) were collected by the Resource Assessment and Conservation Engineering (RACE) Division of the Alaska Fisheries Science Center (AFSC), NOAA and downloaded from: https://www.fisheries.noaa.gov/foss/.
 - `data/diet_sdms`: Diet-derived estimates generated using correlative spatial models and data from the Resource Ecology and Ecosystem Modeling program (Gerson et al. In prep).
 - `data/depth_temp_sdms`: Data-poor distribution estimates using depth and temperature ranges.
 
 **Exposure factors**
 - ROMS ocean model outputs: 
-  - temperature, salinity, phytoplankton concentration, zooplankton concentration
+  - Variables: temperature, salinity, phytoplankton concentration, zooplankton concentration
+  - These files are too large for GitHub. 
 - GFDL ESM4 outputs:
   - `data/pH`: pH (ocean acidification)
   - `data/o2`: oxygen concentration
   - `data/tas`: air temperature
   - `data/pr`: precipitation
+- Marine heatwave index: in progress
   
-
 ## Current workflow scripts
 
 1. `sensitivity_analysis.R` – Processes sensitivity scoring from CVA workshops. Calculates distribution change potential and directional effect scores.
