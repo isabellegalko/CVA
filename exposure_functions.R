@@ -1,7 +1,8 @@
 # Functions to create exposure maps and calculate exposure scores for the GOA CVA.
 # Designed for all-species and exposure factor mapping loops.
+# Author: Isabelle Galko
 
-# Default color palette for EFH designations used across maps.
+# default color palette for EFH designations used across maps.
 EFH_cols <- c( 
   "2" = "#4B0082", #value <= 2
   "3" = "#006FA5", #value <= 3
@@ -11,9 +12,12 @@ EFH_cols <- c(
 
 sf_plot_theme = function() {
   theme_bw() +
-  theme(legend.position = c(0.6, 0.17), legend.direction = "horizontal", 
-        legend.text = element_text(size = 8), legend.title = element_text(size = 10), 
-        legend.key.size = unit(0.7, "cm"), legend.key.spacing = unit(0.12, "cm"),
+  theme(legend.position = c(0.6, 0.17), 
+        legend.direction = "horizontal", 
+        legend.text = element_text(size = 8), 
+        legend.title = element_text(size = 10), 
+        legend.key.size = unit(0.7, "cm"), 
+        legend.key.spacing = unit(0.12, "cm"),
         legend.frame = element_rect(color = "black", linewidth = 0.25),
         legend.background = element_rect(fill = "transparent"),
         legend.ticks = element_line(color = "black", linewidth = 0.25),
