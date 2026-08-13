@@ -2,6 +2,7 @@
 # Exposure script
 # ============================================================================
 # Purpose: This script calculates exposure for all species and all exposure factors in the CVA.
+# Author: Isabelle Galko
 
 # clear work space and free up memory
 rm(list = ls())
@@ -17,6 +18,8 @@ here::i_am("exposure_EFH.R")
 
 # load custom analysis functions
 source(here("exposure_functions.R")) 
+
+sf::sf_use_s2(FALSE) # IMPORTANT - turns off spherical geometry
 
 # ============================================================================
 # SECTION 1A: Load and Filter ROMS Data - Historical and Future
@@ -40,9 +43,9 @@ load_roms("surface", "MZL") # large microzooplankton concentration
 load_roms("surface", "MZS") # small microzooplankton concentration
 
 # combine phytoplankton (small and large)
-PhT_ssp585_surface <- rbind(PhL_ssp585_surface, PhS_ssp585_surface) 
+PhT_ssp585_surface <- rbind(PhL_ssp585_surface, PhS_ssp585_surface)
 PhT_ssp585_surface <- PhT_ssp585_surface |> summarize(value_dc = sum(value_dc), .by = c(cell_id, lon_rho, lat_rho, year, month))
-PhT_hindcast_surface <- rbind(PhL_hindcast_surface, PhS_hindcast_surface) 
+PhT_hindcast_surface <- rbind(PhL_hindcast_surface, PhS_hindcast_surface)
 PhT_hindcast_surface <- PhT_hindcast_surface |> summarize(value = sum(value), .by = c(cell_id, lon_rho, lat_rho, year, month))
 
 # combine zooplankton (all)
@@ -232,8 +235,6 @@ MHW <- create_anomaly_mhw(mhw_ssp585, mhw_hindcast) |>
 exposure_factors_df <- list(SST, BT, SS, BS, PhT, ZP, SpH, BpH, SO2, BO2, AT, PR, MHW)
 names(exposure_factors_df) <- c("SST", "BT", "SS", "BS", "PhT", "ZP", "SpH", "BpH", "SO2", "BO2", "AT", "PR", "MHW")
 
-sf::sf_use_s2(FALSE) # IMPORTANT - turns off spherical geometry
-
 # for plotting:
 # load coastline 
 coast <- ne_coastline(scale = "medium", returnclass = "sf") |>
@@ -315,14 +316,10 @@ for (i in 1:length(species_layers)) {
 # and variability exposure factors.
 # ============================================================================
 
-# test overlap function and calculating exposure scores
-geoduck_clam <- create_overlap("Geoduck clam", exposure_factors_df[["MHW"]])
-calculate_exposure_score(geoduck_clam, "anomaly")
-
 # create data frame to place exposure scores in 
 exposure_scores <- layer_names |>
   dplyr::select(!c(path, EFH_level, layer)) |>
-  pivot_longer(cols=c("sea_temperature", "salinity", "ph", "phytoplankton", "zooplankton",
+  pivot_longer(cols = c("sea_temperature", "salinity", "ph", "phytoplankton", "zooplankton",
                       "oxygen", "air_temperature", "precipitation", "marine_heatwave"),
                                names_to = "variable",
                                values_to = "exposure_factor") |>
@@ -354,11 +351,60 @@ for (i in 1:length(species_layers)) {
   }
 }
 
-# remove variability for MHW index
 all_exposure_scores <- rbind(anomaly_scores, variability_scores)
 
 # save csv with exposure scores
 write.csv(all_exposure_scores, "results/exposure_factor_scores_final.csv", row.names = FALSE)
+
+# prep data sheet for bootstrapping
+
+geoduck_clam <- create_overlap("Geoduck clam", exposure_factors_df[["MHW"]])
+geoduck <- assign_exposure_levels(geoduck_clam, "anomaly") |>
+  dplyr::select(!c(total, prop)) |>
+  pivot_wider(names_from = exposure_score,
+              values_from = count)
+
+
+
+n <- 1
+bootstrap_anomalies <- exposure_scores
+bootstrap_variability <- exposure_scores
+for (i in 1:length(species_layers)) {
+  # identify appropriate list of exposure factors for each species
+  exposure_factors_list <- layer_names[i,6:14]
+  these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
+  these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)])
+  
+  for(k in 1:length(these_exposure_factors$V1)){
+    original_exposure_data <- create_overlap(species_name[i], exposure_factors_df[[paste(these_exposure_factors$V1[k])]], these_exposure_factors$V1[k])
+    
+    anomaly_tallies <- assign_exposure_levels(original_exposure_data, "anomaly") |>
+      dplyr::select(!c(total, prop)) |>
+      pivot_wider(names_from = exposure_score,
+                  values_from = count)
+    variability_tallies <- assign_exposure_levels(original_exposure_data, "variability") |>
+      dplyr::select(!c(total, prop)) |>
+      pivot_wider(names_from = exposure_score,
+                  values_from = count)
+
+    bootstrap_anomalies[n,"sum_low"] <- anomaly_tallies$low
+    bootstrap_anomalies[n,"sum_moderate"] <- anomaly_tallies$moderate
+    bootstrap_anomalies[n,"sum_high"] <- anomaly_tallies$high
+    bootstrap_anomalies[n,"sum_vh"] <- anomaly_tallies$very_high
+    bootstrap_anomalies[n,"type"] <- "anomaly"
+    
+    bootstrap_variability[n,"sum_low"] <- variability_tallies$low
+    bootstrap_variability[n,"sum_moderate"] <- variability_tallies$moderate
+    bootstrap_variability[n,"sum_high"] <- variability_tallies$high
+    bootstrap_variability[n,"sum_vh"] <- variability_tallies$very_high
+    bootstrap_variability[n,"type"] <- "variability"
+    
+    n <- n + 1
+  }
+}
+
+bootstrap_df <- rbind(bootstrap_anomalies, bootstrap_variability)
+write.csv(bootstrap_df, "results/exposure_bootstrap.csv", row.names = FALSE)
 
 # ============================================================================
 # SECTION 5: Summary plots
