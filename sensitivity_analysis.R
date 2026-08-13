@@ -1,8 +1,13 @@
-# Sensitivity analysis for GOA CVA
-# Saves three csv results files:
-#   1. Sensitivity scores
-#   2. Additional scores (distribution shift potential and directional effect)
-#   3. Data quality scores
+# ============================================================================
+# Sensitivity script
+# ============================================================================
+# Purpose: 
+# 1. Processes sensitivity workshop scores
+# 2. Saves three csv results files:
+#   a. Sensitivity scores
+#   b. Additional scores (distribution shift potential and directional effect)
+#   c. Data quality scores
+# Author: Isabelle Galko
 
 # load required packages
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
@@ -12,9 +17,20 @@ if (!require("pacman", quietly = TRUE)) install.packages("pacman")
 here::i_am("sensitivity_analysis.R")
 
 # load sensitivity workshop data
-final_scores <- read_excel(here("data/Sensitivity_Final_Scores.xlsx"), sheet = "Sensitivity",
-                           col_names = c("scorer", "workshop", "species", "attribute_name", "low", "moderate", "high", "very_high", "tallies", "data_quality"),
-                           skip = 1, na = "")
+final_scores <- read_excel(here("data/Sensitivity_Final_Scores.xlsx"), 
+                           sheet = "Sensitivity",
+                           col_names = c("scorer", 
+                                         "workshop", 
+                                         "species", 
+                                         "attribute_name", 
+                                         "low", 
+                                         "moderate", 
+                                         "high", 
+                                         "very_high", 
+                                         "tallies", 
+                                         "data_quality"),
+                           skip = 1, 
+                           na = "")
 
 final_scores <- final_scores |> 
   mutate(group = workshop |> 
@@ -26,8 +42,12 @@ final_scores <- final_scores |>
 final_scores[is.na(final_scores)] <- 0
 
 # rename certain attributes and species
-final_scores$attribute_name <- gsub("Sensitivity to Ocean Acidification", "Sensitivity to OA", final_scores$attribute_name)
-final_scores$species <- gsub("Rougheye/blackspotted rockfish", "Rougheye_blackspotted rockfish", final_scores$species)
+final_scores$attribute_name <- gsub("Sensitivity to Ocean Acidification", 
+                                    "Sensitivity to OA", 
+                                    final_scores$attribute_name)
+final_scores$species <- gsub("Rougheye/blackspotted rockfish", 
+                             "Rougheye_blackspotted rockfish", 
+                             final_scores$species)
 
 # recode and order attributes 
 final_scores <- final_scores |>  mutate(
@@ -255,7 +275,8 @@ dist_group_scores <- dist_sensitivity_scores |>
     mutate(prop = count / total) |>
     complete(dist_potential, group, fill = list(count = 0, prop = 0))
 
-dist_group_scores$dist_potential <- factor(dist_group_scores$dist_potential, levels = c("low", "moderate", "high", "very high"))
+dist_group_scores$dist_potential <- factor(dist_group_scores$dist_potential, 
+                                           levels = c("low", "moderate", "high", "very high"))
 dist_group_scores$dist_potential = ordered(dist_group_scores$dist_potential,
                                    levels = c("low",
                                               "moderate",
@@ -278,26 +299,33 @@ ggplot(dist_group_scores) +
 ggsave(filename = "group_dist_shift.png", plot = get_last_plot(), path = here("plots/"), device = "png", width = 7, height = 5, bg = "transparent", dpi = 300)
 
 # ============================================================================
-# SECTION 3: Calculate Directional Effect Scores and Compare
+# SECTION 3: Calculate directional effect scores and compare
 # ============================================================================
 # Import directional effect scores, calculate directional effect scores across 
 # species and groups, and make comparison plots.
 # ============================================================================
 
 # load directional effect data
-de_scores <- read_excel(here("data/Sensitivity_Final_Scores.xlsx"), sheet = "Directional effect",
-                           col_names = c("scorer", "workshop", "species", "negative", "neutral", "positive"),
+de_scores <- read_excel(here("data/Sensitivity_Final_Scores.xlsx"), 
+                        sheet = "Directional effect",
+                           col_names = c("scorer", 
+                                         "workshop", 
+                                         "species", 
+                                         "negative", 
+                                         "neutral", 
+                                         "positive"),
                            skip = 1, na = "")
 
 # clean data
 de_scores <- de_scores |> mutate(
   group = workshop |> replace_values(c("Rockfish1", "Rockfish2") ~ "Rockfish",
                                      c("Flatfish1", "Flatfish2") ~ "Flatfish",
-                                     "Forage" ~ "Forage Fish")
-)
+                                     "Forage" ~ "Forage Fish"))
 
 de_scores[is.na(de_scores)] <- 0
-de_scores$species <- gsub("Rougheye/blackspotted rockfish", "Rougheye_blackspotted rockfish", de_scores$species)
+de_scores$species <- gsub("Rougheye/blackspotted rockfish", 
+                          "Rougheye_blackspotted rockfish", 
+                          de_scores$species)
 de_scores <- de_scores |>  mutate(
   scorer = factor(scorer),
   species = factor(species),
