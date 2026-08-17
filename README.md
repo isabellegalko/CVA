@@ -34,10 +34,10 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
   
 ## Current workflow scripts
 
-1. `sensitivity_analysis.R` – Processes sensitivity scoring from CVA workshops. Calculates distribution change potential, directional effect, and data quality scores for each species and functional group.
+1. `sensitivity_analysis.R` – Processes sensitivity scoring from CVA workshops. Calculates distribution change potential, directional effect, and data quality scores for each species and functional group. Saves sensitivity results to `results`.
 
 2. `load_gfdl_data.R` – Pulls data from ESGF using OPeNDAP, separates into surface and bottom variables (as needed), and saves locally as parquet files.
 
-3. `exposure_EFH.R` – Calculates exposure and creates associated plots for all species for which EFH maps are available and all exposure factors. `exposure_functions.R` contains custom functions for this script.
+3. `exposure_EFH.R` – Calculates exposure and creates associated plots for all species for which EFH maps are available and all exposure factors. Saves exposure results to `results`. `exposure_functions.R` contains custom functions for this script.
 
-4. `vulnerability.R` – Calculates vulnerability by combining exposure and sensitivity scores in `results`. Creates plots.
+4. `vulnerability.R` – Calculates vulnerability by combining exposure and sensitivity scores. Synthesizes trends in sensitivity, exposure, and vulnerability across functional groups. Conducts leave-one-out analysis and bootstrapping of vulnerability scores. Creates plots.
