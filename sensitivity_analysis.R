@@ -464,12 +464,21 @@ outlier_plot(scorer_averages, "Groundfish")
 # ============================================================================
 # SECTION 5: Data quality scores
 # ============================================================================
-# Calculate average data quality score for each species.
+# Calculate average data quality score for each species by functional group.
 # ============================================================================
 
 data_quality_sensitivity <- final_scores |>
-  summarize(mean = mean(data_quality), .by = c(species)) |>
-  mutate(across(where(is.numeric), round, digits = 1))
+  summarize(mean = mean(data_quality), .by = c(species, group)) |>
+  mutate(across(where(is.numeric), round, digits = 1)) |>
+  mutate(group = recode(group,
+                        "Mollusc" = "Molluscs",
+                        "Crustacean" = "Crustaceans",
+                        "Elasmobranch" = "Elasmobranchs",
+                        "Salmon" = "Salmonids",
+                        "Forage Fish" = "Forage fishes",
+                        "Groundfish" = "Other groundfishes",
+                        "Rockfish" = "Rockfishes",
+                        "Flatfish" = "Flatfishes"))
 
 # save for vulnerability analysis script
 write.csv(data_quality_sensitivity, "results/sensitivity_data_quality.csv", row.names = FALSE)
