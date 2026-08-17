@@ -29,7 +29,8 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
   - `data/o2`: oxygen concentration
   - `data/tas`: air temperature
   - `data/pr`: precipitation
-- Marine heatwave index: in progress
+- Marine heatwave index: 
+  - `data/mhw`: Cumulative intensity of marine heatwaves (see https://github.com/somros/MHWI_GOACLIM; Rovellini et al. in prep)
   
 ## Current workflow scripts
 
