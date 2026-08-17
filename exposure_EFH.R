@@ -177,6 +177,8 @@ for(i in 1:length(gfdl_files)){
 }
 
 exposure_factors <- c("SST", "BT", "SS", "BS", "PhT", "ZP", "SpH", "BpH", "SO2", "BO2", "AT", "PR", "MHW") 
+factor_full_names <- c("Sea surface temperature", "Bottom temperature", "Surface salinity", "Bottom salinity", "Phytoplankton concentration", "Zooplankton concentration",
+                       "Surface pH", "Bottom pH", "Surface oxygen concentration", "Bottom oxygen concentration", "Air temperature", "PR" = "Precipitation", "MHW" = "Marine heatwaves")
 # sea-surface temp, bottom temp, surface salinity, bottom salinity,
 # phytoplankton concentration, zooplankton concentration, pH (ocean acidification),
 # oxygen concentration, air temperature, precipitation, mhw index
@@ -190,50 +192,51 @@ exposure_factors <- c("SST", "BT", "SS", "BS", "PhT", "ZP", "SpH", "BpH", "SO2",
 # ============================================================================
 
 SST <- create_anomaly_roms(temp_ssp585_surface, temp_hindcast_surface) |>
-  mutate(exposure_factor = "SST")
+  mutate(exposure_factor = "SST", factor_name = "Sea surface temperature")
 
 BT <- create_anomaly_roms(temp_ssp585_bottom, temp_hindcast_bottom) |>
-  mutate(exposure_factor = "BT")
+  mutate(exposure_factor = "BT", factor_name = "Bottom temperature")
 
 SS <- create_anomaly_roms(salt_ssp585_surface, salt_hindcast_surface) |>
-  mutate(exposure_factor = "SS")
+  mutate(exposure_factor = "SS", factor_name = "Surface salinity")
 
 BS <- create_anomaly_roms(salt_ssp585_bottom, salt_hindcast_bottom) |>
-  mutate(exposure_factor = "BS")
+  mutate(exposure_factor = "BS", factor_name = "Bottom salinity")
 
 PhT <- create_anomaly_roms(PhT_ssp585_surface, PhT_hindcast_surface) |>
-    mutate(exposure_factor = "PhT")
+    mutate(exposure_factor = "PhT", factor_name = "Phytoplankton concentration")
 
 ZP <- create_anomaly_roms(ZP_ssp585_surface, ZP_hindcast_surface) |>
-    mutate(exposure_factor = "ZP")
+    mutate(exposure_factor = "ZP", factor_name = "Zooplankton concentration")
 
 # calculate anomaly for ESM variables (note different function in exposure_functions.R)
 
 SpH <- create_anomaly_gfdl("SpH", kriged[["pH_ssp585_surface"]], kriged[["pH_historical_surface"]]) |>
-    mutate(exposure_factor = "SpH")
+    mutate(exposure_factor = "SpH", factor_name = "Surface pH")
 
 BpH <- create_anomaly_gfdl("BpH", kriged[["pH_ssp585_bottom"]], kriged[["pH_historical_bottom"]]) |>
-    mutate(exposure_factor = "BpH")
+    mutate(exposure_factor = "BpH", factor_name = "Bottom pH")
 
 SO2 <- create_anomaly_gfdl("SO2", kriged[["o2_ssp585_surface"]], kriged[["o2_historical_surface"]]) |>
-    mutate(exposure_factor = "SO2")
+    mutate(exposure_factor = "SO2", factor_name = "Surface oxygen concentration")
 
 BO2 <- create_anomaly_gfdl("BO2", kriged[["o2_ssp585_bottom"]], kriged[["o2_historical_bottom"]]) |>
-    mutate(exposure_factor = "BO2")
+    mutate(exposure_factor = "BO2", factor_name = "Bottom oxygen concentration")
 
 AT <- create_anomaly_gfdl("AT", kriged[["AT_ssp585"]], kriged[["AT_historical"]]) |>
-    mutate(exposure_factor = "AT")
+    mutate(exposure_factor = "AT", factor_name = "Air temperature")
 
 PR <- create_anomaly_gfdl("PR", kriged[["PR_ssp585"]], kriged[["PR_historical"]]) |>
-    mutate(exposure_factor = "PR")
+    mutate(exposure_factor = "PR", factor_name = "Precipitation")
   
 # calculate anomaly for chosen MHW index 
 MHW <- create_anomaly_mhw(mhw_ssp585, mhw_hindcast) |>
-  mutate(exposure_factor = "MHW")
+  mutate(exposure_factor = "MHW", factor_name = "Marine heatwaves")
 
 # list of exposure factor data frames
 exposure_factors_df <- list(SST, BT, SS, BS, PhT, ZP, SpH, BpH, SO2, BO2, AT, PR, MHW)
 names(exposure_factors_df) <- c("SST", "BT", "SS", "BS", "PhT", "ZP", "SpH", "BpH", "SO2", "BO2", "AT", "PR", "MHW")
+all_exposure <- rbind(SST, BT, SS, BS, PhT, ZP, SpH, BpH, SO2, BO2, AT, PR, MHW)
 
 # for plotting:
 # load coastline 
@@ -252,19 +255,19 @@ canada = ne_countries(scale = "medium", country = "Canada", returnclass = "sf") 
   st_crop(xmin = -172, xmax = -130, ymin = 50, ymax = 62) |>  
     st_shift_longitude()  
 
-# create single anomaly plots for all exposure factors and save locally (13 plots)
+# create single anomaly and variability plots for all exposure factors and save locally 
 for (k in 1:length(exposure_factors_df)){
-  create_anomaly_plot(exposure_factors_df[[k]], exposure_factors[k])
+  create_exposure_plot(exposure_factors_df[[k]], factor_full_names[k])
 }
 
-# create series of plots: show average mean, sd, future change, and anomaly (13 plots)
+# create series of plots for anomalies: average mean, standard deviation, future change, and anomaly (13 plots)
 for (k in 1:length(exposure_factors_df)){
   create_all_anomaly_plots(exposure_factors_df[[k]], exposure_factors[k])
 }
 
 # create series of plots for variability: future variance, historical variance, and variability (13 plots)
 for (k in 1:length(exposure_factors_df)){
-  create_variability_plots(exposure_factors_df[[k]], exposure_factors[k])
+  create_all_variability_plots(exposure_factors_df[[k]], exposure_factors[k])
 }
 
 # ============================================================================
@@ -461,3 +464,124 @@ group_exposure_plots("Sockeye salmon", "anomaly")
 group_exposure_plots("Sockeye salmon", "variability")
 group_exposure_plots("Pacific spiny dogfish", "anomaly")
 group_exposure_plots("Pacific spiny dogfish", "variability")
+group_exposure_plots("Sablefish", "anomaly")
+group_exposure_plots("Sablefish", "variability")
+
+
+species <- "Sablefish"
+type <- "anomaly"
+exposure_map_list = list()
+exposure_factors_list <- layer_names[layer_names$species_name == species, 6:14] # identify species in layer list 
+
+these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
+these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)]) # identify set of exposure factors for this species
+
+# create data frame to put exposure score numbers in
+species_scores <- data.frame(exposure_factor = unlist(these_exposure_factors$V1))
+
+for(k in 1:length(these_exposure_factors$V1)){
+  original_exposure_data <- create_overlap(species, exposure_factors_df[[paste(these_exposure_factors$V1[k])]], these_exposure_factors$V1[k])
+  
+  score <- calculate_exposure_score(original_exposure_data, "anomaly")
+  species_scores[k,"score"] <- score
+  species_scores[k,"type"] <- "anomaly"
+  species_scores[k,"factor_name"] <- original_exposure_data$factor_name[1]
+  
+  if(type == "anomaly"){
+    original_exposure_data <- original_exposure_data |>
+      dplyr::select(geometry, anomaly, anomaly_bins, factor_name) |>
+      rename(value = anomaly,
+             bins = anomaly_bins)
+  }
+  else if(type == "variability"){
+    original_exposure_data <- original_exposure_data |>
+      dplyr::select(geometry, variability, variability_bins, factor_name) |>
+      rename(value = variability,
+             bins = variability_bins)
+  }
+  
+  get_coordinates <- original_exposure_data |> # transform to coordinates for geom_tile use
+    mutate(x_coord = st_coordinates(geometry)[, 1],
+           y_coord = st_coordinates(geometry)[, 2])
+  
+  w = 0.02 * (max(get_coordinates$x_coord)-min(get_coordinates$x_coord))
+  h = 0.02 * (max(get_coordinates$y_coord)-min(get_coordinates$y_coord))
+  
+  exposure_map_list[[k]] <- get_coordinates # add it to the list
+}
+
+exposure_maps <- function(map_data, score, factor_name){
+  map <- ggplot() + 
+    #geom_sf(data = map_data, aes(color = value, geometry = geometry), size = 1, alpha = 0.8) +
+    geom_tile(data = map_data, aes(x = x_coord, y = y_coord, fill = value), width = w, height = h) +
+    #coord_sf(xlim = c(-170, -130), ylim = c(50, 62)) +
+    geom_sf(data = GOA, size = 0.2, fill = "gray85") +
+    geom_sf(data = canada, size = 0.2, fill = "gray95") +
+    scale_x_continuous(n.breaks = 4, expand = c(0,0)) +
+    scale_y_continuous(breaks = seq(52, 60, by = 4), expand = c(0,0)) +
+    scale_fill_gradientn(
+      rescaler = function (...) {
+        scales::rescale_mid(..., mid = 0)
+      },
+      colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
+      values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
+      name = str_to_sentence(type)) +
+    labs(x = "Longitude",
+         y = "Latitude",
+         fill = str_to_sentence(type),
+         title = factor_name) +
+    annotate("text", x = I(0.65), y = I(0.55), label = score) + # add exposure score above inset map
+    theme_bw() +
+    theme(panel.grid = element_blank(),
+          plot.title = element_text(margin = margin(b = -5), size = 14),
+          legend.position = c(0.95,0.85), 
+          legend.direction = "vertical", 
+          legend.text = element_text(size = 6), 
+          legend.title = element_text(size = 8, margin = margin(b = 5)), 
+          legend.key.size = unit(0.25, "cm"), 
+          legend.key.spacing = unit(0.05, "cm"),
+          legend.frame = element_rect(color = "black", linewidth = 0.2),
+          legend.background = element_rect(fill = "transparent"),
+          legend.ticks = element_line(color = "black", linewidth = 0.25),
+          strip.text = element_text(hjust = 0, size = 10),
+          strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+          panel.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+          plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+          panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5)
+    )
+  
+  inset <- ggplot(map_data) +
+    geom_histogram(aes(x = value, y = after_stat(count / sum(count)), fill = bins), binwidth = 0.25, boundary = 0, linewidth = 0.25, colour="black", show.legend = FALSE) +
+    scale_fill_manual(values = c("low" = "#d9f2d0", 
+                                 "moderate" = "#fffd78", 
+                                 "high" = "#ffca00", 
+                                 "very high" = "#ff8884")) + 
+    scale_x_continuous(expand = c(0,0)) +
+    xlab(str_to_sentence(type)) +
+    ylab("Proportion") +
+    theme_bw() +
+    theme(panel.grid = element_blank(), axis.title = element_text(size = 8), axis.text = element_text(size = 5),
+          rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+          panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
+  
+  ggdraw() +
+    draw_plot(map) +
+    draw_plot(inset, height = 0.15, x = 0.65, y = 0.15, vjust = 1)
+  
+  combined_plot <- map +
+    inset_element(inset, align_to = "plot", left = 0.5, bottom = 0.17, right = 0.8, top = 0.57) 
+  combined_plot$patches$layout$widths  <- 0.5
+  combined_plot$patches$layout$heights <- 0.5
+  
+  return(combined_plot)
+}
+
+exposure_plot_list = list()
+for(i in 1:length(exposure_map_list)){
+  data <- exposure_map_list[[i]]
+  plot <- exposure_maps(data, species_scores[i, "score"], species_scores[i, "factor_name"])
+  
+  exposure_plot_list[[i]] <- plot
+  
+  ggsave(filename = paste("exposure", species_scores[i, "exposure_factor"], type, ".png", sep = ""), path = here(paste("plots/Focal species/", species, sep = "")), plot = plot, device = "png", width = 8.5, height = 4, bg = "transparent", dpi = 400)
+}

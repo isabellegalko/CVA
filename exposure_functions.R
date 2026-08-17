@@ -65,10 +65,10 @@ create_anomaly_roms <- function(future_data, hindcast_data) {
   # calculate climate anomaly (future mean - hindcast mean / hindcast standard deviation)
   calculate_anomaly <- future_data |> 
     # filter(month == c("7", "8", "9")) |> # can filter by winter or summer months by changing month numbers
-    summarize(average_future = mean(value_dc), variance_future = var(value_dc), .by = c(cell_id, lon_rho, lat_rho)) |> # use bias-corrected values: value_dc
+    summarize(average_future = mean(value_dc), variance_future = var(value_dc), .by = c(lon_rho, lat_rho)) |> # use bias-corrected values: value_dc
     left_join(hindcast_data |> 
         # filter(month == c("7", "8", "9")) |> 
-        summarize(average_hist = mean(value), sd_hist = sd(value), variance_hist = var(value), .by = c(cell_id, lon_rho, lat_rho)), # for hindcast, value = value_dc
+        summarize(average_hist = mean(value), sd_hist = sd(value), variance_hist = var(value), .by = c(lon_rho, lat_rho)), # for hindcast, value = value_dc
       by = join_by(lon_rho, lat_rho)
     ) |>
     mutate(anomaly = (average_future-average_hist)/sd_hist,
@@ -191,26 +191,55 @@ create_anomaly_mhw <- function(future_data, hindcast_data) {
 #' @param exposure_factor_name Character exposure factor name.
 #'
 #' @return NA
-create_anomaly_plot <- function(data, exposure_factor_name) {
+create_exposure_plot <- function(data, exposure_factor_name) {
+  get_coordinates <- data |> # transform to coordinates for geom_tile use
+    mutate(x_coord = st_coordinates(geometry)[, 1],
+           y_coord = st_coordinates(geometry)[, 2])
+  
+  w = 0.02 * (max(get_coordinates$x_coord)-min(get_coordinates$x_coord))
+  h = 0.02 * (max(get_coordinates$y_coord)-min(get_coordinates$y_coord))
+  
   plot1 <- ggplot() + # plot climate anomaly
-    geom_sf(data = data, aes(color = anomaly, geometry=geometry), size = 0.5, alpha = 0.8) +
+    #geom_sf(data = data, aes(color = anomaly, geometry=geometry), size = 0.5, alpha = 0.8) +
+    geom_tile(data = get_coordinates, aes(x = x_coord, y = y_coord, fill = anomaly), width = w, height = h) +
     geom_sf(data = GOA, size=0.2, fill="gray85") +
     geom_sf(data = canada, size=0.2, fill="gray95") +
     scale_y_continuous(expand = c(0,0)) +
     scale_x_continuous(expand = c(0,0)) +
-    scale_color_gradientn(
+    scale_fill_gradientn(
       rescaler = function (...) {
         scales::rescale_mid(..., mid = 0)
       },
-      colors = c("purple", "blue", "cyan", "green", "yellow", "orange", "red"), # set colors for scoring categories
+      colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
       values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
       name = "Anomaly"
     ) +
     labs(x = "Longitude",
-         y = "Latitude") +
-    sf_plot_theme() +
-    guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
+         y = "Latitude",
+         title = exposure_factor_name) +
+    sf_plot_theme() 
+    #guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
    ggsave(paste(exposure_factor_name, "anomaly.png", sep="_"), path = here("plots/Anomaly plots"), device = "png", dpi = 300, width=8, height=5)
+   
+   variability_plot <- ggplot() + 
+     #geom_sf(data = data, aes(color = variability, geometry=geometry), size = 0.5, alpha = 0.8) +
+     geom_tile(data = get_coordinates, aes(x = x_coord, y = y_coord, fill = variability), width = w, height = h) +
+     geom_sf(data = GOA, size = 0.2, fill = "gray85") +
+     geom_sf(data = canada, size = 0.2, fill = "gray95") +
+     scale_x_continuous(n.breaks = 4, expand = c(0,0)) +
+     scale_y_continuous(breaks = seq(52, 60, by = 4), expand = c(0,0)) +
+     scale_fill_gradientn(
+       rescaler = function (...) {
+         scales::rescale_mid(..., mid = 0)
+       },
+       colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
+       values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
+       name = ""
+     ) +
+     labs(x = "Longitude",
+          y = "Latitude",
+          title = exposure_factor_name) +
+     sf_plot_theme() 
 }
 
 anomaly_plot_theme = function(){
@@ -323,7 +352,7 @@ create_all_anomaly_plots <- function(data, exposure_factor_name){
 #' @param exposure_factor_name Character exposure factor name.
 #'
 #' @return NA
-create_variability_plots <- function(data, exposure_factor_name){
+create_all_variability_plots <- function(data, exposure_factor_name){
   hist_var_plot <- ggplot() + 
     geom_sf(data = data, aes(color = variance_hist, geometry = geometry), size = 0.5, alpha = 0.8) +
     geom_sf(data = GOA, size=0.2, fill = "gray85") +
@@ -928,9 +957,7 @@ group_exposure_plots <- function(species, type){
   these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)]) # identify set of exposure factors for this species
   
   # create data frame to put exposure score numbers in
-  species_scores <- data.frame(
-    exposure_factor = unlist(these_exposure_factors$V1)
-  )
+  species_scores <- data.frame(exposure_factor = unlist(these_exposure_factors$V1))
   
   for(k in 1:length(these_exposure_factors$V1)){
     original_exposure_data <- create_overlap(species, exposure_factors_df[[paste(these_exposure_factors$V1[k])]], these_exposure_factors$V1[k])
@@ -938,47 +965,61 @@ group_exposure_plots <- function(species, type){
     score <- calculate_exposure_score(original_exposure_data, type)
     species_scores[k,"score"] <- score
     species_scores[k,"type"] <- type
+    species_scores[k,"factor_name"] <- original_exposure_data$factor_name[1]
     
     if(type == "anomaly"){
       original_exposure_data <- original_exposure_data |>
-        dplyr::select(geometry, anomaly, anomaly_bins) |>
+        dplyr::select(geometry, anomaly, anomaly_bins, factor_name) |>
         rename(value = anomaly,
                bins = anomaly_bins)
     }
     else if(type == "variability"){
       original_exposure_data <- original_exposure_data |>
-        dplyr::select(geometry, variability, variability_bins) |>
+        dplyr::select(geometry, variability, variability_bins, factor_name) |>
         rename(value = variability,
                bins = variability_bins)
     }
     
-    exposure_map_list[[k]] <- original_exposure_data # add it to the list
+    get_coordinates <- original_exposure_data |> # transform to coordinates for geom_tile use
+      mutate(x_coord = st_coordinates(geometry)[, 1],
+             y_coord = st_coordinates(geometry)[, 2])
+    
+    w = 0.02 * (max(get_coordinates$x_coord)-min(get_coordinates$x_coord))
+    h = 0.02 * (max(get_coordinates$y_coord)-min(get_coordinates$y_coord))
+    
+    exposure_map_list[[k]] <- get_coordinates # add it to the list
   }
   
-  exposure_maps <- function(map_data, score){
+  exposure_maps <- function(map_data, score, factor_name){
     map <- ggplot() + 
-      geom_sf(data = map_data, aes(color = value, geometry = geometry), size = 1, alpha = 0.8) +
-      coord_sf(xlim = c(-170, -130), ylim = c(50, 62)) +
+      #geom_sf(data = map_data, aes(color = value, geometry = geometry), size = 1, alpha = 0.8) +
+      geom_tile(data = map_data, aes(x = x_coord, y = y_coord, fill = value), width = w, height = h) +
+      #coord_sf(xlim = c(-170, -130), ylim = c(50, 62)) +
       geom_sf(data = GOA, size = 0.2, fill = "gray85") +
       geom_sf(data = canada, size = 0.2, fill = "gray95") +
       scale_x_continuous(n.breaks = 4, expand = c(0,0)) +
       scale_y_continuous(breaks = seq(52, 60, by = 4), expand = c(0,0)) +
-      scale_color_gradientn(
+      scale_fill_gradientn(
         rescaler = function (...) {
           scales::rescale_mid(..., mid = 0)
         },
-        colors = c("purple", "blue", "cyan", "green", "yellow", "orange", "red"), # set colors for scoring categories
+        colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
         values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
         name = str_to_sentence(type)) +
       labs(x = "Longitude",
            y = "Latitude",
-           color = str_to_sentence(type)) +
-      annotate("text", x = I(0.65), y = I(0.55), label = paste("Exposure = ", score, sep = "")) + # add exposure score above inset map
+           fill = str_to_sentence(type),
+           title = factor_name) +
+      annotate("text", x = I(0.65), y = I(0.53), label = paste("Exposure = ", score, sep = "")) + # add exposure score above inset map
       theme_bw() +
       theme(panel.grid = element_blank(),
-            legend.position = c(0.95,0.85), legend.direction = "vertical", 
-            legend.text = element_text(size = 6), legend.title = element_text(size = 8, margin = margin(b = 5)), 
-            legend.key.size = unit(0.25, "cm"), legend.key.spacing = unit(0.05, "cm"),
+            plot.title = element_text(size = 14),
+            legend.position = c(0.95,0.85), 
+            legend.direction = "vertical", 
+            legend.text = element_text(size = 6), 
+            legend.title = element_text(size = 8, margin = margin(b = 5)), 
+            legend.key.size = unit(0.25, "cm"), 
+            legend.key.spacing = unit(0.05, "cm"),
             legend.frame = element_rect(color = "black", linewidth = 0.2),
             legend.background = element_rect(fill = "transparent"),
             legend.ticks = element_line(color = "black", linewidth = 0.25),
@@ -991,10 +1032,10 @@ group_exposure_plots <- function(species, type){
     
     inset <- ggplot(map_data) +
       geom_histogram(aes(x = value, y = after_stat(count / sum(count)), fill = bins), binwidth = 0.25, boundary = 0, linewidth = 0.25, colour="black", show.legend = FALSE) +
-      scale_fill_manual(values = c("low" = "green", 
-                                   "moderate" = "yellow", 
-                                   "high" = "orange", 
-                                   "very high" = "red")) +
+      scale_fill_manual(values = c("low" = "#d9f2d0", 
+                                   "moderate" = "#fffd78", 
+                                   "high" = "#ffca00", 
+                                   "very high" = "#ff8884")) + 
       scale_x_continuous(expand = c(0,0)) +
       xlab(str_to_sentence(type)) +
       ylab("Proportion") +
@@ -1008,7 +1049,7 @@ group_exposure_plots <- function(species, type){
       draw_plot(inset, height = 0.15, x = 0.65, y = 0.15, vjust = 1)
     
     combined_plot <- map +
-      inset_element(inset, align_to = "plot", left = 0.5, bottom = 0.17, right = 0.8, top = 0.57) 
+      inset_element(inset, align_to = "plot", left = 0.5, bottom = 0.15, right = 0.8, top = 0.55) 
     combined_plot$patches$layout$widths  <- 0.5
     combined_plot$patches$layout$heights <- 0.5
     
@@ -1018,11 +1059,11 @@ group_exposure_plots <- function(species, type){
   exposure_plot_list = list()
   for(i in 1:length(exposure_map_list)){
     data <- exposure_map_list[[i]]
-    plot <- exposure_maps(data, species_scores[i, "score"])
+    plot <- exposure_maps(data, species_scores[i, "score"], species_scores[i, "factor_name"])
     
     exposure_plot_list[[i]] <- plot
     
-    ggsave(filename = paste("exposure", species_scores[i, "exposure_factor"], type, ".png", sep = ""), path = here(paste("plots/Focal species/", species, sep = "")), plot = plot, device = "png", width = 7, height = 4, bg = "transparent", dpi = 400)
+    ggsave(filename = paste("exposure", species_scores[i, "exposure_factor"], type, ".png", sep = ""), path = here(paste("plots/Focal species/", species, sep = "")), plot = plot, device = "png", width = 8.5, height = 4, bg = "transparent", dpi = 400)
   }
   
 }
