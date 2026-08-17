@@ -468,8 +468,7 @@ outlier_plot(scorer_averages, "Groundfish")
 # ============================================================================
 
 data_quality_sensitivity <- final_scores |>
-  summarize(mean = mean(data_quality), .by = c(species, group)) |>
-  mutate(across(where(is.numeric), round, digits = 1)) |>
+  dplyr::select(group, species, attribute_name, data_quality) |>
   mutate(group = recode(group,
                         "Mollusc" = "Molluscs",
                         "Crustacean" = "Crustaceans",
