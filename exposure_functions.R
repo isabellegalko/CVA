@@ -219,9 +219,9 @@ create_exposure_plot <- function(data, exposure_factor_name) {
          title = exposure_factor_name) +
     sf_plot_theme() 
     #guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
-   ggsave(paste(exposure_factor_name, "anomaly.png", sep="_"), path = here("plots/Anomaly plots"), device = "png", dpi = 300, width=8, height=5)
+   ggsave(paste(exposure_factor_name, "anomaly.png", sep = "_"), path = here("plots/Anomaly plots"), plot = plot1, device = "png", dpi = 300, width = 8.5, height = 4)
    
-   variability_plot <- ggplot() + 
+   plot2 <- ggplot() + 
      #geom_sf(data = data, aes(color = variability, geometry=geometry), size = 0.5, alpha = 0.8) +
      geom_tile(data = get_coordinates, aes(x = x_coord, y = y_coord, fill = variability), width = w, height = h) +
      geom_sf(data = GOA, size = 0.2, fill = "gray85") +
@@ -234,12 +234,13 @@ create_exposure_plot <- function(data, exposure_factor_name) {
        },
        colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
        values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
-       name = ""
+       name = "Variability"
      ) +
      labs(x = "Longitude",
           y = "Latitude",
           title = exposure_factor_name) +
      sf_plot_theme() 
+   ggsave(paste(exposure_factor_name, "variability.png", sep = "_"), path = here("plots/Variability plots"), plot = plot2, device = "png", dpi = 300, width = 8.5, height = 4)
 }
 
 anomaly_plot_theme = function(){
