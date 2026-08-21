@@ -490,7 +490,6 @@ group_exposure_plots("Pacific spiny dogfish", "variability")
 group_exposure_plots("Sablefish", "anomaly")
 group_exposure_plots("Sablefish", "variability")
 
-
 # species <- "Sablefish"
 # type <- "anomaly"
 # exposure_map_list = list()
