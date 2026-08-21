@@ -2,14 +2,6 @@
 # Designed for all-species and exposure factor mapping loops.
 # Author: Isabelle Galko
 
-# default color palette for EFH designations used across maps.
-EFH_cols <- c( 
-  "2" = "#4B0082", #value <= 2
-  "3" = "#006FA5", #value <= 3
-  "4" = "#3CB371", #value <= 4
-  "5" = "#FFFF00"  #value <= 5
-)
-
 sf_plot_theme = function() {
   theme_bw() +
   theme(legend.position = c(0.6, 0.17), 
@@ -586,61 +578,70 @@ plot_species_distribution <- function(species){
   else if(path == "depth_temp_path"){
     sf_filtered = create_depth_temp_layer(path, species_layer)}
   
-  #create plot
-  if(path == "gdb_path"){ # for EFH predictions
+  # for EFH predictions
+  if(path == "gdb_path"){
   plot <- ggplot() +
     geom_sf(data = sf_filtered, aes(color = layer, fill = layer, geometry = geometry), size = 0.5, alpha = 0.8) +
-    geom_sf(data = GOA, size=0.2, fill="gray85") +
-    geom_sf(data = canada, size=0.2, fill="gray95") +
+    geom_sf(data = GOA, size = 0.2, fill = "gray85") +
+    geom_sf(data = canada, size = 0.2, fill = "gray95") +
     scale_y_continuous(expand = c(0,0)) +
     scale_x_continuous(expand = c(0,0)) +
-    scale_color_manual(values = EFH_cols,
-                       guide = "none") +
-    scale_fill_manual(values = EFH_cols,
+    scale_color_manual(values = c("4" = "#9EBCDAFF",
+                                  "5" = "#88419DFF")) +
+    scale_fill_manual(values = c("4" = "#9EBCDAFF",
+                                 "5" = "#88419DFF"),
                       labels = c(
-                        "2" = "95% EFH Area",
-                        "3" = "75% Principal EFH Area",
-                        "4" = "50% Core EFH Area",
-                        "5" = "25% EFH Hot Spots"),
-                      # 2. Control the legend breaks and order
+                        "2" = "Occupied habitat (95%)",
+                        "3" = "Principal habitat (75%)",
+                        "4" = "Core habitat (50%)",
+                        "5" = "Hot spots (25%)"),
                       breaks = c("2", "3", "4", "5")) +
     labs(x = "Longitude",
          y = "Latitude",
-         fill = "EFH area") +
+         fill = "Habitat-related density") +
     sf_plot_theme() +
-    theme(panel.grid = element_blank())
+    guides(color = "none")
   }
-  else if(path == "scallop_path" | path == "depth_temp_path"){ # for presence-absence SDMs
+  # for presence-absence SDMs
+  else if(path == "scallop_path" | path == "depth_temp_path"){ 
   plot <- ggplot() +
-    geom_sf(data = sf_filtered, aes(geometry = geometry), size = 0.5, alpha = 0.8) +
-    geom_sf(data = GOA, size=0.2, fill="gray85") +
-    geom_sf(data = canada, size=0.2, fill="gray95") +
+    geom_sf(data = sf_filtered, aes(geometry = geometry, fill = "layer"), size = 0.5, alpha = 0.8) +
+    geom_sf(data = GOA, size=0.2, fill = "gray85") +
+    geom_sf(data = canada, size=0.2, fill = "gray95") +
     scale_y_continuous(expand = c(0,0)) +
     scale_x_continuous(expand = c(0,0)) +
+    scale_fill_manual(
+      values = c("layer" = "#9EBCDAFF"),
+      name = "") +
     labs(x = "Longitude",
          y = "Latitude") +
-    sf_plot_theme()
+    sf_plot_theme() +
+    guides(color = "none")
   }
-  else if(path == "bts_sdm_path" | path == "diet_derived_path"){ # for EFH predictions from BTS or diet data
+  # for EFH predictions from BTS or diet data
+  else if(path == "bts_sdm_path" | path == "diet_derived_path"){ 
   plot <- ggplot() +
-      geom_sf(data = sf_filtered, aes(geometry = geometry, color = layer), size = 0.3, alpha = 0.8) +
-      geom_sf(data = GOA, size=0.2, fill="gray85") +
-      geom_sf(data = canada, size=0.2, fill="gray95") +
+      geom_sf(data = sf_filtered, aes(geometry = geometry, color = layer, fill = layer), size = 0.3, alpha = 0.8) +
+      geom_sf(data = GOA, size = 0.2, fill = "gray85") +
+      geom_sf(data = canada, size = 0.2, fill = "gray95") +
       scale_y_continuous(expand = c(0,0)) +
       scale_x_continuous(expand = c(0,0)) +
-      scale_color_manual(
-        values = c("4" = "#3CB371",
-                   "5" = "#FFFF00"),
-        labels = c(
-          "4" = "50% Core EFH Area",
-          "5" = "25% EFH Hot Spots"),
-        name = "Population \n Percentile",
-        breaks = c("4", "5")) +
+      scale_color_manual(values = c("4" = "#9EBCDAFF",
+                                    "5" = "#88419DFF"),
+                         labels = c(
+                           "4" = "Core habitat (50%)",
+                           "5" = "Hot spots (25%)"),
+                         name = "Population \n Percentile",
+                         breaks = c("4", "5")) +
+      scale_fill_manual(
+        values = c("4" = "#9EBCDAFF",
+                   "5" = "#88419DFF")) +
       labs(x = "Longitude",
            y = "Latitude") +
-      sf_plot_theme()
+      sf_plot_theme() +
+    guides(fill = "none")
   }
-  ggsave(paste(species, "distribution.png", sep="_"), device = "png", path = here("plots/Distribution plots"), plot = plot, width = 8, height = 5, dpi = 300)
+  ggsave(paste(species, "distribution.png", sep="_"), device = "png", path = here("plots/Distribution plots"), plot = plot, width = 8.75, height = 4, dpi = 300)
 }
 
 #' Keep points that intersect species EFH polygons.
@@ -948,12 +949,7 @@ exposure_histogram_series <- function(species, type){
 group_exposure_plots <- function(species, type){
   exposure_map_list = list()
   exposure_factors_list <- layer_names[layer_names$species_name == species, 6:14] # identify species in layer list 
-  
-  # # remove MHW variability 
-  # if(type == "variability"){
-  #   exposure_factors_list <- exposure_factors_list |>
-  #     dplyr::select(!marine_heatwave)
-  # }
+
   these_exposure_factors <- as.list(as.data.frame(t(exposure_factors_list)))
   these_exposure_factors <- lapply(these_exposure_factors, function(x) x[!is.na(x)]) # identify set of exposure factors for this species
   
