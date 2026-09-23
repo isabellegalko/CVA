@@ -139,9 +139,9 @@ calculate_sensitivity_scores <- function(data) {
   return(calculated_sensitivity_scores)
 }
 
-sensitivity_scores <- calculate_sensitivity_scores(final_scores)
+calculated_sensitivity_scores <- calculate_sensitivity_scores(final_scores)
 
-sensitivity_scores <- sensitivity_scores |>
+calculated_sensitivity_scores <- calculated_sensitivity_scores |>
   mutate(sensitivity_number = recode(sensitivity, 
                                   "low" = "1",
                                   "moderate" = "2", 
@@ -198,9 +198,9 @@ workshop_plots <- function(data, species_name) {
 # }
 
 # calculate sensitivity scores across functional groups
-group_scores <- sensitivity_scores |>
+group_scores <- calculated_sensitivity_scores |>
   summarize(count = n(), .by = c(sensitivity, group)) |>
-  left_join(sensitivity_scores |> summarize(total = n(), .by = c(group))) |>
+  left_join(calculated_sensitivity_scores |> summarize(total = n(), .by = c(group))) |>
   mutate(group = paste(group, " (n = ", total, ")", sep = "")) |>
   mutate(prop = count / total)
 
@@ -340,7 +340,7 @@ average_de <- de_scores |>
   summarize(de_mean = mean(score))
 
 average_de <- average_de |> mutate(
-  directional_effect = ifelse(de_mean <= -0.333, "negative", ifelse(de_mean >= 0.333, "positive", "neutral"))) |>
+  directional_effect = ifelse(de_mean <= -(1/3), "negative", ifelse(de_mean >= (1/3), "positive", "neutral"))) |>
   ungroup()
 
 de_group_scores <- average_de |>
@@ -418,48 +418,12 @@ potential_outliers <- loo_analysis |>
   left_join(num_participants, join_by(scorer)) |>
   mutate(
     change = ifelse(sensitivity_with != sensitivity_without, TRUE, FALSE) # did the score change without the removed scorer?
-  ) |> filter(change == TRUE) |>  # filter out unchanged scores
-  filter(participants > 4) # filter for workshops with more than 4 participants
+  ) |> filter(change == TRUE)  # filter out unchanged scores
 
 potential_outliers_unique <- potential_outliers |>
   group_by(species, sensitivity_with, sensitivity_without) |>
   mutate(dupe = n()>1) |>
   filter(dupe == FALSE)
-
-# make box plot of average scores for each 
-scorer_averages <- final_scores |>
-  group_by(workshop, scorer, species, attribute_short, attribute_name) |>
-  summarize(sum_low = sum(low), sum_moderate = sum(moderate), sum_high = sum(high), sum_vh = sum(very_high)
-  ) |>
-  mutate( # calculate average score for each sensitivity attribute by species and scorer
-    weighted_mean = ((sum_low*1)+(sum_moderate*2)+(sum_high*3)+(sum_vh*4))/(sum_low+sum_moderate+sum_high+sum_vh),
-  )
-
-scorer_averages <- scorer_averages |>
-  group_by(workshop, scorer, species) |>
-  summarize(mean = mean(weighted_mean))
-
-# makes a plot of the average participant score for each species in a given workshop
-outlier_plot <- function(data, workshop_name) {
-  filtered <- data |>
-    filter(workshop == workshop_name)
-  
-  plot <- ggplot(filtered) +
-    geom_boxplot(aes(x = species, y = mean)) +
-    geom_point(aes(x = species, y = mean, color=scorer), size=2) +
-    xlab("Species") +
-    ylab("Average Participant Score") +
-    scale_x_discrete(labels = wrap_format(10)) +
-    theme_bw() +
-    theme(strip.text = element_text(hjust = 0, size = 10),
-        strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-        rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-        panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-  ggsave(paste(workshop_name, "scorer_distribution.png", sep="_"), plot = plot, width=8, height=5)
-}
-
-# create plot for a workshop
-outlier_plot(scorer_averages, "Groundfish")
 
 # ============================================================================
 # SECTION 5: Data quality scores
