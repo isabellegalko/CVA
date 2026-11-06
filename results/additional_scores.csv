@@ -1,58 +1,58 @@
-group,species,dist_potential,dist_number,de_mean,directional_effect
-Crustacean,Golden king crab,moderate,2,-0.458333333,negative
-Forage Fish,Eulachon,moderate,2,-0.75,negative
-Forage Fish,Pacific sand lance,moderate,2,-0.7,negative
-Groundfish,Atka mackerel,moderate,2,-0.4,negative
-Rockfish,Harlequin rockfish,moderate,2,-0.35,negative
-Rockfish,Redbanded rockfish,moderate,2,-0.35,negative
-Rockfish,Yelloweye rockfish,moderate,2,-0.35,negative
-Salmon,Chinook salmon,moderate,2,-0.8125,negative
-Salmon,Coho salmon,moderate,2,-0.625,negative
-Salmon,Steelhead trout,moderate,2,-0.5625,negative
-Crustacean,Red king crab,high,3,-0.416666667,negative
-Crustacean,Sidestriped shrimp,high,3,-0.4,negative
-Crustacean,Tanner crab,high,3,-0.333333333,negative
-Elasmobranch,Alaska skate,high,3,-0.65,negative
-Flatfish,Alaska plaice,high,3,-0.75,negative
-Flatfish,Northern rock sole,high,3,-0.6875,negative
-Flatfish,Yellowfin sole,high,3,-0.6875,negative
-Forage Fish,Capelin,high,3,-0.8,negative
-Groundfish,Giant grenadier,high,3,-0.45,negative
-Groundfish,Pacific cod,high,3,-0.85,negative
-Mollusc,Littleneck clam,high,3,-0.375,negative
-Mollusc,Razor clam,high,3,-0.5625,negative
-Mollusc,Weathervane scallop,high,3,-0.5,negative
-Rockfish,Rougheye_blackspotted rockfish,high,3,-0.35,negative
-Groundfish,Plain sculpin,low,1,-0.3,neutral
-Groundfish,Lingcod,moderate,2,-0.3,neutral
-Rockfish,Black rockfish,moderate,2,0.0625,neutral
-Rockfish,Dusky rockfish,moderate,2,-0.125,neutral
-Rockfish,Northern rockfish,moderate,2,-0.125,neutral
-Rockfish,Sharpchin rockfish,moderate,2,-0.0625,neutral
-Salmon,Sockeye salmon,moderate,2,-0.125,neutral
-Crustacean,Dungeness crab,high,3,0.041666667,neutral
-Crustacean,Spot shrimp,high,3,-0.3,neutral
-Elasmobranch,Big skate,high,3,-0.05,neutral
-Elasmobranch,Longnose skate,high,3,0.05,neutral
-Elasmobranch,Pacific spiny dogfish,high,3,0,neutral
-Flatfish,Arrowtooth flounder,high,3,-0.125,neutral
-Flatfish,Dover sole,high,3,-0.291666667,neutral
-Flatfish,Flathead sole,high,3,-0.166666667,neutral
-Flatfish,Petrale sole,high,3,-0.25,neutral
-Flatfish,Rex sole,high,3,-0.166666667,neutral
-Flatfish,Southern rock sole,high,3,0.1875,neutral
-Flatfish,Starry flounder,high,3,-0.125,neutral
-Forage Fish,Pacific sandfish,high,3,0.05,neutral
-Groundfish,Walleye pollock,high,3,-0.2,neutral
-Mollusc,Geoduck clam,high,3,-0.25,neutral
-Mollusc,Giant Pacific octopus,high,3,0.125,neutral
-Mollusc,Magistrate armhook squid,high,3,0.125,neutral
-Rockfish,Pacific ocean perch,high,3,0,neutral
-Rockfish,Shortraker rockfish,high,3,-0.3,neutral
-Rockfish,Shortspine thornyhead,high,3,0,neutral
-Rockfish,Silvergray rockfish,high,3,-0.25,neutral
-Salmon,Chum salmon,high,3,-0.25,neutral
-Salmon,Pink salmon,high,3,0.0625,neutral
-Flatfish,Pacific halibut,very high,4,-0.083333333,neutral
-Groundfish,Sablefish,very high,4,0.15,neutral
-Forage Fish,Pacific herring,high,3,0.45,positive
+"group","species","dist_potential","dist_number","de_mean","directional_effect"
+"Crustacean","Dungeness crab","high",3,0.0416666666666667,"neutral"
+"Crustacean","Golden king crab","moderate",2,-0.458333333333333,"negative"
+"Crustacean","Red king crab","high",3,-0.416666666666667,"negative"
+"Crustacean","Sidestriped shrimp","high",3,-0.4,"negative"
+"Crustacean","Spot shrimp","high",3,-0.3,"neutral"
+"Crustacean","Tanner crab","high",3,-0.333333333333333,"negative"
+"Elasmobranch","Alaska skate","high",3,-0.65,"negative"
+"Elasmobranch","Big skate","high",3,-0.05,"neutral"
+"Elasmobranch","Longnose skate","high",3,0.05,"neutral"
+"Elasmobranch","Pacific spiny dogfish","high",3,0,"neutral"
+"Flatfish","Alaska plaice","high",3,-0.75,"negative"
+"Flatfish","Arrowtooth flounder","high",3,-0.125,"neutral"
+"Flatfish","Dover sole","high",3,-0.291666666666667,"neutral"
+"Flatfish","Flathead sole","high",3,-0.166666666666667,"neutral"
+"Flatfish","Northern rock sole","high",3,-0.6875,"negative"
+"Flatfish","Pacific halibut","very high",4,-0.0833333333333333,"neutral"
+"Flatfish","Petrale sole","high",3,-0.25,"neutral"
+"Flatfish","Rex sole","high",3,-0.166666666666667,"neutral"
+"Flatfish","Southern rock sole","high",3,0.1875,"neutral"
+"Flatfish","Starry flounder","high",3,-0.125,"neutral"
+"Flatfish","Yellowfin sole","high",3,-0.6875,"negative"
+"Forage Fish","Capelin","high",3,-0.8,"negative"
+"Forage Fish","Eulachon","moderate",2,-0.75,"negative"
+"Forage Fish","Pacific herring","high",3,0.45,"positive"
+"Forage Fish","Pacific sand lance","moderate",2,-0.7,"negative"
+"Forage Fish","Pacific sandfish","high",3,0.05,"neutral"
+"Groundfish","Atka mackerel","moderate",2,-0.4,"negative"
+"Groundfish","Giant grenadier","high",3,-0.45,"negative"
+"Groundfish","Lingcod","moderate",2,-0.3,"neutral"
+"Groundfish","Pacific cod","high",3,-0.85,"negative"
+"Groundfish","Plain sculpin","low",1,-0.3,"neutral"
+"Groundfish","Sablefish","very high",4,0.15,"neutral"
+"Groundfish","Walleye pollock","high",3,-0.2,"neutral"
+"Mollusc","Geoduck clam","high",3,-0.25,"neutral"
+"Mollusc","Giant Pacific octopus","high",3,0.125,"neutral"
+"Mollusc","Littleneck clam","high",3,-0.375,"negative"
+"Mollusc","Magistrate armhook squid","high",3,0.125,"neutral"
+"Mollusc","Razor clam","high",3,-0.5625,"negative"
+"Mollusc","Weathervane scallop","high",3,-0.5,"negative"
+"Rockfish","Black rockfish","moderate",2,0.0625,"neutral"
+"Rockfish","Dusky rockfish","moderate",2,-0.125,"neutral"
+"Rockfish","Harlequin rockfish","moderate",2,-0.35,"negative"
+"Rockfish","Northern rockfish","moderate",2,-0.125,"neutral"
+"Rockfish","Pacific ocean perch","high",3,0,"neutral"
+"Rockfish","Redbanded rockfish","moderate",2,-0.35,"negative"
+"Rockfish","Rougheye_blackspotted rockfish","high",3,-0.35,"negative"
+"Rockfish","Sharpchin rockfish","moderate",2,-0.0625,"neutral"
+"Rockfish","Shortraker rockfish","high",3,-0.3,"neutral"
+"Rockfish","Shortspine thornyhead","high",3,0,"neutral"
+"Rockfish","Silvergray rockfish","high",3,-0.25,"neutral"
+"Rockfish","Yelloweye rockfish","moderate",2,-0.35,"negative"
+"Salmon","Chinook salmon","moderate",2,-0.8125,"negative"
+"Salmon","Chum salmon","high",3,-0.25,"neutral"
+"Salmon","Coho salmon","moderate",2,-0.625,"negative"
+"Salmon","Pink salmon","high",3,0.0625,"neutral"
+"Salmon","Sockeye salmon","moderate",2,-0.125,"neutral"
+"Salmon","Steelhead trout","moderate",2,-0.5625,"negative"
