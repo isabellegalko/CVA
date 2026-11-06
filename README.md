@@ -13,6 +13,9 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 **Species list** 
 - `exposure_assignments.xlsx`: Full species list, distribution file paths, and exposure assignments.
 
+**Workshop scores**
+- `sensitivity_workshop_scores.xlsx`: scores produced during CVA workshops.
+
 **Species distributions** 
 - Essential Fish Habitat (EFH) predictions for federally-managed species in the GOA. File geodatabases for species in the Groundfish and Scallop Fishery Management Plans (FMP) were downloaded from: https://www.fisheries.noaa.gov/resource/map/alaska-essential-fish-habitat-efh-species-shapefiles.
   - These files are too large for GitHub. Please download them yourself and include the geodatabases in the `data` folder.
