@@ -9,10 +9,10 @@
 # load required packages
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
   pacman::p_load(ggplot2, stringr, tidyverse, tidync, ncdf4, lubridate, here, sf, rnaturalearth, arrow, dplyr, terra, readxl, data.table, gstat, ggpubr, cowplot, patchwork, heatwaveR)
-    pacman::p_load_gh("ropensci/rnaturalearthhires")  # High-resolution coastline data
+    pacman::p_load_gh("ropensci/rnaturalearthhires")  # high-resolution coastline data
     
 # identify wd using here package
-here::i_am("exposure_EFH.R")
+here::i_am("02_exposure_analysis.R")
 
 # load custom analysis functions
 source(here("exposure_functions.R")) 
@@ -266,15 +266,15 @@ for (k in 1:length(exposure_factors_df)){
   create_exposure_plot(exposure_factors_df[[k]], factor_full_names[k])
 }
 
-# create series of plots for anomalies: average mean, standard deviation, future change, and anomaly (13 plots)
-for (k in 1:length(exposure_factors_df)){
-  create_all_anomaly_plots(exposure_factors_df[[k]], exposure_factors[k])
-}
-
-# create series of plots for variability: future variance, historical variance, and variability (13 plots)
-for (k in 1:length(exposure_factors_df)){
-  create_all_variability_plots(exposure_factors_df[[k]], exposure_factors[k])
-}
+# # create series of plots for anomalies: average mean, standard deviation, future change, and anomaly (13 plots)
+# for (k in 1:length(exposure_factors_df)){
+#   create_all_anomaly_plots(exposure_factors_df[[k]], exposure_factors[k])
+# }
+# 
+# # create series of plots for variability: future variance, historical variance, and variability (13 plots)
+# for (k in 1:length(exposure_factors_df)){
+#   create_all_variability_plots(exposure_factors_df[[k]], exposure_factors[k])
+# }
 
 # ============================================================================
 # SECTION 4: Species distributions

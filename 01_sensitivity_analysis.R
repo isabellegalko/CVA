@@ -15,7 +15,7 @@ if (!require("pacman", quietly = TRUE)) install.packages("pacman")
   pacman::p_load(ggplot2, tidyverse, readxl, lubridate, dplyr, scales, here)
 
 # set working directory using here package
-here::i_am("sensitivity_analysis.R")
+here::i_am("01_sensitivity_analysis.R")
 
 # load sensitivity workshop data
 final_scores <- read_excel(here("data/Sensitivity_Final_Scores.xlsx"), 
