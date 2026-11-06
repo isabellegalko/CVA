@@ -173,9 +173,9 @@ workshop_plots <- function(data, species_name) {
   
   plot <- ggplot(filtered) +
     geom_col(mapping = aes(x = category_short, y = score, fill = category_short), position = "stack", linewidth = 0.25, colour="black", show.legend = FALSE) +
-    xlab("Sensitivity Attribute") +
+    xlab("Sensitivity") +
     ylab("Proportion of Tallies") +
-    scale_fill_manual(values = c("green", "yellow", "orange", "red")) +
+    scale_fill_manual(values = c("#d9f2d0", "#fffd78", "#ffca00", "#ff8884")) +
     scale_y_continuous(
       limits = c(0,1),
       breaks = seq(0, 1, by = 0.2),
@@ -217,7 +217,7 @@ ggplot(group_scores) +
   scale_x_discrete(labels = c("L", "M", "H", "V")) +
   ylab("Proportion of Group") +
   xlab("Sensitivity Score") +
-  scale_fill_manual(values = c("green", "yellow", "orange", "red")) +
+  scale_fill_manual(values = c("#d9f2d0", "#fffd78", "#ffca00", "#ff8884")) +
   theme_bw() + 
   theme(strip.text = element_text(hjust = 0, size = 10),
         strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
@@ -452,20 +452,30 @@ write.csv(data_quality_sensitivity, "results/sensitivity_data_quality.csv", row.
 # Individual plots for each species' sensitivity attribute.
 # ============================================================================
 
-# # one attribute for one species plot
-# ggplot(final_scores |> filter(species == "Dusky rockfish", attribute_short == "HS")) +
-#   geom_col(mapping = aes(x = category_short, y = score, fill = category_short), linewidth = 0.25, colour="black", show.legend = FALSE) +
-#   xlab("Scoring Category") +
-#   ylab("Expert Score Distribution") +
-#   scale_fill_manual(values = c("green", "yellow", "orange", "red")) +
-#   scale_y_continuous(
-#     limits = c(0,21),
-#     breaks = seq(0, 20, by = 5), 
-#   ) +
-#   theme_bw() +
-#   theme(strip.text = element_text(hjust = 0, size = 12),
-#         strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-#         rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-#         panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-# ggsave("~/Documents/OSU/GOA CVA/Sensitivity/Final Scores/dusky_habitat.png", plot = last_plot(), width=8, height=5)
+# one attribute for one species plot
+single_species <- sensitivity_scores |>
+  filter(species == "Sablefish") |>
+  pivot_longer(cols=c("sum_low", "sum_moderate", "sum_high", "sum_vh"),
+               names_to = "category",
+               values_to = "score") |>
+  mutate(
+    category_short = recode(category, "sum_low" = "L", "sum_moderate" = "M", "sum_high" = "H", "sum_vh" = "VH"),
+    category_short = factor(category_short, levels=c("L", "M", "H", "VH"))
+  )
+ggplot(single_species |> 
+         filter(attribute_short == "TT")) +
+  geom_col(mapping = aes(x = category_short, y = score, fill = category_short), linewidth = 0.25, colour = "black", show.legend = FALSE) +
+  xlab("Sensitivity") +
+  ylab("Expert Score Distribution") +
+  scale_fill_manual(values = c("#d9f2d0", "#fffd78", "#ffca00", "#ff8884")) +
+  scale_y_continuous(
+    limits = c(0,21),
+    breaks = seq(0, 20, by = 5),
+  ) +
+  theme_bw() +
+  theme(strip.text = element_text(hjust = 0, size = 12),
+        strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+        rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+        panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
+ggsave(filename = "sablefish_TT.png", path = here("plots/"), plot = last_plot(), width=8, height=5)
 
