@@ -1,6 +1,10 @@
-# Manage GFDL data sources
-# Pull data from ESGF using OPeNDAP. 
-# Save locally as parquet files.
+# ============================================================================
+# GOA CVA exposure analysis 
+# ============================================================================
+# Purpose: This file manages GFDL data sources, pulls data from ESGF using OPeNDAP,
+# and saves locally as parquet files.
+# Author: Isabelle Galko
+# Date: November 6, 2026
 
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(tidyverse, tidync, ncdf4, lubridate, here, sf, arrow, dplyr, here, data.table) # packages 
