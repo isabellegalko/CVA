@@ -18,7 +18,7 @@ if (!require("pacman", quietly = TRUE)) install.packages("pacman")
 here::i_am("01_sensitivity_analysis.R")
 
 # load sensitivity workshop data
-final_scores <- read_excel(here("data/Sensitivity_Final_Scores.xlsx"), 
+final_scores <- read_excel(here("data/sensitivity_workshop_scores.xlsx"), 
                            sheet = "Sensitivity",
                            col_names = c("scorer", 
                                          "workshop", 
