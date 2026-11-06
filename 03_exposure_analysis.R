@@ -290,7 +290,7 @@ diet_derived_path <- here::here("data", "diet_sdms/") # estimates from predator 
 depth_temp_path <- here::here("data", "depth_temp_sdms/") # estimates based on species depth and temperature preferences
 
 # list of all species, associated distribution file/layer, and exposure assignments
-layer_names <- read_excel(here("exposure_assignments.xlsx"), sheet = "CVA_exposure_assignments", skip = 1,
+layer_names <- read_excel(here("data/exposure_assignments.xlsx"), sheet = "CVA_exposure_assignments", skip = 1,
                            col_names = c("group", "species_name", "scientific_name", "path", 
                                          "EFH_level", "layer", "sea_temperature", 
                                          "salinity", "ph", "phytoplankton", "zooplankton",
