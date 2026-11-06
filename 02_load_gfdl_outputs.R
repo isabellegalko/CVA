@@ -4,7 +4,7 @@
 
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(tidyverse, tidync, ncdf4, lubridate, here, sf, arrow, dplyr, here, data.table) # packages 
-here::i_am("load_gfdl_data.R")
+here::i_am("02_load_gfdl_data.R")
 
 # make lat-lon box for the GOA
 lonrange <- c(188, 235)
