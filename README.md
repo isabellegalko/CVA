@@ -6,10 +6,10 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 - **Climate vulnerability** – how a species will be impacted by climate change, composed of sensitivity and exposure
 - **Exposure** – conditions that a species experiences in its environment, quantified through the overlap of species distributions and environmental projections
 - **Exposure factors** – environmental variables that are of interest to the list of species
-- **Sensitivity** – the intrinsic susceptability of a species to change
+- **Sensitivity** – the intrinsic susceptibility of a species to change
 - **Sensitivity attributes** – a set of life history characteristics that characterize a species' potential response to climate change
 
-## Data sources 
+## Data  
 **Species list** 
 - `exposure_assignments.xlsx`: Full species list, distribution file paths, and exposure assignments.
 
@@ -32,12 +32,14 @@ This repository contains code and analysis for the Gulf of Alaska (GOA) Climate 
 - Marine heatwave index: 
   - `data/mhw`: Cumulative intensity of marine heatwaves (see https://github.com/somros/MHWI_GOACLIM; Rovellini et al. in prep)
   
-## Current workflow scripts
+## Workflow
 
-1. `sensitivity_analysis.R` – Processes sensitivity scoring from CVA workshops. Calculates distribution change potential, directional effect, and data quality scores for each species and functional group. Saves sensitivity results to `results`.
+`00_functions.R` - Contains custom functions.
 
-2. `load_gfdl_data.R` – Pulls data from ESGF using OPeNDAP, separates into surface and bottom variables (as needed), and saves locally as parquet files.
+`01_sensitivity_analysis.R` – Processes sensitivity scoring from CVA workshops. Calculates distribution change potential, directional effect, and data quality scores for each species and functional group. Saves sensitivity results to `results`.
 
-3. `exposure_EFH.R` – Calculates exposure and creates associated plots for all species for which EFH maps are available and all exposure factors. Saves exposure results to `results`. `exposure_functions.R` contains custom functions for this script.
+`02_load_gfdl_outputs.R` – Pulls files from ESGF using OPeNDAP, separates into surface and bottom variables (as needed), and saves locally as parquet files.
 
-4. `vulnerability.R` – Calculates vulnerability by combining exposure and sensitivity scores. Synthesizes trends in sensitivity, exposure, and vulnerability across functional groups. Conducts leave-one-out analysis and bootstrapping of vulnerability scores. Creates plots.
+`03_exposure_analysis.R` – Calculates exposure scores and creates associated plots. Saves exposure results to `results`.
+
+`04_vulnerability.R` – Calculates vulnerability by combining exposure and sensitivity scores. Synthesizes trends in sensitivity, exposure, and vulnerability across functional groups. Conducts leave-one-out analysis and bootstrapping of vulnerability scores. Creates plots.

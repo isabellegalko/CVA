@@ -1,7 +1,7 @@
 # ============================================================================
-# GOA CVA exposure analysis 
+# Pull GFDL Outputs
 # ============================================================================
-# Purpose: This file manages GFDL data sources, pulls data from ESGF using OPeNDAP,
+# Purpose: This file manages GFDL outputs, pulls files from ESGF using OPeNDAP,
 # and saves locally as parquet files.
 # Author: Isabelle Galko
 # Date: November 6, 2026
@@ -14,7 +14,7 @@ here::i_am("02_load_gfdl_outputs.R")
 lonrange <- c(188, 235)
 latrange <- c(52, 62)
 
-# For a particular exposure factor, process GFDL data, extract necessary parts, 
+# For a particular exposure factor, process GFDL outputs, extract necessary parts, 
 # and save as a data frame for exposure analysis.
 # 
 # exposure_factor: Character exposure factor name.
@@ -37,7 +37,7 @@ get_gfdl <- function(exposure_factor, data, run, esm_slice){
       pull(value) %>%
       as.Date()
     
-    # pull data from particular latitude and longitude
+    # pull outputs from particular latitude and longitude
     this_esm_data <- esm_data %>% hyper_filter(lon = lon > lonrange[1] & lon <= lonrange[2], 
                                                lat = lat > latrange[1] & lat <= latrange[2]) 
     
@@ -95,49 +95,49 @@ get_gfdl <- function(exposure_factor, data, run, esm_slice){
   return(this_esm_scenario_df)
 }
 
-########## PH (OCEAN ACIDIFICATION) #########
-# load future data (scenario ssp585) for ph
+# pH (ocean acidification)
+## load future projections (scenario ssp585) for ph
 ph_ssp585_2015_2034_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp585/r1i1p1f1/Omon/ph/gr/v20180701/ph_Omon_GFDL-ESM4_ssp585_r1i1p1f1_gr_201501-203412.nc"
 ph_ssp585_2035_2054_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp585/r1i1p1f1/Omon/ph/gr/v20180701/ph_Omon_GFDL-ESM4_ssp585_r1i1p1f1_gr_203501-205412.nc"
 ph_ssp585_2055_2074_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp585/r1i1p1f1/Omon/ph/gr/v20180701/ph_Omon_GFDL-ESM4_ssp585_r1i1p1f1_gr_205501-207412.nc"
-# ph_ssp585_2015_2034 <- tidync(ph_ssp585_2015_2034_url)
-# ph_ssp585_2035_2054 <- tidync(ph_ssp585_2035_2054_url)
-# ph_ssp585_2055_2074 <- tidync(ph_ssp585_2055_2074_url)
+  # ph_ssp585_2015_2034 <- tidync(ph_ssp585_2015_2034_url)
+  # ph_ssp585_2035_2054 <- tidync(ph_ssp585_2035_2054_url)
+  # ph_ssp585_2055_2074 <- tidync(ph_ssp585_2055_2074_url)
 ph_ssp585_files <- list(ph_ssp585_2015_2034_url, ph_ssp585_2035_2054_url, ph_ssp585_2055_2074_url)
 # ph_ssp585_files <- list(ph_ssp585_2015_2034, ph_ssp585_2035_2054, ph_ssp585_2055_2074)
 
-# load historical data for ph
+## load historical for ph
 ph_hist_2010_2014_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/CMIP/NOAA-GFDL/GFDL-ESM4/historical/r1i1p1f1/Omon/ph/gr/v20190726/ph_Omon_GFDL-ESM4_historical_r1i1p1f1_gr_201001-201412.nc"
 ph_hist_1990_2009_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/CMIP/NOAA-GFDL/GFDL-ESM4/historical/r1i1p1f1/Omon/ph/gr/v20190726/ph_Omon_GFDL-ESM4_historical_r1i1p1f1_gr_199001-200912.nc"
 
-# load data from 2015-2020 from scenario ssp245
+## load 2015-2020 outputs from scenario ssp245
 ph_ssp245_2015_3034_url <- "http://esgf-node.ornl.gov/thredds/dodsC/css03_data/CMIP6/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp245/r1i1p1f1/Omon/ph/gr/v20180701/ph_Omon_GFDL-ESM4_ssp245_r1i1p1f1_gr_201501-203412.nc"
 ph_historical_files <- list(ph_hist_2010_2014_url, ph_hist_1990_2009_url, ph_ssp245_2015_3034_url)
 
-# run functions to put GFDL pH data into a data frame for correct coords and surface layer, and compute means by month and year
+## run functions to put GFDL pH outputs into a data frame for correct coords and surface layer, and compute means by month and year
 ph_ssp585_surface <- get_gfdl("PH", ph_ssp585_files, "ssp585", "surface")
 ph_ssp585_bottom <- get_gfdl("PH", ph_ssp585_files, "ssp585", "bottom")
 ph_historical_surface <- get_gfdl("PH", ph_historical_files, "historical", "surface")
 ph_historical_bottom <- get_gfdl("PH", ph_historical_files, "historical", "bottom")
 
-# write parquet files into folder
+## write parquet files into folder
 write_parquet(ph_ssp585_surface, "data/pH/ph_ssp585_surface.parquet")
 write_parquet(ph_historical_surface, "data/pH/ph_historical_surface.parquet")
 write_parquet(ph_ssp585_bottom, "data/pH/ph_ssp585_bottom.parquet")
 write_parquet(ph_historical_bottom, "data/pH/ph_historical_bottom.parquet")
 
-########## OXYGEN CONCENTRATION #########
-# load future (ssp585) data for o2
+# oxygen concentration
+## load future (ssp585) projections for o2
 o2_ssp585_2015_2034_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp585/r1i1p1f1/Omon/o2/gr/v20180701/o2_Omon_GFDL-ESM4_ssp585_r1i1p1f1_gr_201501-203412.nc"
 o2_ssp585_2035_2054_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp585/r1i1p1f1/Omon/o2/gr/v20180701/o2_Omon_GFDL-ESM4_ssp585_r1i1p1f1_gr_203501-205412.nc"
 o2_ssp585_2055_2074_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp585/r1i1p1f1/Omon/o2/gr/v20180701/o2_Omon_GFDL-ESM4_ssp585_r1i1p1f1_gr_205501-207412.nc"
 o2_ssp585_files <- list(o2_ssp585_2015_2034_url, o2_ssp585_2035_2054_url, o2_ssp585_2055_2074_url)
 
-# load historical data for 02
+## load historical outputs for 02
 o2_hist_2010_2014_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/CMIP/NOAA-GFDL/GFDL-ESM4/historical/r1i1p1f1/Omon/o2/gr/v20190726/o2_Omon_GFDL-ESM4_historical_r1i1p1f1_gr_201001-201412.nc"
 o2_hist_1990_2009_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/CMIP/NOAA-GFDL/GFDL-ESM4/historical/r1i1p1f1/Omon/o2/gr/v20190726/o2_Omon_GFDL-ESM4_historical_r1i1p1f1_gr_199001-200912.nc"
 
-# load data from 2015-2020 from scenario ssp245
+## load outputs from 2015-2020 from scenario ssp245
 o2_ssp245_2015_2034_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp245/r1i1p1f1/Omon/o2/gr/v20180701/o2_Omon_GFDL-ESM4_ssp245_r1i1p1f1_gr_201501-203412.nc"
 o2_historical_files <- list(o2_hist_2010_2014_url, o2_hist_1990_2009_url, o2_ssp245_2015_2034_url)
 
@@ -151,14 +151,14 @@ write_parquet(o2_historical_surface, "data/o2/o2_historical_surface.parquet")
 write_parquet(o2_ssp585_bottom, "data/o2/o2_ssp585_bottom.parquet")
 write_parquet(o2_historical_bottom, "data/o2/o2_historical_bottom.parquet")
 
-########## AIR TEMPERATURE #########
-# load future data
+# air temperature
+## load future projections
 airtemp_ssp585_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp585/r1i1p1f1/Amon/tas/gr1/v20180701/tas_Amon_GFDL-ESM4_ssp585_r1i1p1f1_gr1_201501-210012.nc"
 
-# load historical data
+## load historical outputs
 airtemp_historical_url <- "http://esgf-node.ornl.gov/thredds/dodsC/css03_data/CMIP6/CMIP/NOAA-GFDL/GFDL-ESM4/historical/r1i1p1f1/Amon/tas/gr1/v20190726/tas_Amon_GFDL-ESM4_historical_r1i1p1f1_gr1_195001-201412.nc"
 
-# add ssp245 for 2015-2100 to fill in gap from 2015-2020 for historical data
+# add ssp245 for 2015-2100 to fill in gap from 2015-2020 for historical outputs
 airtemp_ssp245_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp245/r1i1p1f1/Amon/tas/gr1/v20180701/tas_Amon_GFDL-ESM4_ssp245_r1i1p1f1_gr1_201501-210012.nc"
 airtemp_historical_files <- list(airtemp_historical_url, airtemp_ssp245_url) 
 
@@ -168,11 +168,11 @@ airtemp_historical_na <- get_gfdl("AT", airtemp_historical_files, "ssp585", "na"
 write_parquet(airtemp_ssp585_na, "data/tas/airtemp_ssp585_na.parquet")
 write_parquet(airtemp_historical_na, "data/tas/airtemp_historical_na_2020.parquet")
 
-######### PRECIPITATION ############
+# precipitation
 precip_ssp585_url <- "http://esgf-node.ornl.gov/thredds/dodsC/css03_data/CMIP6/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp585/r1i1p1f1/Amon/pr/gr1/v20180701/pr_Amon_GFDL-ESM4_ssp585_r1i1p1f1_gr1_201501-210012.nc"
 precip_historical_url <- "http://esgdata.gfdl.noaa.gov/thredds/dodsC/gfdl_dataroot4/CMIP/NOAA-GFDL/GFDL-ESM4/historical/r1i1p1f1/Amon/pr/gr1/v20190726/pr_Amon_GFDL-ESM4_historical_r1i1p1f1_gr1_195001-201412.nc"
 
-# add ssp245 for 2015-2100 to fill in gap from 2015-2020 for historical data
+# add ssp245 for 2015-2100 to fill in gap from 2015-2020 for historical outputs
 precip_ssp245_url <- "http://esgf-node.ornl.gov/thredds/dodsC/css03_data/CMIP6/ScenarioMIP/NOAA-GFDL/GFDL-ESM4/ssp245/r1i1p1f1/Amon/pr/gr1/v20180701/pr_Amon_GFDL-ESM4_ssp245_r1i1p1f1_gr1_201501-210012.nc"
 precip_historical_files <- list(precip_historical_url, precip_ssp245_url)
 
@@ -181,5 +181,3 @@ precip_historical_na <- get_gfdl("PR", precip_historical_files, "ssp585", "na")
 
 write_parquet(precip_ssp585_na, "data/pr/precip_ssp585_na.parquet")
 write_parquet(precip_historical_na, "data/pr/precip_historical_na_2020.parquet")
-
-
