@@ -8,6 +8,7 @@
 #   b. Additional scores (distribution shift potential and directional effect)
 #   c. Data quality scores
 # Author: Isabelle Galko
+# Date: November 6, 2026
 
 # load required packages
 if (!require("pacman", quietly = TRUE)) install.packages("pacman")
@@ -114,7 +115,7 @@ calculate_sum_scores <- function(data) {
 sensitivity_scores <- calculate_sum_scores(final_scores)
 
 # save in format for vulnerability analysis
-write.csv(sensitivity_scores, "results/sensitivity_scores_original.csv", row.names = FALSE)
+write.csv(sensitivity_scores, "results/sensitivity_results.csv", row.names = FALSE)
 
 # calculate overall sensitivity scores
 calculate_sensitivity_scores <- function(data) {
@@ -190,7 +191,7 @@ workshop_plots <- function(data, species_name) {
   ggsave(paste(species_name, "sensitivity.png", sep="_"), plot = plot, path = here("plots/sensitivity"), width = 8, height=5)
   
 }
-# 
+ 
 # # for loop to create all species plots
 # species_name<-unique(sum_scores$species)
 # for (i in 1:length(species_name)) {
@@ -210,23 +211,23 @@ group_scores$sensitivity = ordered(group_scores$sensitivity,
                                                  "high",
                                                  "very high"))
 
-# group comparison plot
-ggplot(group_scores) +
-  geom_col(mapping = aes(x = sensitivity, y = prop, fill = sensitivity), position = "dodge", linewidth = 0.25, colour="black", width = 0.8, show.legend = FALSE) +
-  facet_wrap(vars(group)) +
-  scale_x_discrete(labels = c("L", "M", "H", "V")) +
-  ylab("Proportion of Group") +
-  xlab("Sensitivity Score") +
-  scale_fill_manual(values = c("#d9f2d0", "#fffd78", "#ffca00", "#ff8884")) +
-  theme_bw() + 
-  theme(strip.text = element_text(hjust = 0, size = 10),
-        strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-        rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-        panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-ggsave(filename = "group_sensitivity_scores.png", plot = get_last_plot(), path = here("plots/"), device = "png", width = 7, height = 5, bg = "transparent", dpi = 300)
+# # create comparison plot of sensitivity scores by functional group
+# ggplot(group_scores) +
+#   geom_col(mapping = aes(x = sensitivity, y = prop, fill = sensitivity), position = "dodge", linewidth = 0.25, colour="black", width = 0.8, show.legend = FALSE) +
+#   facet_wrap(vars(group)) +
+#   scale_x_discrete(labels = c("L", "M", "H", "V")) +
+#   ylab("Proportion of Group") +
+#   xlab("Sensitivity Score") +
+#   scale_fill_manual(values = c("#d9f2d0", "#fffd78", "#ffca00", "#ff8884")) +
+#   theme_bw() + 
+#   theme(strip.text = element_text(hjust = 0, size = 10),
+#         strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+#         rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+#         panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
+# ggsave(filename = "group_sensitivity_scores.png", plot = get_last_plot(), path = here("plots/"), device = "png", width = 7, height = 5, bg = "transparent", dpi = 300)
 
 # ============================================================================
-# SECTION 2: Calculate potential for distributional shift score
+# SECTION 2: Calculate redistributional potential scores
 # ============================================================================
 # Use a subset of sensitivity attributes to evaluate the likelihood that a species
 # will exhibit a shift in distribution with climate change (high adult movement,
@@ -283,23 +284,23 @@ dist_group_scores$dist_potential = ordered(dist_group_scores$dist_potential,
                                               "high",
                                               "very high"))
 
-# group comparison plots for distributional shift 
-ggplot(dist_group_scores) +
-  geom_col(mapping = aes(x = dist_potential, y = prop, fill = dist_potential), position = "dodge", linewidth = 0.25, colour="black", width = 0.8, show.legend = FALSE) +
-  facet_wrap(vars(group)) +
-  scale_x_discrete(labels = c("L", "M", "H", "V")) +
-  ylab("Proportion of Group") +
-  xlab("Potential for Distribution Shift") +
-  scale_fill_brewer(palette = "BuPu") +
-  theme_bw() + 
-  theme(strip.text = element_text(hjust = 0, size = 10),
-        strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-        rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-        panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
-ggsave(filename = "group_dist_shift.png", plot = get_last_plot(), path = here("plots/"), device = "png", width = 7, height = 5, bg = "transparent", dpi = 300)
+# # create comparison plots for distributional shift by functional group
+# ggplot(dist_group_scores) +
+#   geom_col(mapping = aes(x = dist_potential, y = prop, fill = dist_potential), position = "dodge", linewidth = 0.25, colour="black", width = 0.8, show.legend = FALSE) +
+#   facet_wrap(vars(group)) +
+#   scale_x_discrete(labels = c("L", "M", "H", "V")) +
+#   ylab("Proportion of Group") +
+#   xlab("Potential for Distribution Shift") +
+#   scale_fill_brewer(palette = "BuPu") +
+#   theme_bw() + 
+#   theme(strip.text = element_text(hjust = 0, size = 10),
+#         strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+#         rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+#         panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
+# ggsave(filename = "group_dist_shift.png", plot = get_last_plot(), path = here("plots/"), device = "png", width = 7, height = 5, bg = "transparent", dpi = 300)
 
 # ============================================================================
-# SECTION 3: Calculate directional effect scores and compare
+# SECTION 3: Calculate directional effect scores
 # ============================================================================
 # Import directional effect scores, calculate directional effect scores across 
 # species and groups, and make comparison plots.
@@ -355,30 +356,30 @@ de_group_scores$directional_effect = ordered(de_group_scores$directional_effect,
                                                       "neutral",
                                                       "positive"))
 
-# group comparison plots for directional effect
-ggplot(de_group_scores) +
-  geom_col(mapping = aes(x = directional_effect, y = prop, fill = directional_effect), position = "dodge", linewidth = 0.25, colour="black", width = 0.8, show.legend = FALSE) +
-  facet_wrap(vars(group)) +
-  scale_x_discrete(labels = c("Negative", "Neutral", "Positive")) +
-  scale_y_continuous(labels = scales::percent) +
-  ylab("Proportion of Group") +
-  xlab("Directional Effect") +
-  scale_fill_manual(values = c("red", "beige", "green")) +
-  theme_bw() + 
-  theme(strip.text = element_text(hjust = 0, size = 10),
-        strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-        rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-        panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-ggsave(filename = "group_directional_effect.png", plot = get_last_plot(), path = here("plots/"), device = "png", width = 7, height = 5, bg = "transparent", dpi = 300)
+# # create comparison plots for directional effect scores by functional group
+# ggplot(de_group_scores) +
+#   geom_col(mapping = aes(x = directional_effect, y = prop, fill = directional_effect), position = "dodge", linewidth = 0.25, colour="black", width = 0.8, show.legend = FALSE) +
+#   facet_wrap(vars(group)) +
+#   scale_x_discrete(labels = c("Negative", "Neutral", "Positive")) +
+#   scale_y_continuous(labels = scales::percent) +
+#   ylab("Proportion of Group") +
+#   xlab("Directional Effect") +
+#   scale_fill_manual(values = c("red", "beige", "green")) +
+#   theme_bw() + 
+#   theme(strip.text = element_text(hjust = 0, size = 10),
+#         strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+#         rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+#         panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
+# ggsave(filename = "group_directional_effect.png", plot = get_last_plot(), path = here("plots/"), device = "png", width = 7, height = 5, bg = "transparent", dpi = 300)
 
-# join and export distribution and directional effect scores for vulnerability analysis
+# join and export distribution and directional effect scores as csv
 additional_scores <- left_join(dist_sensitivity_scores, average_de |> select(-group), by = "species") 
 write.csv(additional_scores, "results/additional_scores.csv", row.names = FALSE)
 
 # ============================================================================
-# SECTION 4: Leave-one-out analysis
+# SECTION 4: Leave-one-out analysis by workshop participant
 # ============================================================================
-# Re-run each sensitivity calculation leaving out each scorer. This will point to 
+# Re-run each sensitivity calculation leaving out each scorer. Points to 
 # individual scorers whose scores had a large effect on changing the overall 
 # sensitivity score for each species.
 # ============================================================================
@@ -387,7 +388,7 @@ write.csv(additional_scores, "results/additional_scores.csv", row.names = FALSE)
 loo_analysis <- final_scores |>
   group_by(scorer, species) |>
   summarize() |>
-  left_join(sensitivity_scores, join_by(species)) |>
+  left_join(calculated_sensitivity_scores, join_by(species)) |>
   rename(sensitivity_with = sensitivity) 
   
 # loop over scorers:
@@ -415,15 +416,15 @@ num_participants <- num_participants |> left_join(num_participants2, join_by(wor
 
 # identify potential outliers
 potential_outliers <- loo_analysis |>
-  left_join(num_participants, join_by(scorer)) |>
+  left_join(num_participants, join_by(scorer, workshop)) |>
   mutate(
     change = ifelse(sensitivity_with != sensitivity_without, TRUE, FALSE) # did the score change without the removed scorer?
   ) |> filter(change == TRUE)  # filter out unchanged scores
 
-potential_outliers_unique <- potential_outliers |>
-  group_by(species, sensitivity_with, sensitivity_without) |>
-  mutate(dupe = n()>1) |>
-  filter(dupe == FALSE)
+# potential_outliers_unique <- potential_outliers |>
+#   group_by(species, sensitivity_with, sensitivity_without) |>
+#   mutate(dupe = n()>1) |>
+#   filter(dupe == FALSE)
 
 # ============================================================================
 # SECTION 5: Data quality scores
@@ -443,13 +444,13 @@ data_quality_sensitivity <- final_scores |>
                         "Rockfish" = "Rockfishes",
                         "Flatfish" = "Flatfishes"))
 
-# save for vulnerability analysis script
+# save data quality scores as csv
 write.csv(data_quality_sensitivity, "results/sensitivity_data_quality.csv", row.names = FALSE)
 
 # ============================================================================
 # SECTION 6: Other plots
 # ============================================================================
-# Individual plots for each species' sensitivity attribute.
+# Create plots for an individual species' and sensitivity attribute 
 # ============================================================================
 
 # one attribute for one species plot
@@ -462,20 +463,22 @@ single_species <- sensitivity_scores |>
     category_short = recode(category, "sum_low" = "L", "sum_moderate" = "M", "sum_high" = "H", "sum_vh" = "VH"),
     category_short = factor(category_short, levels=c("L", "M", "H", "VH"))
   )
-ggplot(single_species |> 
-         filter(attribute_short == "TT")) +
-  geom_col(mapping = aes(x = category_short, y = score, fill = category_short), linewidth = 0.25, colour = "black", show.legend = FALSE) +
-  xlab("Sensitivity") +
-  ylab("Expert Score Distribution") +
-  scale_fill_manual(values = c("#d9f2d0", "#fffd78", "#ffca00", "#ff8884")) +
-  scale_y_continuous(
-    limits = c(0,21),
-    breaks = seq(0, 20, by = 5),
-  ) +
-  theme_bw() +
-  theme(strip.text = element_text(hjust = 0, size = 12),
-        strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-        rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-        panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-ggsave(filename = "sablefish_TT.png", path = here("plots/"), plot = last_plot(), width=8, height=5)
+
+# example for sablefish and thermal tolerance
+# ggplot(single_species |> 
+#          filter(attribute_short == "TT")) +
+#   geom_col(mapping = aes(x = category_short, y = score, fill = category_short), linewidth = 0.25, colour = "black", show.legend = FALSE) +
+#   xlab("Sensitivity") +
+#   ylab("Expert Score Distribution") +
+#   scale_fill_manual(values = c("#d9f2d0", "#fffd78", "#ffca00", "#ff8884")) +
+#   scale_y_continuous(
+#     limits = c(0,21),
+#     breaks = seq(0, 20, by = 5),
+#   ) +
+#   theme_bw() +
+#   theme(strip.text = element_text(hjust = 0, size = 12),
+#         strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+#         rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+#         panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
+# ggsave(filename = "sablefish_TT.png", path = here("plots/"), plot = last_plot(), width=8, height=5)
 
