@@ -15,7 +15,7 @@ if (!require("pacman", quietly = TRUE)) install.packages("pacman")
 here::i_am("02_exposure_analysis.R")
 
 # load custom analysis functions
-source(here("exposure_functions.R")) 
+source(here("00_functions.R")) 
 
 sf::sf_use_s2(FALSE) # necessary for sf plots - turns off spherical geometry
 
