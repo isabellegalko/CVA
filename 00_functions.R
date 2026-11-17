@@ -1,6 +1,6 @@
-# Functions to create exposure maps and calculate exposure scores for the GOA CVA.
-# Designed for all-species and exposure factor mapping loops.
+# Functions to process exposure data and calculate scores for the GOA CVA.
 # Author: Isabelle Galko
+# Date: November 17, 2026
 
 sf_plot_theme = function() {
   theme_bw() +
@@ -21,48 +21,48 @@ sf_plot_theme = function() {
 }
 
 #' For each exposure factor sourced from ROMS, load bias-corrected parquet, 
-#' filter to correct future and reference time periods, and collect data. 
+#' filter to correct future and reference time periods, and collect. 
 #'
 #' @param depth "surface" or "bottom".
 #' @param variable_name Exposure factor options include: "temp", "salt", "PhL", 
 #' "PhS", "Cop", "NCa", "Eup", "MZL", and "MZS"
 #'
-#' @assign Two data frames with ROMS data in the GOA, one for future projections 
-#' (ssp585), and one for historical data (hindcasts). 
+#' @assign Two data frames with ROMS outputs in the GOA: one for future
+#' projections (ssp585) and one for historical outputs (hindcasts). 
 load_roms <- function(depth, variable_name) {
   variable <- open_dataset(here(paste("data/roms/all_scenarios_bias_corrected_", variable_name, "_", depth, ".parquet", sep =""))) # load projections
   future <- variable |> 
-    filter(run == "ssp585") |> # future projections
-    filter(date > as.Date("2030-01-01")) |>  # Restrict dates to later than 2030
-    filter(date < as.Date("2059-12-31")) |>  # Restrict to earlier than 2059
-    collect()  # now load the filtered data into RAM
+    filter(run == "ssp585") |> # filter future projections
+    filter(date > as.Date("2030-01-01")) |>  # restrict dates to future period: 2030-2059
+    filter(date < as.Date("2059-12-31")) |> 
+    collect()  # load the filtered data into RAM
   hindcast <- variable |> 
-    filter(run == "hindcast") |> # hindcasts
-    filter(date > as.Date("1993-01-01")) |>  # Restrict dates to later than
-    filter(date < as.Date("2020-12-31")) |>  # Restrict to 2020
-    collect()  # now load the filtered data into RAM
+    filter(run == "hindcast") |> # filter hindcasts
+    filter(date > as.Date("1993-01-01")) |>  # restrict to reference period: 1993-2020
+    filter(date < as.Date("2020-12-31")) |>  
+    collect()  
   
   assign(paste(variable_name, "_ssp585_", depth, sep = ""), future, envir = .GlobalEnv)
   assign(paste(variable_name, "_hindcast_", depth, sep = ""), hindcast, envir = .GlobalEnv)
 }
 
-#' For a particular exposure factor from ROMS (sst, bt, etc.), calculate anomaly
-#' and variability for each point in the GOA. All should be bias-corrected.
+#' For a particular exposure factor from ROMS (SST, BT, etc.), calculate anomaly
+#' and variability for each ROMS cell in the GOA. 
 #'
 #' @param future_data A data frame with variable values for future dates.
 #' @param future_data A data frame with variable values for historical dates.
 #'
-#' @return A data frame with anomalies for each point in the GOA.
+#' @return A data frame with anomaly and variability scores for each cell in the GOA.
 create_anomaly_roms <- function(future_data, hindcast_data) {
-  # calculate climate anomaly (future mean - hindcast mean / hindcast standard deviation)
+  # calculate anomaly: (future mean - historical mean / historical standard deviation)
+  # calculate variability: (future variance) / (historical variance)
   calculate_anomaly <- future_data |> 
-    # filter(month == c("7", "8", "9")) |> # can filter by winter or summer months by changing month numbers
+    # filter(month == c("7", "8", "9")) |> # explore seasonality
     summarize(average_future = mean(value_dc), variance_future = var(value_dc), .by = c(lon_rho, lat_rho)) |> # use bias-corrected values: value_dc
     left_join(hindcast_data |> 
         # filter(month == c("7", "8", "9")) |> 
-        summarize(average_hist = mean(value), sd_hist = sd(value), variance_hist = var(value), .by = c(lon_rho, lat_rho)), # for hindcast, value = value_dc
-      by = join_by(lon_rho, lat_rho)
-    ) |>
+        summarize(average_hist = mean(value), sd_hist = sd(value), variance_hist = var(value), .by = c(lon_rho, lat_rho)), # for hindcasts, value = value_dc
+      by = join_by(lon_rho, lat_rho)) |>
     mutate(anomaly = (average_future-average_hist)/sd_hist,
            variability = variance_future/variance_hist,
            future_change = average_future-average_hist) 
@@ -71,6 +71,7 @@ create_anomaly_roms <- function(future_data, hindcast_data) {
     st_as_sf(coords = c("lon_rho", "lat_rho"))
     st_crs(spatial_data) = 4326
     
+  # assign scoring category bins
   exposure_factor <- spatial_data |>
     mutate(anomaly_bins = case_when(anomaly < -2 ~"very high",
                                      anomaly >= -2 & anomaly < -1.5 ~"high",
@@ -89,20 +90,21 @@ create_anomaly_roms <- function(future_data, hindcast_data) {
   return(exposure_factor)
 }
 
-#' For a particular exposure factor from GFDL ESM (pH, o2, etc.), filter to 
+#' For a particular exposure factor from GFDL ESM (pH, O2, etc.), filter to 
 #' future and reference time periods and calculate anomaly and variability for each cell.
 #'
 #' @param exposure_factor Character exposure factor name.
 #' @param future_data A data frame with variable values for future dates.
 #' @param future_data A data frame with variable values for historical dates.
 #'
-#' @return A data frame with anomalies for each point in the GOA.
+#' @return A data frame with anomaly and variability scores for each cell in the GOA.
 create_anomaly_gfdl <- function(exposure_factor, future_data, historical_data) {
   # filter years
   future <- future_data |> filter(year >= 2030 & year <= 2059) 
   hist <- historical_data |> filter(year >= 2005 & year <= 2020) 
     
-  # calculate anomaly (future mean - historical mean / historical standard deviation)
+  # calculate anomaly: (future mean - historical mean / historical standard deviation)
+  # calculate variability: (future variance) / (historical variance)
   calculate_anomaly <- future |> 
     summarize(average_future = mean(kriged), variance_future = var(kriged), .by = c(geometry)) |>
     left_join(hist |> 
@@ -115,49 +117,50 @@ create_anomaly_gfdl <- function(exposure_factor, future_data, historical_data) {
   spatial_data <- calculate_anomaly |>
     sf::st_as_sf(crs = 4326)
   
+  # set scoring categories
   exposure_factor <- spatial_data |>
-    mutate( # set scoring categories
-      anomaly_bins = case_when(anomaly < -2 ~"very high",
-                               anomaly >= -2 & anomaly < -1.5 ~"high",
-                               anomaly >= -1.5 & anomaly < -0.5 ~"moderate",
-                               anomaly >= -0.5 & anomaly < 0.5 ~"low",
-                               anomaly >= 0.5 & anomaly < 1.5 ~"moderate",
-                               anomaly >= 1.5 & anomaly < 2 ~"high",
-                               anomaly >=2 ~"very high"),
-      variability_bins = case_when(variability < -2 ~"very high",
-                               variability >= -2 & variability < -1.5 ~"high",
-                               variability >= -1.5 & variability < -0.5 ~"moderate",
-                               variability >= -0.5 & variability < 0.5 ~"low",
-                               variability >= 0.5 & variability < 1.5 ~"moderate",
-                               variability >= 1.5 & variability < 2 ~"high",
-                               variability >=2 ~"very high"))
+    mutate(anomaly_bins = case_when(anomaly < -2 ~"very high",
+                                     anomaly >= -2 & anomaly < -1.5 ~"high",
+                                     anomaly >= -1.5 & anomaly < -0.5 ~"moderate",
+                                     anomaly >= -0.5 & anomaly < 0.5 ~"low",
+                                     anomaly >= 0.5 & anomaly < 1.5 ~"moderate",
+                                     anomaly >= 1.5 & anomaly < 2 ~"high",
+                                     anomaly >=2 ~"very high"),
+          variability_bins = case_when(variability < -2 ~"very high",
+                                     variability >= -2 & variability < -1.5 ~"high",
+                                     variability >= -1.5 & variability < -0.5 ~"moderate",
+                                     variability >= -0.5 & variability < 0.5 ~"low",
+                                     variability >= 0.5 & variability < 1.5 ~"moderate",
+                                     variability >= 1.5 & variability < 2 ~"high",
+                                     variability >=2 ~"very high"))
   return(exposure_factor)
 }
 
-#' For a select marine heatwave index, filter to future and reference
-#' time periods and calculate anomaly and variability for each cell.
+#' For a select marine heatwave index (here, total intensity), filter to future 
+#' and reference time periods. Calculate anomaly and variability for each cell.
 #'
 #' @param future_data A data frame with variable values for future dates.
 #' @param future_data A data frame with variable values for historical dates.
 #'
-#' @return A data frame with MHW anomalies for each point in the GOA.
+#' @return A data frame with marine heatwave scores for each cell in the GOA.
 create_anomaly_mhw <- function(future_data, hindcast_data) {
+  # filter years
   spatial_ssp585 <- future_data |>
     filter(year >= 2030, year <= 2059)
-  
   spatial_hindcast <- hindcast_data |>
     filter(year >= 1993, year <= 2020)
   
+  # calculate anomaly and variability 
   calculate_anomaly <- spatial_ssp585 |> 
     summarize(average_future = mean(total_intensity), variance_future = var(total_intensity), .by = c(geometry)) |> 
     st_join(spatial_hindcast |> 
               summarize(average_hist = mean(total_intensity), sd_hist = sd(total_intensity), variance_hist = var(total_intensity), .by = c(geometry)),
-            by = join_by(geometry)
-    ) |>
+            by = join_by(geometry)) |>
     mutate(anomaly = (average_future-average_hist)/sd_hist,
            variability = variance_future/variance_hist,
            future_change = average_future-average_hist) 
   
+  # set scoring categories
   exposure_factor <- calculate_anomaly |>
     mutate(anomaly_bins = case_when(anomaly < -2 ~"very high",
                                     anomaly >= -2 & anomaly < -1.5 ~"high",
@@ -176,43 +179,44 @@ create_anomaly_mhw <- function(future_data, hindcast_data) {
   return(exposure_factor)
 }
 
-#' For a particular exposure factor, create a plot of climate anomalies across the GOA
-#' and save in plots/Anomaly plots.
+#' For a particular exposure factor, create and save plot of anomalies and 
+#' variability across the GOA. 
 #'
-#' @param data A data frame with anomaly values and corresponding latitude/longitude or geometry columns.
+#' @param data A data frame with values and corresponding latitude/longitude or geometry columns.
 #' @param exposure_factor_name Character exposure factor name.
 #'
-#' @return NA
+#' @return No return. Saves an anomaly plot to plots/Anomaly plots and a variability 
+#'  plot to plots/Variability plots.
 create_exposure_plot <- function(data, exposure_factor_name) {
   get_coordinates <- data |> # transform to coordinates for geom_tile use
     mutate(x_coord = st_coordinates(geometry)[, 1],
            y_coord = st_coordinates(geometry)[, 2])
   
+  # specific coordinates for plots
   w = 0.02 * (max(get_coordinates$x_coord)-min(get_coordinates$x_coord))
   h = 0.02 * (max(get_coordinates$y_coord)-min(get_coordinates$y_coord))
   
-  plot1 <- ggplot() + # plot climate anomaly
+  # plot climate anomaly
+  plot1 <- ggplot() + 
     #geom_sf(data = data, aes(color = anomaly, geometry=geometry), size = 0.5, alpha = 0.8) +
     geom_tile(data = get_coordinates, aes(x = x_coord, y = y_coord, fill = anomaly), width = w, height = h) +
-    geom_sf(data = GOA, size=0.2, fill="gray85") +
-    geom_sf(data = canada, size=0.2, fill="gray95") +
+    geom_sf(data = GOA, size = 0.2, fill = "gray85") +
+    geom_sf(data = canada, size = 0.2, fill = "gray95") +
     scale_y_continuous(expand = c(0,0)) +
     scale_x_continuous(expand = c(0,0)) +
-    scale_fill_gradientn(
-      rescaler = function (...) {
-        scales::rescale_mid(..., mid = 0)
-      },
-      colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
-      values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
-      name = "Anomaly"
-    ) +
+    scale_fill_gradientn(rescaler = function (...) {scales::rescale_mid(..., mid = 0)},
+                          colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
+                          values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
+                          name = "Anomaly") +
     labs(x = "Longitude",
          y = "Latitude",
          title = exposure_factor_name) +
     sf_plot_theme() 
-    #guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
+    # guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
+  
    ggsave(paste(exposure_factor_name, "anomaly.png", sep = "_"), path = here("plots/Anomaly plots"), plot = plot1, device = "png", dpi = 300, width = 8.5, height = 4)
    
+   # plot variability
    plot2 <- ggplot() + 
      #geom_sf(data = data, aes(color = variability, geometry=geometry), size = 0.5, alpha = 0.8) +
      geom_tile(data = get_coordinates, aes(x = x_coord, y = y_coord, fill = variability), width = w, height = h) +
@@ -220,18 +224,15 @@ create_exposure_plot <- function(data, exposure_factor_name) {
      geom_sf(data = canada, size = 0.2, fill = "gray95") +
      scale_x_continuous(n.breaks = 4, expand = c(0,0)) +
      scale_y_continuous(breaks = seq(52, 60, by = 4), expand = c(0,0)) +
-     scale_fill_gradientn(
-       rescaler = function (...) {
-         scales::rescale_mid(..., mid = 0)
-       },
-       colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
-       values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
-       name = "Variability"
-     ) +
+     scale_fill_gradientn(rescaler = function (...) {scales::rescale_mid(..., mid = 0)},
+                           colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
+                           values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
+                           name = "Variability") +
      labs(x = "Longitude",
           y = "Latitude",
           title = exposure_factor_name) +
      sf_plot_theme() 
+   
    ggsave(paste(exposure_factor_name, "variability.png", sep = "_"), path = here("plots/Variability plots"), plot = plot2, device = "png", dpi = 300, width = 8.5, height = 4)
 }
 
@@ -246,29 +247,23 @@ anomaly_plot_theme = function(){
 }
 
 #' For a particular exposure factor, create a series of plots:
-#' 1. Average historical means across the GOA
-#' 2. Historical standard deviation across the GOA
-#' 3. Future change (historical - future)
-#' 4. Anomalies across the GOA
-#' Save plots in plots/Anomaly plots.
+#'  1. Average historical means across the GOA
+#'  2. Historical standard deviation across the GOA
+#'  3. Future change (historical - future)
+#'  4. Anomalies across the GOA
 #'
 #' @param data A data frame with anomaly values and corresponding latitude/longitude or geometry columns.
 #' @param exposure_factor_name Character exposure factor name.
 #'
-#' @return NA
+#' @return No return. Saves plot series in plots/Anomaly plots.
 create_all_anomaly_plots <- function(data, exposure_factor_name){
   average_hist_plot <- ggplot() + 
-      geom_sf(data = data, aes(color = average_hist, geometry=geometry), size = 0.5, alpha = 0.8) +
-      geom_sf(data = GOA, size=0.2, fill="gray85") +
-      geom_sf(data = canada, size=0.2, fill="gray95") +
+      geom_sf(data = data, aes(color = average_hist, geometry = geometry), size = 0.5, alpha = 0.8) +
+      geom_sf(data = GOA, size = 0.2, fill = "gray85") +
+      geom_sf(data = canada, size = 0.2, fill = "gray95") +
       scale_x_continuous(n.breaks = 4, expand = c(0,0)) +
       scale_y_continuous(breaks = seq(52, 60, by = 4), expand = c(0,0)) +
-      scale_color_gradientn(colors = c("darkslateblue",
-                                       "dodgerblue1",
-                                       "green3", 
-                                       "yellow1",
-                                       "chocolate1",  
-                                       "firebrick3"),
+      scale_color_gradientn(colors = c("darkslateblue", "dodgerblue1", "green3", "yellow1","chocolate1",  "firebrick3"),
                             name = "",
                             n.breaks = 4) +
       labs(x = "Longitude",
@@ -279,9 +274,9 @@ create_all_anomaly_plots <- function(data, exposure_factor_name){
       guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
 
   sd_hist_plot <- ggplot() + 
-    geom_sf(data = data, aes(color = sd_hist, geometry=geometry), size = 0.5, alpha = 0.8) +
-    geom_sf(data = GOA, size=0.2, fill = "gray85") +
-    geom_sf(data = canada, size=0.2, fill = "gray95") +
+    geom_sf(data = data, aes(color = sd_hist, geometry = geometry), size = 0.5, alpha = 0.8) +
+    geom_sf(data = GOA, size = 0.2, fill = "gray85") +
+    geom_sf(data = canada, size = 0.2, fill = "gray95") +
     scale_x_continuous(n.breaks = 4, 
                        expand = c(0,0)) +
     scale_y_continuous(breaks = seq(52, 60, by = 4), 
@@ -295,7 +290,7 @@ create_all_anomaly_plots <- function(data, exposure_factor_name){
     anomaly_plot_theme() +
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
+      guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
   
   future_change_plot <- ggplot() + 
     geom_sf(data = data, aes(color = future_change, geometry = geometry), size = 0.5, alpha = 0.8) +
@@ -303,12 +298,7 @@ create_all_anomaly_plots <- function(data, exposure_factor_name){
     geom_sf(data = canada, size=0.2, fill="gray95") +
     scale_x_continuous(n.breaks = 4, expand = c(0,0)) +
     scale_y_continuous(breaks = seq(52, 60, by = 4), expand = c(0,0)) +
-    scale_color_gradientn(colors = c("darkslateblue",
-                                     "dodgerblue1",
-                                     "green3", 
-                                     "yellow1",
-                                     "chocolate1",  
-                                     "firebrick3"),
+    scale_color_gradientn(colors = c("darkslateblue", "dodgerblue1", "green3", "yellow1", "chocolate1", "firebrick3"),
                           name = "",
                           n.breaks = 3) +
     labs(x = "Longitude",
@@ -317,7 +307,7 @@ create_all_anomaly_plots <- function(data, exposure_factor_name){
     anomaly_plot_theme() +
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
+      guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
   
   anomaly_plot <- ggplot() + 
     geom_sf(data = data, aes(color = anomaly, geometry = geometry), size = 0.5, alpha = 0.8) +
@@ -325,22 +315,18 @@ create_all_anomaly_plots <- function(data, exposure_factor_name){
     geom_sf(data = canada, size=0.2, fill="gray95") +
     scale_x_continuous(n.breaks = 4, expand = c(0,0)) +
     scale_y_continuous(breaks = seq(52, 60, by = 4), expand = c(0,0)) +
-    scale_color_gradientn(
-      rescaler = function (...) {
-        scales::rescale_mid(..., mid = 0)
-      },
-      colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
-      values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
-      name = "",
-      n.breaks = 4
-    ) +
+    scale_color_gradientn(rescaler = function (...) {scales::rescale_mid(..., mid = 0)},
+                          colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
+                          values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
+                          name = "",
+                          n.breaks = 4) +
     labs(x = "Longitude",
          title = "Anomaly") +
     sf_plot_theme() +
     anomaly_plot_theme() +
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
+      guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
   
   plot_exposure <- patchwork::wrap_plots(average_hist_plot, sd_hist_plot, future_change_plot, anomaly_plot, ncol = 4)
   ggsave(filename = paste(exposure_factor_name, "_all_plots.png", sep = ""), path = here("plots/Anomaly plots"), plot = plot_exposure, device = "png", width = 8, height = 3, bg = "transparent", dpi = 400)
@@ -355,20 +341,15 @@ create_all_anomaly_plots <- function(data, exposure_factor_name){
 #' @param data A data frame with variability values and corresponding latitude/longitude or geometry columns.
 #' @param exposure_factor_name Character exposure factor name.
 #'
-#' @return NA
+#' @return No return. Saves plot series to plots/Variability plots.
 create_all_variability_plots <- function(data, exposure_factor_name){
   hist_var_plot <- ggplot() + 
     geom_sf(data = data, aes(color = variance_hist, geometry = geometry), size = 0.5, alpha = 0.8) +
-    geom_sf(data = GOA, size=0.2, fill = "gray85") +
-    geom_sf(data = canada, size=0.2, fill = "gray95") +
+    geom_sf(data = GOA, size = 0.2, fill = "gray85") +
+    geom_sf(data = canada, size = 0.2, fill = "gray95") +
     scale_x_continuous(n.breaks = 4, expand = c(0,0)) +
     scale_y_continuous(breaks = seq(52, 60, by = 4), expand = c(0,0)) +
-    scale_color_gradientn(colors = c("darkslateblue",
-                                     "dodgerblue1",
-                                     "green3", 
-                                     "yellow1",
-                                     "chocolate1",  
-                                     "firebrick3"),
+    scale_color_gradientn(colors = c("darkslateblue", "dodgerblue1", "green3", "yellow1", "chocolate1", "firebrick3"),
                           name = "",
                           n.breaks = 4) +
     labs(x = "Longitude",
@@ -376,7 +357,7 @@ create_all_variability_plots <- function(data, exposure_factor_name){
          title = "Historical variance") +
     sf_plot_theme() +
     anomaly_plot_theme() +
-    guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
+      guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
   
   future_var_plot <- ggplot() + 
     geom_sf(data = data, aes(color = variance_future, geometry = geometry), size = 0.5, alpha = 0.8) +
@@ -384,12 +365,7 @@ create_all_variability_plots <- function(data, exposure_factor_name){
     geom_sf(data = canada, size = 0.2, fill = "gray95") +
     scale_x_continuous(n.breaks = 4, expand = c(0,0)) +
     scale_y_continuous(breaks = seq(52, 60, by = 4), expand = c(0,0)) +
-    scale_color_gradientn(colors = c("darkslateblue",
-                                     "dodgerblue1",
-                                     "green3", 
-                                     "yellow1",
-                                     "chocolate1",  
-                                     "firebrick3"),
+    scale_color_gradientn(colors = c("darkslateblue", "dodgerblue1", "green3", "yellow1", "chocolate1", "firebrick3"),
                           name = "",
                           n.breaks = 4) +
     labs(x = "Longitude",
@@ -398,35 +374,32 @@ create_all_variability_plots <- function(data, exposure_factor_name){
     anomaly_plot_theme() +
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
+      guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
   
   variability_plot <- ggplot() + 
-    geom_sf(data = data, aes(color = variability, geometry=geometry), size = 0.5, alpha = 0.8) +
+    geom_sf(data = data, aes(color = variability, geometry = geometry), size = 0.5, alpha = 0.8) +
     geom_sf(data = GOA, size = 0.2, fill = "gray85") +
     geom_sf(data = canada, size = 0.2, fill = "gray95") +
     scale_x_continuous(n.breaks = 4, expand = c(0,0)) +
     scale_y_continuous(breaks = seq(52, 60, by = 4), expand = c(0,0)) +
-    scale_color_gradientn(
-      rescaler = function (...) {
-        scales::rescale_mid(..., mid = 0)
-      },
-      colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
-      values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
-      name = "",
-      n.breaks = 4) +
+    scale_color_gradientn(rescaler = function (...) {scales::rescale_mid(..., mid = 0)},
+                          colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
+                          values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
+                          name = "",
+                          n.breaks = 4) +
     labs(x = "Longitude",
          title = "Variability") +
     sf_plot_theme() +
     anomaly_plot_theme() +
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank()) +
-    guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
+      guides(fill = guide_colorbar(frame.colour = "black", frame.linewidth = 1.5))
   
   plot_variability <- patchwork::wrap_plots(hist_var_plot, future_var_plot, variability_plot, ncol = 3)
   ggsave(filename = paste(exposure_factor_name, "_all_plots.png", sep = ""), path = here("plots/Variability plots"), plot = plot_variability, device = "png", width = 8, height = 3, bg = "transparent", dpi = 400)
 }
 
-#' Prepare EFH polygons for overlap work.
+#' Prepare EFH polygons for exposure analysis.
 #' 
 #' Projects an EFH `SpatVector` to a target CRS, converts to `sf`, drops
 #' non-EFH layer code "1", validates geometry, and shifts longitudes to match
@@ -434,58 +407,68 @@ create_all_variability_plots <- function(data, exposure_factor_name){
 #' 
 #' @param path Path to EFH geodatabase files.
 #' @param species_layer A `terra::SpatVector` containing EFH polygons and a `layer` field. 
-#' @param level EFH level (either 1 (presence-absence) or 2 (population percentiles)).
+#' @param level EFH level (either 1 (presence-absence) or 2 (habitat-related densities)).
 #'
 #' @return An `sf` polygon object with valid geometry and character `layer` values.
 create_EFH_layer <- function(path, species_layer, level){
-  #load a specific layer
+  # load a specific layer
   filtered <- vect(get(path), layer = species_layer)  
-  sf_use_s2(FALSE) # don't use spherical geometry 
+
   # adjust the EFH map 
-  if(level == "2"){ # population percentiles EFH maps (level 2)
+  if(level == "2"){ 
     filtered <- project(filtered, "epsg:4326") # project EFH map onto same crs as ROMS 
     sf_filtered <- st_as_sf(filtered, crs = 4326) |> # convert terra vector -> sf for sf-based spatial joins/intersections
-      filter(layer == "5" | layer == "4")  |> # filter to core habitat
+      filter(layer == "5" | layer == "4")  |> # filter to core habitat (50%)
       st_make_valid() |> # repair invalid polygon geometries so spatial operations do not fail
       st_shift_longitude() # shift longitudes from -180..180 to 0..360 to match ROMS grid convention
     sf_filtered$layer <- as.character(sf_filtered$layer) # keep EFH designations as character labels for filtering/legend mapping
   }
-  
-  else{ # presence-absence EFH maps (level 1)
-    filtered <- project(filtered, "epsg:4326") # project EFH map onto same crs as ROMS 
-    sf_filtered <- st_as_sf(filtered, crs = 4326) |> # make sf object
-      st_make_valid() |> # make geometry valid
+  else{ 
+    filtered <- project(filtered, "epsg:4326")
+    sf_filtered <- st_as_sf(filtered, crs = 4326) |> 
+      st_make_valid() |> 
       st_shift_longitude() }
   return(sf_filtered)
 }
 
-#' Prepare bottom trawl survey SDMs for exposure analysis.
-#' 
-#' Loads an .rda data structure, converts to `sf` and to a target CRS, and  
-#' filters to "core" habitat area (population percentiles <50%).
+#' Prepare bottom trawl survey SDMs for exposure analysis via caching function.
 #' 
 #' @param path Path to .rda SDM predictions.
-#'
+#' @param species_layer String specific to each species .rda file.
+#' 
 #' @return An `sf` polygon object with valid geometry and character `layer` values.
 create_BTS_SDM_layer <- function(path, species_layer){
   return(create_BTS_SDM_layer_cached(path, species_layer, TRUE))
 }
 
-# caches processed BTS data to disk and returns if already cached rather than processing again
+#' Prepare bottom trawl survey SDMs for exposure analysis. Caches processed data
+#' to disk or returns already-cached data rather than processing again.
+#' 
+#' Loads an .rda data structure, converts to `sf` and to a target CRS, and  
+#' filters to "core" habitat area (50%).
+#' 
+#' @param path Path to .rda SDM predictions.
+#' @param species_layer String specific to each species .rda file.
+#' @param use_cache Set to TRUE to use previously-processed file. 
+#' 
+#' @return An `sf` polygon object with valid geometry and character `layer` values.
 create_BTS_SDM_layer_cached <- function(path, species_layer, use_cache = TRUE) {
   cache_path <- paste("data/filtered_sdms/", species_layer, sep = "")
+  
   # check if this request is already cached
   if(file.exists(cache_path) && use_cache) {
     # if it is and we're using the cache, load the cached data and return it
     load(cache_path)
-    return(sf_filtered)}
+    return(sf_filtered)
+    }
   
   # otherwise, load the unfiltered data and process it
   load(paste(get(path), species_layer, sep = ""))
   sf_filtered <- st_as_sf(EFH.data, coords = c("lon", "lat"), 
                           crs = 4326) |>
     st_shift_longitude() |> 
-    mutate(layer = recode(EFH.area,   "25" = "5",
+    mutate(layer = recode(EFH.area,   
+                          "25" = "5",
                           "50" = "4",
                           "75" = "3",
                           "95" = "2")) |>
@@ -494,29 +477,43 @@ create_BTS_SDM_layer_cached <- function(path, species_layer, use_cache = TRUE) {
   
   # save the filtered data to the cache for next time
   save(sf_filtered, file=cache_path)
-  return(sf_filtered)}
+  return(sf_filtered)
+}
 
-#' Prepare diet-derived SDMs for exposure analysis.
+#' Prepare diet-derived SDMs for exposure analysis via caching function.
 #' 
 #' Loads an .rda data structure, converts to `sf` and to a target CRS, and  
 #' filters to "core" habitat area (population percentiles <50%).
 #' 
 #' @param path Path to .rda predictions derived from diet data.
+#' @param species_layer String specific to each species .rda file.
 #'
 #' @return An `sf` polygon object with valid geometry and character `layer` values.
 create_diet_derived_layer <- function(path, species_layer){
   return(create_diet_derived_layer_cached(path, species_layer, TRUE))
 }
 
+#' Prepare diet-derived SDMs for exposure analysis. Caches processed data
+#' to disk or returns already-cached data rather than processing again.
+#' 
+#' Loads an .rda data structure, converts to `sf` and to a target CRS, and  
+#' filters to "core" habitat area (population percentiles <50%).
+#' 
+#' @param path Path to .rda predictions derived from diet data.
+#' @param species_layer String specific to each species .rda file.
+#' @param use_cache Set to TRUE to use previously-processed file. 
+#'
+#' @return An `sf` polygon object with valid geometry and character `layer` values.
 # caches processed BTS data to disk and returns if already cached rather than processing again
 create_diet_derived_layer_cached <- function(path, species_layer, use_cache = TRUE) {
   cache_path <- paste("data/filtered_sdms/", species_layer, sep = "")
   
   # check if this request is already cached
   if(file.exists(cache_path) && use_cache) {
-    # if it is and we're using the cache, load the cached data and return it
+    # if it is, load the cached data and return it
     load(cache_path)
-    return(sf_filtered)}
+    return(sf_filtered)
+  }
   
   # otherwise, load the unfiltered data and process it
   load(paste(get(path), species_layer, sep = ""))
@@ -532,19 +529,33 @@ create_diet_derived_layer_cached <- function(path, species_layer, use_cache = TR
   
   # save the filtered data to the cache for next time
   save(sf_filtered, file=cache_path)
-  return(sf_filtered)}
+  return(sf_filtered)
+}
 
-#' Prepare SDMs estimated from depth and temperature ranges for exposure analysis.
+#' Prepare SDMs estimated from depth and temperature ranges for exposure analysis 
+#'  via caching function.
 #' 
 #' Loads an .rda data structure, converts to `sf` and to a target CRS.
 #' 
 #' @param path Path to .rda predictions derived from diet data.
+#' @param species_layer String specific to each species .rda file.
 #'
 #' @return An `sf` polygon object with valid geometry and character `layer` values.
 create_depth_temp_layer <- function(path, species_layer){
   return(create_depth_temp_layer_cached(path, species_layer, TRUE))
 }
 
+#' Prepare SDMs estimated from depth and temperature ranges for exposure 
+#'  analysis. Caches processed data to disk or returns already-cached data 
+#'  rather than processing again.
+#' 
+#' Loads an .rda data structure. Converts to `sf` and to a target CRS.
+#' 
+#' @param path Path to .rda predictions derived from diet data.
+#' @param species_layer String specific to each species .rda file.
+#' @param use_cache Set to TRUE to use previously-processed file. 
+#'
+#' @return An `sf` polygon object with valid geometry and character `layer` values.
 # caches processed BTS data to disk and returns if already cached rather than processing again
 create_depth_temp_layer_cached <- function(path, species_layer, use_cache = TRUE) {
   cache_path <- paste("data/filtered_sdms/", species_layer, sep = "")
@@ -565,14 +576,16 @@ create_depth_temp_layer_cached <- function(path, species_layer, use_cache = TRUE
   
   # save the filtered data to the cache for next time
   save(sf_filtered, file=cache_path)
-  return(sf_filtered)}
+  return(sf_filtered)
+}
 
-#' Save plot of EFH area for a single species to plots/EFH plots.
+#' Save plot of the species distribution area used for exposure analysis.
 #' 
 #' @param species Character species name.
 #'
-#' @return NA
+#' @return No return. Saves a plot of the species distribution to plots/Distribution plots.
 plot_species_distribution <- function(species){
+  # identify species-specific layer, path, and EFH level
   species_layer_name <- layer_names[layer_names$species_name == species, "layer"]
   species_layer <- as.character(species_layer_name)
   
@@ -584,15 +597,19 @@ plot_species_distribution <- function(species){
   
   # load correct species distribution
   if(path == "gdb_path" | path == "scallop_path"){
-    sf_filtered = create_EFH_layer(path, species_layer, level)}
+    sf_filtered = create_EFH_layer(path, species_layer, level)
+  }
   else if(path == "bts_sdm_path"){
-    sf_filtered = create_BTS_SDM_layer(path, species_layer)}
+    sf_filtered = create_BTS_SDM_layer(path, species_layer)
+  }
   else if(path == "diet_derived_path"){
-    sf_filtered = create_diet_derived_layer(path, species_layer)}
+    sf_filtered = create_diet_derived_layer(path, species_layer)
+  }
   else if(path == "depth_temp_path"){
-    sf_filtered = create_depth_temp_layer(path, species_layer)}
+    sf_filtered = create_depth_temp_layer(path, species_layer)
+  }
   
-  # for EFH predictions
+  # for EFH SDMs 
   if(path == "gdb_path"){
   plot <- ggplot() +
     geom_sf(data = sf_filtered, aes(color = layer, fill = layer, geometry = geometry), size = 0.5, alpha = 0.8) +
@@ -604,35 +621,33 @@ plot_species_distribution <- function(species){
                                   "5" = "#88419DFF")) +
     scale_fill_manual(values = c("4" = "#9EBCDAFF",
                                  "5" = "#88419DFF"),
-                      labels = c(
-                        "2" = "Occupied habitat (95%)",
-                        "3" = "Principal habitat (75%)",
-                        "4" = "Core habitat (50%)",
-                        "5" = "Hot spots (25%)"),
+                      labels = c("2" = "Occupied habitat (95%)",
+                                 "3" = "Principal habitat (75%)",
+                                 "4" = "Core habitat (50%)",
+                                 "5" = "Hot spots (25%)"),
                       breaks = c("2", "3", "4", "5")) +
     labs(x = "Longitude",
          y = "Latitude",
          fill = "Habitat-related density") +
     sf_plot_theme() +
-    guides(color = "none")
+      guides(color = "none")
   }
   # for presence-absence SDMs
   else if(path == "scallop_path" | path == "depth_temp_path"){ 
   plot <- ggplot() +
     geom_sf(data = sf_filtered, aes(geometry = geometry, fill = "layer"), size = 0.5, alpha = 0.8) +
-    geom_sf(data = GOA, size=0.2, fill = "gray85") +
-    geom_sf(data = canada, size=0.2, fill = "gray95") +
+    geom_sf(data = GOA, size = 0.2, fill = "gray85") +
+    geom_sf(data = canada, size = 0.2, fill = "gray95") +
     scale_y_continuous(expand = c(0,0)) +
     scale_x_continuous(expand = c(0,0)) +
-    scale_fill_manual(
-      values = c("layer" = "#9EBCDAFF"),
-      name = "") +
+    scale_fill_manual(values = c("layer" = "#9EBCDAFF"),
+                      name = "") +
     labs(x = "Longitude",
          y = "Latitude") +
     sf_plot_theme() +
-    guides(color = "none")
+      guides(color = "none")
   }
-  # for EFH predictions from BTS or diet data
+  # for predictions from BTS or diet data
   else if(path == "bts_sdm_path" | path == "diet_derived_path"){ 
   plot <- ggplot() +
       geom_sf(data = sf_filtered, aes(geometry = geometry, color = layer, fill = layer), size = 0.3, alpha = 0.8) +
@@ -642,32 +657,28 @@ plot_species_distribution <- function(species){
       scale_x_continuous(expand = c(0,0)) +
       scale_color_manual(values = c("4" = "#9EBCDAFF",
                                     "5" = "#88419DFF"),
-                         labels = c(
-                           "4" = "Core habitat (50%)",
-                           "5" = "Hot spots (25%)"),
+                         labels = c("4" = "Core habitat (50%)",
+                                    "5" = "Hot spots (25%)"),
                          name = "Population \n Percentile",
                          breaks = c("4", "5")) +
-      scale_fill_manual(
-        values = c("4" = "#9EBCDAFF",
-                   "5" = "#88419DFF")) +
+      scale_fill_manual(values = c("4" = "#9EBCDAFF",
+                                   "5" = "#88419DFF")) +
       labs(x = "Longitude",
            y = "Latitude") +
       sf_plot_theme() +
-    guides(fill = "none")
+        guides(fill = "none")
   }
   ggsave(paste(species, "distribution.png", sep="_"), device = "png", path = here("plots/Distribution plots"), plot = plot, width = 8.75, height = 4, dpi = 300)
 }
 
-#' Keep points that intersect species EFH polygons.
+#' Select points that intersect a species' distribution area.
 #' 
-#' Reprojects anomaly points to EFH CRS, computes point-in-polygon overlaps,
-#' and stores matching a EFH layer value per point.
+#' Reprojects anomaly points to distribution CRS, computes point-in-polygon 
+#' overlaps or point-to-point neareast neighbors, and stores a matching EFH 
+#' layer value per point.
 #' 
-#' @param path Path to EFH or SDM files.
-#' @param species_layer A `terra::SpatVector` containing EFH polygons and a `layer` field. 
-#' @param level EFH level (either 1 (presence-absence) or 2 (population percentiles)).
-#' @param species Character species name.
-#' @param exposure_data A data frame with calculated anomalies for each point in the GOA.
+#' @param species A character species name.
+#' @param exposure_data A data frame with calculated scores for each cell in the GOA.
 #' @param exposure_factor_name Character exposure factor name.
 #'
 #' @return Filtered `sf` points representing exposure within EFH.
@@ -684,41 +695,40 @@ create_overlap <- function(species, exposure_data, exposure_factor_name){
   if(path == "gdb_path" | path == "scallop_path"){
     sf_filtered = create_EFH_layer(path, species_layer, level)
 
-    exposure_data = st_transform(exposure_data, crs = st_crs(sf_filtered)) # transform points to exact CRS used by EFH polygons
+    exposure_data = st_transform(exposure_data, crs = st_crs(sf_filtered)) # transform points to matching CRS
     
-    # spatial join - assign EFH layer to each ROMS point
-    # st_intersects() creates a polygon x point logical matrix:
-    # apply(..., 2, ...) loops across columns (one point at a time)
-    # for each point-column, which(col) finds intersecting polygon row indices,
-    # then sf_filtered[which(col), ]$layer returns that point's EFH layer label(s)
-    
-    # for species with EFH designations
+    # for species with EFH polygons:
+      # spatial join - assign EFH layer to each ROMS point
+      # st_intersects() creates a polygon x point logical matrix:
+      # apply(..., 2, ...) loops across columns (one point at a time)
+      # for each point-column, which(col) finds intersecting polygon row indices,
+      # then sf_filtered[which(col), ]$layer returns that point's EFH layer label(s)
     if(level == "2"){ 
       exposure_data$EFH <- apply(st_intersects(sf_filtered, exposure_data, sparse = FALSE), 2, 
                                 function(col) {sf_filtered[which(col), ]$layer}) 
       exposure <- exposure_data |> 
         filter(EFH == "4" | EFH == "5") # filter to core habitat (50% EFH Area)
     }
-    # for species with EFH presence-absence maps (e.g., weathervane scallop)
     else{ 
       exposure_data$EFH <- apply(st_intersects(sf_filtered, exposure_data, sparse = FALSE), 2, 
                                 function(col) {sf_filtered[which(col), ]$geometry}) 
-      
       exposure <- exposure_data |> mutate(na=map_lgl(.x = EFH, .f = is_empty)) # identify rows not not included in the presence-absence polygon
       exposure <- exposure |> filter(na == FALSE)    
     }
   }
-  else if(path == "bts_sdm_path"){ # for SDMs
+  # for species with distributions as points
+    # st_nearest_feature identifies value of nearest point
+  else if(path == "bts_sdm_path"){ 
     sf_filtered = create_BTS_SDM_layer(path, species_layer)
     nearest_points <- st_nearest_feature(sf_filtered, exposure_data)
     exposure <- cbind(sf_filtered, st_drop_geometry(exposure_data)[nearest_points, ])
   }
-  else if(path == "diet_derived_path"){ # for SDMs
+  else if(path == "diet_derived_path"){ 
     sf_filtered = create_diet_derived_layer(path, species_layer)
     nearest_points <- st_nearest_feature(sf_filtered, exposure_data)
     exposure <- cbind(sf_filtered, st_drop_geometry(exposure_data)[nearest_points, ])
   }
-  else if(path == "depth_temp_path"){ # for SDMs
+  else if(path == "depth_temp_path"){
     sf_filtered = create_depth_temp_layer(path, species_layer)
     nearest_points <- st_nearest_feature(sf_filtered, exposure_data)
     exposure <- cbind(sf_filtered, st_drop_geometry(exposure_data)[nearest_points, ])
@@ -726,18 +736,17 @@ create_overlap <- function(species, exposure_data, exposure_factor_name){
   return(exposure)
 }
 
-#' Bin anomalies into categories from low to very high.
+#' Assign categories from low to very high.
 #' 
-#' Assigns each point an exposure level: low, moderate, high, or very high 
+#' Assigns each cell an exposure level: low, moderate, high, or very high 
 #' according to previous CVA methods (see Loughran et al. 2025).
 #' 
-#' @param data Data frame with calculated anomalies.
-#' @param type "anomaly" or "variability".
+#' @param data Data frame with calculated anomaly or variability values.
+#' @param type Character: "anomaly" or "variability".
 #'
-#' @return Data frame with count of anomalies in each exposure category.
+#' @return Data frame with counts of anomalies or variabilities in each category.
 assign_exposure_levels <- function(data, type){
-  # print(data)
-  # assign scoring categories from low - very high 
+  # assign scoring categories from low to very high 
   if(type == "anomaly"){
   exposure_plot <- data |> 
     mutate(exposure_score = ifelse((anomaly >= -0.5 & anomaly <= 0.5), "low", 
@@ -761,15 +770,14 @@ assign_exposure_levels <- function(data, type){
                                             ifelse((value < -1.5 & value >= -2) | (value > 1.5 & value <= 2), "high", "very_high")))) |>
       st_drop_geometry()
   }
-
-  # set levels for exposure scores from low - very high
+  # order levels for exposure scores from low to very high
   exposure_plot$exposure_score <- factor(exposure_plot$exposure_score, levels = c("low", "moderate", "high", "very_high"))
   exposure_plot$exposure_score = ordered(exposure_plot$exposure_score,
                                          levels = c("low",
                                                     "moderate",
                                                     "high",
                                                     "very_high"))
-  # calculate counts and proportion in each scoring category 
+  # calculate counts and proportions in each scoring category 
   exposure_plot <- exposure_plot |>
     group_by(exposure_score, .drop = FALSE) |>
     summarize(count = n()) |>
@@ -783,8 +791,8 @@ assign_exposure_levels <- function(data, type){
 
 #' Calculate an exposure score for a particular species and exposure factor.
 #' 
-#' @param original_exposure_data Data frame with calculated anomalies and variabilities.
-#' @param type "anomaly" or "variability".
+#' @param original_exposure_data Data frame with calculated anomaly and variability values.
+#' @param type Character: "anomaly" or "variability".
 #'
 #' @return An integer (an exposure score for a single species/exposure factor).
 calculate_exposure_score <- function(original_exposure_data, type){
@@ -800,18 +808,17 @@ calculate_exposure_score <- function(original_exposure_data, type){
   return(exp_fact_mean$weighted_mean)
 }
 
-#' Bin anomalies into categories from low to very high (according to CVA methods)
-#' and save three plots in plots/Exposure plots/species name:
-#' 1. An exposure map of anomalies across the GOA within a particular species' EFH area.
-#' 2. A histogram of binned anomalies from the exposure map.
-#' 3. The distribution of the exposure scores across the four scoring categories.
+#' Create three plots that show exposure process:
+#'  1. An exposure map of anomalies across the GOA within a particular species' EFH area.
+#'  2. A histogram of binned anomalies from the exposure map.
+#'  3. The distribution of the exposure scores across the four scoring categories.
 #' 
 #' @param species_name Character species name.
 #' @param exposure_data A data frame with calculated anomalies for each point in the GOA.
 #' @param exposure_factor_name Character exposure factor name.
 #' @param type "anomaly" or "variability.
 #'
-#' @return NA
+#' @return No return. Saves three plots to plots/Exposure plots.
 create_exposure_plots <- function(species_name, exposure_data, exposure_factor_name, type) {
   # only do first time!
   # dir.create(here("plots/Exposure plots/"), recursive = TRUE)
@@ -830,82 +837,85 @@ create_exposure_plots <- function(species_name, exposure_data, exposure_factor_n
   exposure_plot <- assign_exposure_levels(original_exposure_data, "value")
 
   # plot exposure map
-  plot2 <- ggplot() + 
+  exposure_map <- ggplot() + 
     geom_sf(data = original_exposure_data, aes(color = value, geometry = geometry), size = 1, alpha = 0.8) +
     geom_sf(data = GOA, size = 0.2, fill = "gray85") +
     geom_sf(data = canada, size = 0.2, fill = "gray95") +
     scale_y_continuous(expand = c(0,0)) +
     scale_x_continuous(expand = c(0,0)) +
-    scale_color_gradientn(
-      rescaler = function (...) {
-        scales::rescale_mid(..., mid = 0)
-      },
-      colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
-      values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
-      name = "") +
+    scale_color_gradientn(rescaler = function (...) {scales::rescale_mid(..., mid = 0)},
+                          colors = c("#d86ecc", "#30a4cf", "#b1dff0", "#d9f2d0", "#fffd78", "#ffca00", "#ff8884"), # set colors for scoring categories
+                          values = scales::rescale(c(-2, -1.5, -0.5, 0.5, 1.5, 2)),
+                          name = "") +
     labs(x = "Longitude",
          y = "Latitude",
          color = "Anomaly") +
     theme_bw() +
-    theme(panel.grid = element_blank(),
-      legend.position = c(0.6, 0.15), legend.direction = "horizontal", 
-      legend.text = element_text(size = 8), legend.title = element_text(size = 10), 
-      legend.key.size = unit(0.7, "cm"), legend.key.spacing = unit(0.12, "cm"),
-      legend.frame = element_rect(color = "black", linewidth = 0.25),
-      legend.background = element_rect(fill = "transparent"),
-      legend.ticks = element_line(color = "black", linewidth = 0.25),
-      strip.text = element_text(hjust = 0, size = 10),
-      strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-      plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-      panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-  ggsave(paste(species_name, exposure_factor_name, type, "exposure_map.png", sep="_"), path = here("plots/Exposure plots/"), plot = plot2, device = "png", width = 8, height = 5, dpi = 300)
+      theme(panel.grid = element_blank(),
+        legend.position = c(0.6, 0.15), 
+        legend.direction = "horizontal", 
+        legend.text = element_text(size = 8), 
+        legend.title = element_text(size = 10), 
+        legend.key.size = unit(0.7, "cm"), 
+        legend.key.spacing = unit(0.12, "cm"),
+        legend.frame = element_rect(color = "black", linewidth = 0.25),
+        legend.background = element_rect(fill = "transparent"),
+        legend.ticks = element_line(color = "black", linewidth = 0.25),
+        strip.text = element_text(hjust = 0, size = 10),
+        strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+        plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+        panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
   
-  # make histogram of anomalies
-  plot3 <- ggplot(original_exposure_data) +
-    geom_histogram(aes(x = value, y = after_stat(count / sum(count)), fill = get(paste(type, "_bins", sep = ""))), binwidth = 0.25, boundary = 0, linewidth = 0.25, colour = "black", show.legend = FALSE) +
+  ggsave(paste(species_name, exposure_factor_name, type, "exposure_map.png", sep="_"), path = here("plots/Exposure plots/"), plot = exposure_map, device = "png", width = 8, height = 5, dpi = 300)
+  
+  score_histogram <- ggplot(original_exposure_data) +
+    geom_histogram(aes(x = value, y = after_stat(count / sum(count)), fill = get(paste(type, "_bins", sep = ""))), 
+                   binwidth = 0.25, boundary = 0, linewidth = 0.25, colour = "black", show.legend = FALSE) +
     scale_fill_manual(values = c("low" = "#d9f2d0", 
                                  "moderate" = "#fffd78", 
                                  "high" = "#ffca00", 
                                  "very high" = "#ff8884")) +
     scale_x_continuous(breaks = seq(-10, 10, by = 1), 
-      limits = c(-3, 3),
-      expand = c(0,0)
-    ) +
+                       limits = c(-3, 3),
+                       expand = c(0,0)) +
     xlab("Anomaly") +
     ylab("Proportion") +
     theme_bw() +
-    theme(panel.grid = element_blank(),
-          rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-          panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
-  ggsave(paste(species_name, exposure_factor_name, type, "histogram.png", sep="_"), path = here("plots/Exposure plots/"), plot = plot3, device = "png")
+      theme(panel.grid = element_blank(),
+            rect = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+            panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
   
+  ggsave(paste(species_name, exposure_factor_name, type, "histogram.png", sep="_"), path = here("plots/Exposure plots/"), plot = score_histogram, device = "png")
+  
+  # get exposure score
   exp_fact_mean <- calculate_exposure_score(original_exposure_data, "value")
   
-  # plot distribution of exposure scores
-  plot4 <- ggplot(exposure_plot) +
-    geom_col(mapping = aes(x = exposure_score, y = prop, fill = exposure_score), position = "dodge", linewidth = 0.25, colour="black", width = 0.8, show.legend = FALSE) +
+  score_summary <- ggplot(exposure_plot) +
+    geom_col(mapping = aes(x = exposure_score, y = prop, fill = exposure_score), 
+             position = "dodge", linewidth = 0.25, colour="black", width = 0.8, show.legend = FALSE) +
     scale_x_discrete(labels = c("L", "M", "H", "V")) +
     ylab("Proportion") +
     xlab("Exposure Score") +
     scale_fill_manual(values = c("#d9f2d0", "#fffd78", "#ffca00", "#ff8884")) +
-    annotate("text", x = I(0.8), y = I(0.9), label = paste("Exposure = ", exp_fact_mean, sep = "")) + # add exposure score in top right corner
-    theme_bw() +
-    theme(panel.grid = element_blank(),
-          strip.text = element_text(hjust = 0, size = 10),
-          strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-          plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-          panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-  ggsave(paste(species_name, exposure_factor_name, "exposure_scores.png", sep="_"), path = here("plots/Exposure plots/"), plot = plot4, device = "png",width = 7, height = 5, bg = "transparent", dpi = 300)
+    annotate("text", x = I(0.8), y = I(0.9), 
+             label = paste("Exposure = ", exp_fact_mean, sep = "")) + # add exposure score in top right corner
+      theme_bw() +
+      theme(panel.grid = element_blank(),
+            strip.text = element_text(hjust = 0, size = 10),
+            strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+            plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+            panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
   
+  ggsave(paste(species_name, exposure_factor_name, "exposure_scores.png", sep="_"), path = here("plots/Exposure plots/"), plot = score_summary, device = "png",width = 7, height = 5, bg = "transparent", dpi = 300)
 }
 
-#' Creates series of faceted histograms for a single species and set of exposure 
-#' factors (anomaly or variability) and saves locally.
+#' Create a series of faceted histograms for a single species and set of  
+#' exposure factors (anomaly or variability) and saves locally.
 #' 
 #' @param species Character species name.
-#' @param type "anomaly" or "variability.
+#' @param type Character: "anomaly" or "variability.
 #'
-#' @return NA
+#' @return No return. Saves plot to plots/Exposure plots/.
 exposure_histogram_series <- function(species, type){
   exposure_plot_list = list() # create list
   # select correct exposure factors for each species
@@ -948,17 +958,16 @@ exposure_histogram_series <- function(species, type){
     ylab("Proportion") +
     xlab("Exposure Score") +
     scale_fill_manual(values = c("green", "yellow", "orange", "red")) +
-    #annotate("text", x = I(0.8), y = I(0.8), label = paste("Exposure = ", exp_fact_mean, sep = "")) + # add exposure score in top right corner
+    # annotate("text", x = I(0.8), y = I(0.8), label = paste("Exposure = ", exp_fact_mean, sep = "")) + # add exposure score in top right corner
     theme_bw() +
-    theme(panel.grid = element_blank(),
-          strip.text = element_text(hjust = 0, size = 10),
-          strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-          plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
-          panel.border = element_rect(colour = "black", fill=NA, linewidth=0.5))
-  
+      theme(panel.grid = element_blank(),
+            strip.text = element_text(hjust = 0, size = 10),
+            strip.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+            plot.background = element_rect(fill = "transparent", color = "transparent", linewidth = 0),
+            panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5))
+    
   ggsave(paste(species, type, "exposure_scores.png", sep="_"), path = here("plots/Exposure plots/"), plot = group_plot, device = "png", width = 7, height = 5, bg = "transparent", dpi = 300)
 }
-
 
 #' #' Creates series of plots for a single species and exposure factors (select anomaly 
 #' #' or variability) and saves locally (6-9 files per run).
