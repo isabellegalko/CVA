@@ -12,7 +12,7 @@ if (!require("pacman", quietly = TRUE)) install.packages("pacman")
     pacman::p_load_gh("ropensci/rnaturalearthhires")  # high-resolution coastline data
     
 # identify wd using here package
-here::i_am("02_exposure_analysis.R")
+here::i_am("03_exposure_analysis.R")
 
 # load custom analysis functions
 source(here("00_functions.R")) 
